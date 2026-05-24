@@ -1,0 +1,26 @@
+---
+description: Smart VMS core norms for all work in this repository
+alwaysApply: true
+---
+
+# Smart VMS — core rules
+
+Read `AGENTS.md` and `docs/product/vision.md` before proposing architecture or code.
+
+## Scope
+- Advance the current **roadmap phase** only; no multi-phase scope creep.
+- Axis **VAPIX-first**; RTSP is media plane, not control plane.
+- **Edge detects, server correlates** — uplink events/clips, not full-time remote 4K.
+
+## Quality
+- Contract-first: event schemas in `shared/` before services (when code exists).
+- Tests per `docs/engineering/testing-strategy.md` — recording and incident paths are P0.
+- ADR required for broker/DB choice, breaking APIs, security model changes.
+
+## Privacy (home)
+- No face **identification** v1; indoor face bbox off by default.
+- No secrets in repo; never log RTSP URLs with credentials.
+
+## AI output
+- Mark doc sections **Proposed** vs **Decided** (link ADR).
+- Prefer trade-off tables over long prose when reviewing design.

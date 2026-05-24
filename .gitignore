@@ -1,0 +1,35 @@
+# Secrets & local config
+.env
+.env.*
+!.env.example
+.vapix.credentials.json
+secrets/
+*.pem
+*.key
+
+# OS & editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Python / Node (future)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+dist/
+build/
+
+# Media & test fixtures (large)
+recordings/
+fixtures/video/
+*.mkv
+*.mp4
+
+# Logs & data
+logs/
+data/
+*.log

@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --color-surface-950: #0a0e14;
+  --color-surface-900: #0f1419;
+  --color-surface-800: #161d27;
+  --color-surface-700: #1e2836;
+  --color-surface-600: #2a3544;
+  --color-accent: #3b82f6;
+  --color-accent-dim: #2563eb;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  @apply m-0 min-h-screen bg-[var(--color-surface-950)] text-slate-100 antialiased;
+  font-family: var(--font-sans);
+}
+
+#root {
+  @apply min-h-screen;
+}
+
+/* Timeline range input */
+input[type='range'].timeline-slider {
+  @apply h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-700;
+}
+
+input[type='range'].timeline-slider::-webkit-slider-thumb {
+  @apply h-4 w-4 appearance-none rounded-full bg-blue-500 shadow-lg;
+}
+
+/* Leaflet i mörkt UI */
+.leaflet-container {
+  background: #0f1419;
+  font-family: inherit;
+}

@@ -1,0 +1,23 @@
+---
+description: Standards for architecture and ADR documentation
+globs: docs/architecture/**,docs/decisions/**,docs/engineering/**
+alwaysApply: false
+---
+
+# Architecture & ADR docs
+
+## Structure
+- State **Status:** Proposed | Decided (ADR link)
+- Include failure modes and degradation paths for runtime components
+- Link related docs; update `docs/README.md` when adding files
+
+## ADRs
+- Irreversible or expensive choices → new `docs/decisions/NNNN-title.md`
+- Do not rewrite Accepted ADRs; supersede with new number
+
+## Diagrams
+- Use Mermaid for flows; keep one diagram per major concept
+- Label trust boundaries (LAN, camera, edge, server)
+
+## Reviews
+When asked to review architecture, use severity P0–P3 and cite file paths.

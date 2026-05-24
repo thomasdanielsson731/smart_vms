@@ -1,0 +1,16 @@
+---
+description: Axis VAPIX and camera integration conventions
+globs: "**/*vapix*,**/*axis*,**/edge-agent/**,**/camera*"
+alwaysApply: false
+---
+
+# Axis / VAPIX integration
+
+Follow `docs/architecture/axis-vapix.md`.
+
+- Capability-driven client: probe firmware/features; no single-model hardcoding
+- Dedicated service account; least privilege; credentials from vault/env only
+- Idempotent event ingest: dedupe with `vapix_event_key` + `event_id`
+- Hybrid: VAPIX events may pre-filter before CV; document fusion in ADR
+- Health: track `vapix_last_event_age`, RTSP frame liveness, clock skew
+- Tests: golden fixtures in `fixtures/vapix/` (no production camera in CI)
