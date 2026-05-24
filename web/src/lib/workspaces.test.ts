@@ -1,26 +1,37 @@
-import { describe, expect, it, vi, afterEach } from 'vitest'
-import { parseWorkspaceId } from './workspaces'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { WORKSPACE_IDS, isCopilotWorkspaceId, parseWorkspaceId } from './workspaces'
 
-describe('parseWorkspaceId', () => {
+describe('parseWorkspaceId — all normal workspaces', () => {
   afterEach(() => vi.unstubAllEnvs())
 
-  it('accepts known workspace ids', () => {
-    expect(parseWorkspaceId('video')).toBe('video')
-    expect(parseWorkspaceId('camera-web')).toBe('camera-web')
+  beforeEach(() => {
+    vi.stubEnv('VITE_FACE_RECOGNITION_ENABLED', 'true')
+  })
+
+  it.each(WORKSPACE_IDS)('accepts %s', (id) => {
+    expect(parseWorkspaceId(id)).toBe(id)
   })
 
   it('rejects unknown ids', () => {
     expect(parseWorkspaceId('not-real')).toBeNull()
+    expect(parseWorkspaceId('')).toBeNull()
     expect(parseWorkspaceId(null)).toBeNull()
   })
 
   it('rejects faces when feature flag is off', () => {
     vi.stubEnv('VITE_FACE_RECOGNITION_ENABLED', '')
     expect(parseWorkspaceId('faces')).toBeNull()
+    expect(parseWorkspaceId('video')).toBe('video')
   })
+})
 
-  it('accepts faces when feature flag is on', () => {
+describe('isCopilotWorkspaceId', () => {
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('mirrors parseWorkspaceId for string ids', () => {
     vi.stubEnv('VITE_FACE_RECOGNITION_ENABLED', 'true')
-    expect(parseWorkspaceId('faces')).toBe('faces')
+    expect(isCopilotWorkspaceId('video')).toBe(true)
+    expect(isCopilotWorkspaceId('camera-web')).toBe(true)
+    expect(isCopilotWorkspaceId('bogus')).toBe(false)
   })
 })

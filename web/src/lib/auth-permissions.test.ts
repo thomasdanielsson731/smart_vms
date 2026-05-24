@@ -1,28 +1,46 @@
 import { describe, expect, it } from 'vitest'
 import { canAccessWorkspace, canWriteSettings, roleLabel } from './auth-permissions'
+import { WORKSPACE_IDS } from './workspaces'
 
-describe('auth-permissions', () => {
-  it('grants admin full workspace access', () => {
-    expect(canAccessWorkspace('admin', 'onboarding')).toBe(true)
-    expect(canAccessWorkspace('admin', 'alarms')).toBe(true)
-    expect(canAccessWorkspace('admin', 'video')).toBe(true)
+describe('auth-permissions — admin', () => {
+  it('grants access to all workspaces', () => {
+    for (const workspace of WORKSPACE_IDS) {
+      expect(canAccessWorkspace('admin', workspace)).toBe(true)
+    }
   })
 
-  it('restricts viewer from admin-only workspaces', () => {
+  it('can write settings', () => {
+    expect(canWriteSettings('admin')).toBe(true)
+    expect(roleLabel('admin')).toBe('Administrator')
+  })
+})
+
+describe('auth-permissions — viewer', () => {
+  const viewerAllowed: typeof WORKSPACE_IDS[number][] = [
+    'video',
+    'dashboard',
+    'tracking',
+    'agents',
+    'forensic',
+    'map',
+    'faces',
+    'settings',
+  ]
+
+  it('allows read-only workspaces', () => {
+    for (const workspace of viewerAllowed) {
+      expect(canAccessWorkspace('viewer', workspace)).toBe(true)
+    }
+  })
+
+  it('denies admin-only workspaces', () => {
     expect(canAccessWorkspace('viewer', 'onboarding')).toBe(false)
     expect(canAccessWorkspace('viewer', 'alarms')).toBe(false)
     expect(canAccessWorkspace('viewer', 'camera-web')).toBe(false)
-    expect(canAccessWorkspace('viewer', 'video')).toBe(true)
-    expect(canAccessWorkspace('viewer', 'forensic')).toBe(true)
   })
 
-  it('allows only admin to write settings', () => {
-    expect(canWriteSettings('admin')).toBe(true)
+  it('cannot write settings', () => {
     expect(canWriteSettings('viewer')).toBe(false)
-  })
-
-  it('labels roles for UI', () => {
-    expect(roleLabel('admin')).toBe('Administrator')
     expect(roleLabel('viewer')).toBe('Read-only')
   })
 })
