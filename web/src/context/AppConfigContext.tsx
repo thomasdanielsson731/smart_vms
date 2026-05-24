@@ -7,6 +7,12 @@ import {
   type ReactNode,
 } from 'react'
 import { mockCameras } from '@/lib/mock-data'
+import {
+  applyCameraHostOverrides,
+  loadCameraHostOverrides,
+  mergeCameraHostOverride,
+  saveCameraHostOverrides,
+} from '@/lib/camera-hosts-storage'
 import { mockMonitoringAgents } from '@/lib/mock-agents'
 import { mockNetworkDiscovery } from '@/lib/mock-discovery'
 import type { Camera } from '@/types/camera'
@@ -26,6 +32,19 @@ import {
 import type { CameraMapPlacement, MapSiteSettings } from '@/types/map'
 import { buildDefaultPlacements } from '@/lib/map/defaults'
 import { loadMapPlacements, loadMapSite, saveMapPlacements, saveMapSite } from '@/lib/map/storage'
+import type {
+  FaceProfile,
+  FaceRecognitionEvent,
+  FaceRecognitionSettings,
+} from '@/types/face'
+import {
+  loadFaceProfiles,
+  loadFaceSettings,
+  saveFaceProfiles,
+  saveFaceSettings,
+} from '@/lib/face-storage'
+import { defaultFaceProfiles, mockFaceEvents } from '@/lib/mock-faces'
+import { buildFaceEventsFromMemory } from '@/lib/face-memory'
 
 function agentsToAlarms(agents: MonitoringAgent[]): AlarmDefinition[] {
   return agents.map((a) => ({
@@ -43,6 +62,7 @@ function agentsToAlarms(agents: MonitoringAgent[]): AlarmDefinition[] {
 
 interface AppConfigContextValue {
   cameras: Camera[]
+  updateCameraHost: (cameraId: string, host: string) => void
   alarms: AlarmDefinition[]
   discovered: DiscoveredCamera[]
   discoveryStatus: DiscoveryStatus
@@ -62,12 +82,23 @@ interface AppConfigContextValue {
   removeCameraMapPlacement: (cameraId: string) => void
   resetMapPlacements: () => void
   updateMapSite: (site: MapSiteSettings) => void
+  faceSettings: FaceRecognitionSettings
+  updateFaceSettings: (settings: FaceRecognitionSettings) => void
+  faceProfiles: FaceProfile[]
+  addFaceProfile: (
+    draft: Pick<FaceProfile, 'name' | 'role' | 'color'> & {
+      notes?: string
+      enrollment?: FaceProfile['enrollment']
+    },
+  ) => void
+  removeFaceProfile: (id: string) => void
+  faceEvents: FaceRecognitionEvent[]
 }
 
 const AppConfigContext = createContext<AppConfigContextValue | null>(null)
 
 export function AppConfigProvider({ children }: { children: ReactNode }) {
-  const [cameras, setCameras] = useState<Camera[]>(() => [...mockCameras])
+  const [cameras, setCameras] = useState<Camera[]>(() => applyCameraHostOverrides([...mockCameras]))
   const [alarms, setAlarms] = useState<AlarmDefinition[]>(() =>
     agentsToAlarms(mockMonitoringAgents),
   )
@@ -125,6 +156,57 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
     setMapSite(site)
     saveMapSite(site)
   }, [])
+
+  const [faceSettings, setFaceSettings] = useState<FaceRecognitionSettings>(() => loadFaceSettings())
+  const [faceProfiles, setFaceProfiles] = useState<FaceProfile[]>(() => {
+    const stored = loadFaceProfiles()
+    return stored.length > 0 ? stored : defaultFaceProfiles.map((p) => ({ ...p }))
+  })
+
+  const updateFaceSettings = useCallback((settings: FaceRecognitionSettings) => {
+    setFaceSettings(settings)
+    saveFaceSettings(settings)
+  }, [])
+
+  const addFaceProfile = useCallback(
+    (
+      draft: Pick<FaceProfile, 'name' | 'role' | 'color'> & {
+        notes?: string
+        enrollment?: FaceProfile['enrollment']
+      },
+    ) => {
+      const profile: FaceProfile = {
+        id: `face-${crypto.randomUUID().slice(0, 8)}`,
+        name: draft.name,
+        role: draft.role,
+        color: draft.color,
+        notes: draft.notes,
+        enrollment: draft.enrollment,
+        enrolledAt: draft.enrollment?.capturedAt ?? new Date().toISOString(),
+        rememberedByCameras: draft.enrollment?.cameraId ? [draft.enrollment.cameraId] : [],
+      }
+      setFaceProfiles((prev) => {
+        const next = [...prev, profile]
+        saveFaceProfiles(next)
+        return next
+      })
+    },
+    [],
+  )
+
+  const removeFaceProfile = useCallback((id: string) => {
+    setFaceProfiles((prev) => {
+      const next = prev.filter((p) => p.id !== id)
+      saveFaceProfiles(next)
+      return next
+    })
+  }, [])
+
+  const faceEvents = useMemo(() => {
+    const fromMemory = buildFaceEventsFromMemory(faceProfiles, cameras, faceSettings)
+    if (fromMemory.length > 0) return fromMemory
+    return faceSettings.enabled ? mockFaceEvents : []
+  }, [faceProfiles, cameras, faceSettings])
 
   const scanNetwork = useCallback(async () => {
     setDiscoveryStatus('scanning')
@@ -227,9 +309,19 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
+  const updateCameraHost = useCallback((cameraId: string, host: string) => {
+    const trimmed = host.trim()
+    const overrides = mergeCameraHostOverride(loadCameraHostOverrides(), cameraId, trimmed)
+    saveCameraHostOverrides(overrides)
+    setCameras((prev) =>
+      prev.map((c) => (c.id === cameraId ? { ...c, host: trimmed || c.host } : c)),
+    )
+  }, [])
+
   const value = useMemo(
     () => ({
       cameras,
+      updateCameraHost,
       alarms,
       discovered,
       discoveryStatus,
@@ -249,9 +341,16 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
       removeCameraMapPlacement,
       resetMapPlacements,
       updateMapSite,
+      faceSettings,
+      updateFaceSettings,
+      faceProfiles,
+      addFaceProfile,
+      removeFaceProfile,
+      faceEvents,
     }),
     [
       cameras,
+      updateCameraHost,
       alarms,
       discovered,
       discoveryStatus,
@@ -271,6 +370,12 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
       removeCameraMapPlacement,
       resetMapPlacements,
       updateMapSite,
+      faceSettings,
+      updateFaceSettings,
+      faceProfiles,
+      addFaceProfile,
+      removeFaceProfile,
+      faceEvents,
     ],
   )
 

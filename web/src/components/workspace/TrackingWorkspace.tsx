@@ -4,16 +4,16 @@ const mockTracks = [
   {
     id: 'track-1',
     label: 'Person',
-    path: ['Uppfart 23:12', 'Entré 23:14'],
+    path: ['Driveway 23:12', 'Entrance 23:14'],
     confidence: 0.72,
     status: 'mock',
   },
   {
     id: 'track-2',
-    label: 'Fordon',
-    path: ['Entré 14:02'],
+    label: 'Vehicle',
+    path: ['Entrance 14:02'],
     confidence: 0.81,
-    status: 'avslutad',
+    status: 'closed',
   },
 ]
 
@@ -21,7 +21,7 @@ export function TrackingWorkspace() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-400">
-        Spårning över kameror (re-id / korrelation). Mock — Phase 3.
+        Cross-camera tracking (re-id / correlation). Mock — Phase 3.
       </p>
       <ul className="space-y-3">
         {mockTracks.map((t) => (
@@ -41,7 +41,7 @@ export function TrackingWorkspace() {
         ))}
       </ul>
       <div className="aspect-video rounded-lg bg-slate-800/50 flex items-center justify-center text-xs text-slate-500">
-        Kart-/planvy + bbox overlay (kommande)
+        Map / floor plan view + bbox overlay (coming soon)
       </div>
     </div>
   )

@@ -1,6 +1,14 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { loadEnv } from 'vite'
+import {
+  decryptSecretPayload,
+  encryptSecretPayload,
+  readLegacyPlainJson,
+  removeSecretFile,
+  writeSecretFile,
+  type StoredSecretPayload,
+} from './credential-store'
 
 export interface VapixCredentials {
   user: string
@@ -17,52 +25,70 @@ export function credentialsFilePath(cwd: string): string {
   return path.join(cwd, FILENAME)
 }
 
-export function loadCredentialsFile(cwd: string): VapixCredentials | null {
-  try {
-    const fp = credentialsFilePath(cwd)
-    if (!fs.existsSync(fp)) return null
-    const data = JSON.parse(fs.readFileSync(fp, 'utf8')) as VapixCredentials
-    if (!data.user?.trim() || !data.password) return null
-    return { user: data.user.trim(), password: data.password }
-  } catch {
-    return null
+/** Stable key for encrypting stored VAPIX credentials — not the per-boot random session secret. */
+function encryptionSecret(mode: string, cwd: string): string {
+  const env = loadEnv(mode, cwd, '')
+  return (
+    env.SMARTVMS_VAPIX_ENCRYPTION_SECRET ||
+    env.SMARTVMS_SESSION_SECRET ||
+    env.VITE_SMARTVMS_SESSION_SECRET ||
+    'smartvms-dev-vapix-encryption-v1'
+  )
+}
+
+function loadFromFile(mode: string, cwd: string): VapixCredentials | null {
+  const fp = credentialsFilePath(cwd)
+  if (!fs.existsSync(fp)) return null
+  const raw = fs.readFileSync(fp, 'utf8')
+  const secret = encryptionSecret(mode, cwd)
+
+  const decrypted = decryptSecretPayload(raw, secret)
+  if (decrypted) {
+    return { user: decrypted.user, password: decrypted.password }
   }
+
+  const legacy = readLegacyPlainJson(raw)
+  if (legacy) {
+    saveVapixCredentials(cwd, mode, { user: legacy.user, password: legacy.password })
+    return { user: legacy.user, password: legacy.password }
+  }
+
+  return null
 }
 
-export function saveCredentialsFile(cwd: string, creds: VapixCredentials): void {
-  const fp = credentialsFilePath(cwd)
-  fs.writeFileSync(fp, JSON.stringify(creds, null, 2), { mode: 0o600 })
-}
-
-export function clearCredentialsFile(cwd: string): void {
-  const fp = credentialsFilePath(cwd)
-  if (fs.existsSync(fp)) fs.unlinkSync(fp)
-}
-
-export function initVapixConfig(cwd: string): void {
-  runtime = loadCredentialsFile(cwd)
+export function initVapixConfig(mode: string, cwd: string): void {
+  runtime = loadFromFile(mode, cwd)
   if (runtime) {
-    console.log('[vapix] Gemensamma kameruppgifter laddade från .vapix.credentials.json')
+    console.log('[vapix] Gemensamma kameruppgifter laddade (krypterad lagring)')
   }
 }
 
-export function setRuntimeCredentials(creds: VapixCredentials | null): void {
-  runtime = creds
+export function getStoredCredentials(mode: string, cwd: string): VapixCredentials | null {
+  return runtime ?? loadFromFile(mode, cwd)
 }
 
-export function getStoredCredentials(cwd: string): VapixCredentials | null {
-  return runtime ?? loadCredentialsFile(cwd)
-}
+export function saveVapixCredentials(
+  cwd: string,
+  mode: string,
+  creds: VapixCredentials,
+): void {
+  const normalized: StoredSecretPayload = {
+    user: creds.user.trim(),
+    password: creds.password,
+  }
+  if (!normalized.user || !normalized.password) {
+    throw new Error('VAPIX-användare och lösenord krävs')
+  }
 
-export function saveVapixCredentials(cwd: string, creds: VapixCredentials): void {
-  const normalized = { user: creds.user.trim(), password: creds.password }
+  const secret = encryptionSecret(mode, cwd)
+  const encrypted = encryptSecretPayload(normalized, secret)
+  writeSecretFile(credentialsFilePath(cwd), encrypted)
   runtime = normalized
-  saveCredentialsFile(cwd, normalized)
 }
 
 export function clearVapixCredentials(cwd: string): void {
   runtime = null
-  clearCredentialsFile(cwd)
+  removeSecretFile(credentialsFilePath(cwd))
 }
 
 export function resolveVapixCredentials(
@@ -70,10 +96,10 @@ export function resolveVapixCredentials(
   cwd: string,
   vapixUserOverride?: string,
 ): { user: string; password: string; source: VapixCredentialSource } {
-  const stored = getStoredCredentials(cwd)
+  const stored = getStoredCredentials(mode, cwd)
   if (stored?.user && stored.password) {
     return {
-      user: vapixUserOverride?.trim() || stored.user,
+      user: stored.user,
       password: stored.password,
       source: runtime ? 'runtime' : 'file',
     }
@@ -84,22 +110,26 @@ export function resolveVapixCredentials(
   const envPass = env.AXIS_VAPIX_PASSWORD || env.VITE_AXIS_VAPIX_PASSWORD || ''
   if (envUser && envPass) {
     return {
-      user: vapixUserOverride?.trim() || envUser,
+      user: envUser,
       password: envPass,
       source: 'env',
     }
   }
 
+  // Per-camera override only when no shared credentials are configured
+  if (vapixUserOverride?.trim()) {
+    return {
+      user: vapixUserOverride.trim(),
+      password: envPass,
+      source: 'none',
+    }
+  }
+
   return {
-    user: vapixUserOverride?.trim() || envUser,
+    user: envUser,
     password: envPass,
     source: 'none',
   }
-}
-
-export function isVapixConfigured(mode: string, cwd: string): boolean {
-  const { user, password, source } = resolveVapixCredentials(mode, cwd)
-  return Boolean(user && password && source !== 'none')
 }
 
 export function vapixConfigPublicView(

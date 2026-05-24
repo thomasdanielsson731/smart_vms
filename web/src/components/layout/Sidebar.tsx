@@ -10,12 +10,12 @@ import {
 } from 'lucide-react'
 
 const nav = [
-  { to: '/', label: 'Översikt', icon: LayoutDashboard, end: true },
-  { to: '/cameras', label: 'Kameror', icon: Cctv },
+  { to: '/', label: 'Overview', icon: LayoutDashboard, end: true },
+  { to: '/cameras', label: 'Cameras', icon: Cctv },
   { to: '/live', label: 'Live', icon: Radio },
-  { to: '/timeline', label: 'Tidslinje', icon: Clock },
-  { to: '/incidents', label: 'Händelser', icon: Bell },
-  { to: '/settings', label: 'Inställningar', icon: Settings },
+  { to: '/timeline', label: 'Timeline', icon: Clock },
+  { to: '/incidents', label: 'Events', icon: Bell },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
 export function Sidebar() {
@@ -27,7 +27,7 @@ export function Sidebar() {
         </div>
         <div>
           <p className="text-sm font-semibold tracking-tight text-white">Smart VMS</p>
-          <p className="text-xs text-slate-500">Hem · Axis VAPIX</p>
+          <p className="text-xs text-slate-500">Home · Axis VAPIX</p>
         </div>
       </div>
 
@@ -53,7 +53,7 @@ export function Sidebar() {
 
       <div className="border-t border-slate-800/80 p-3">
         <p className="rounded-lg bg-slate-800/40 px-3 py-2 text-xs text-slate-500">
-          UI-prototyp · mockdata
+          UI prototype · mock data
         </p>
       </div>
     </aside>

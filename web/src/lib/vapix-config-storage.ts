@@ -1,23 +1,16 @@
-import type { VapixConnectionSettings } from '@/types/vapix'
+/** Endast användarnamn i webbläsaren — lösenord lagras aldrig client-side (CRA). */
+const STORAGE_KEY = 'smart-vms-vapix-user'
 
-const STORAGE_KEY = 'smart-vms-vapix-config'
-
-export function loadLocalVapixSettings(): VapixConnectionSettings | null {
+export function loadLocalVapixUser(): string | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    return JSON.parse(raw) as VapixConnectionSettings
+    return localStorage.getItem(STORAGE_KEY)
   } catch {
     return null
   }
 }
 
-export function saveLocalVapixSettings(settings: VapixConnectionSettings): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
-}
-
-export function clearLocalVapixSettings(): void {
-  localStorage.removeItem(STORAGE_KEY)
+export function saveLocalVapixUser(user: string): void {
+  localStorage.setItem(STORAGE_KEY, user)
 }
 
 export const defaultVapixUser = 'root'

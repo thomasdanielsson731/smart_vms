@@ -64,7 +64,7 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 function displayNameFor(role: UserRole, username: string): string {
-  if (role === 'admin') return 'Administratör'
+  if (role === 'admin') return 'Administrator'
   return username.charAt(0).toUpperCase() + username.slice(1)
 }
 
@@ -246,6 +246,10 @@ export function applySecurityHeaders(res: ServerResponse): void {
   res.setHeader('X-Frame-Options', 'DENY')
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)')
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; img-src 'self' data: blob:; connect-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'",
+  )
 }
 
 export function requiresAuth(pathname: string): boolean {

@@ -4,8 +4,8 @@ import type { IncidentSeverity, IncidentStatus } from '@/types/incident'
 const cameraLabels: Record<CameraStatus, string> = {
   online: 'Online',
   offline: 'Offline',
-  degraded: 'Nedsatt',
-  unknown: 'Okänd',
+  degraded: 'Degraded',
+  unknown: 'Unknown',
 }
 
 const cameraStyles: Record<CameraStatus, string> = {
@@ -35,7 +35,7 @@ const severityStyles: Record<IncidentSeverity, string> = {
 }
 
 export function SeverityBadge({ severity }: { severity: IncidentSeverity }) {
-  const labels = { low: 'Låg', medium: 'Medium', high: 'Hög' }
+  const labels = { low: 'Low', medium: 'Medium', high: 'High' }
   return (
     <span className={`rounded px-2 py-0.5 text-xs font-medium ${severityStyles[severity]}`}>
       {labels[severity]}
@@ -44,9 +44,9 @@ export function SeverityBadge({ severity }: { severity: IncidentSeverity }) {
 }
 
 const incidentStatusLabels: Record<IncidentStatus, string> = {
-  open: 'Öppen',
-  acknowledged: 'Bekräftad',
-  closed: 'Stängd',
+  open: 'Open',
+  acknowledged: 'Acknowledged',
+  closed: 'Closed',
 }
 
 export function IncidentStatusBadge({ status }: { status: IncidentStatus }) {

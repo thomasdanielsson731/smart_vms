@@ -57,7 +57,9 @@ Starta om **`npm run dev`** efter ändringar i `.env`.
 
 - **Timing-safe** jämförelse av lösenord
 - **Rate limit:** max 5 misslyckade inloggningar per IP / 15 min
-- **Security headers:** `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`
+- **Security headers:** `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `Content-Security-Policy`
+- **Kameruppgifter:** krypterade server-side (AES-256-GCM), aldrig i localStorage — se [cyber-resilience-act.md](cyber-resilience-act.md)
+- **Audit log:** `.smartvms-audit.log` (inloggning, sparade kameruppgifter)
 - **Kameraproxy:** endast privata IP (10/8, 192.168/16, 172.16–31, 127.0.0.1)
 - **VAPIX-lösenord** läses aldrig av klienten — endast server-side proxy
 

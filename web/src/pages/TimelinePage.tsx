@@ -10,7 +10,7 @@ export function TimelinePage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <p className="text-sm text-slate-400">
-        Spola tillbaka inspelningar per kamera. Segment och seek kopplas till inspelningstjänsten i
+        Scrub recordings per camera. Segments and seek will connect to the recording service in
         Phase 1.
       </p>
 

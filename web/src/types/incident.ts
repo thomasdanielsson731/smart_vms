@@ -1,3 +1,6 @@
+import type { AlarmTier2Analysis } from '@/types/alarm-analytics'
+import type { FaceMatch } from '@/types/face'
+
 /** Best picture — högst poängsatta bildruta vid larm (edge/server) */
 export interface AlarmBestPicture {
   /** När bilden fångades */
@@ -24,4 +27,8 @@ export interface Incident {
   ruleName?: string
   confidence?: number
   bestPicture?: AlarmBestPicture
+  /** Ansiktsigenkänning vid larm (opt-in) */
+  faceMatch?: FaceMatch
+  /** Second tier-analys (server/edge; kan cachas) */
+  tier2?: AlarmTier2Analysis
 }

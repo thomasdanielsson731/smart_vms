@@ -7,6 +7,8 @@ export type WorkspaceId =
   | 'alarms'
   | 'forensic'
   | 'map'
+  | 'faces'
+  | 'camera-web'
   | 'settings'
   | null
 

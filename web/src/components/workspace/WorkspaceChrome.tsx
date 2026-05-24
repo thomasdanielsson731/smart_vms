@@ -5,13 +5,15 @@ import { useWorkspace } from '@/context/WorkspaceContext'
 const titles: Record<Exclude<WorkspaceId, null>, string> = {
   video: 'Video',
   dashboard: 'Dashboard',
-  tracking: 'Spårning',
-  agents: 'Övervakningsagenter',
-  onboarding: 'Onboarding — nätverk',
-  alarms: 'Skapa larm',
-  forensic: 'Forensic — tidslinje',
-  map: 'Karta',
-  settings: 'Inställningar',
+  tracking: 'Tracking',
+  agents: 'Monitoring agents',
+  onboarding: 'Onboarding — network',
+  alarms: 'Create alarm',
+  forensic: 'Forensic — timeline',
+  map: 'Map',
+  faces: 'Face recognition',
+  'camera-web': 'Camera web UI',
+  settings: 'Settings',
 }
 
 export function WorkspaceChrome({
@@ -31,7 +33,7 @@ export function WorkspaceChrome({
           type="button"
           onClick={closeWorkspace}
           className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
-          aria-label="Stäng vy"
+          aria-label="Close view"
         >
           <X className="h-4 w-4" />
         </button>

@@ -15,6 +15,9 @@ Operatör ska kunna **utreda händelser** i efterhand: se alla larm på en tidsl
 | Tidslinje | Markörer per larm (färg = allvar) |
 | Larmlista | Synkad med tidslinje |
 | Uppspelning | Klippfönster + metadata + export (mock) |
+| **Analys (nivå 2)** | Berikad förklaring av larm + personer efter trigg |
+
+Se [alarm-tier2-analytics.md](alarm-tier2-analytics.md).
 
 ## Chatt
 

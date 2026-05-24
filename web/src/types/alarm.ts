@@ -30,7 +30,7 @@ export const defaultAlarmDraft = (): AlarmDraft => ({
   name: '',
   description: '',
   cameraIds: [],
-  schedule: 'Varje dag 00:00–23:59',
+  schedule: 'Every day 00:00–23:59',
   trigger: 'person',
   zoneName: '',
   severity: 'medium',

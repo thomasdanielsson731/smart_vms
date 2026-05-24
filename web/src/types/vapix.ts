@@ -12,8 +12,8 @@ export interface VapixConfigStatus {
 }
 
 export const vapixSourceLabels: Record<VapixCredentialSource, string> = {
-  runtime: 'Inställningar (session)',
-  file: 'Inställningar (sparad fil)',
+  runtime: 'Settings (session)',
+  file: 'Settings (saved file)',
   env: 'web/.env',
-  none: 'Ej konfigurerad',
+  none: 'Not configured',
 }

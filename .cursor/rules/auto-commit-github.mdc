@@ -1,0 +1,38 @@
+---
+description: Auto-commit and push to GitHub after major changes or bug fixes
+alwaysApply: true
+---
+
+# Auto-commit to GitHub
+
+After completing a **major feature**, **bug fix**, or **coherent batch of work**, commit and push to GitHub without waiting for the user to ask — unless they said not to commit in this session.
+
+## When to commit
+
+Commit when **all** of these apply:
+
+- The change is **complete** (build passes if applicable; no half-finished refactor)
+- It is **major** or **fix-worthy**: new feature, user-visible bug fix, security fix, broken dev/build restored, or docs for a shipped feature
+- **Do not** commit: tiny typos, WIP mid-task, exploratory spikes, or `.env` / secrets / credentials files
+
+## Workflow
+
+1. Run `git status`, `git diff`, and `git log -3 --oneline` (parallel)
+2. Stage relevant files — **never** `.env`, `.vapix.credentials.json`, or other gitignored secrets
+3. Write a concise commit message (1–2 sentences, focus on **why**)
+4. Commit via HEREDOC message
+5. **Push** to `origin` on the current branch (`git push origin HEAD`) so GitHub stays in sync
+
+If push fails (auth, network), report the error and leave the local commit; do not force-push.
+
+## Commit message style
+
+Match existing repo tone. Examples:
+
+- `Fix dev server CSP blocking React Refresh in Vite`
+- `Add camera web UI proxy and stream connectivity test`
+- `Translate UI to English and add menu tab descriptions`
+
+## Split commits
+
+Prefer **one commit per logical unit** when several major items were done in one session (e.g. separate fix vs feature). Avoid one giant commit if changes are clearly unrelated.

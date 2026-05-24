@@ -10,6 +10,8 @@ import { OnboardingWorkspace } from './OnboardingWorkspace'
 import { AlarmCreateWorkspace } from './AlarmCreateWorkspace'
 import { ForensicWorkspace } from './ForensicWorkspace'
 import { MapWorkspace } from './MapWorkspace'
+import { FaceRecognitionWorkspace } from './FaceRecognitionWorkspace'
+import { CameraWebWorkspace } from './CameraWebWorkspace'
 import { SettingsPage } from '@/pages/SettingsPage'
 
 export function WorkspaceRouter({ workspace }: { workspace: Exclude<WorkspaceId, null> }) {
@@ -48,6 +50,12 @@ export function WorkspaceRouter({ workspace }: { workspace: Exclude<WorkspaceId,
       break
     case 'map':
       content = <MapWorkspace />
+      break
+    case 'faces':
+      content = <FaceRecognitionWorkspace />
+      break
+    case 'camera-web':
+      content = <CameraWebWorkspace />
       break
     case 'settings':
       content = <SettingsPage />

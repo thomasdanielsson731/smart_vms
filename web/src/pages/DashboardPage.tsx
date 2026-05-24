@@ -44,33 +44,33 @@ export function DashboardPage() {
     <div className="space-y-8">
       <section>
         <h2 className="mb-4 text-sm font-medium uppercase tracking-wide text-slate-500">
-          Systemstatus
+          System status
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <HealthCard
             icon={Server}
             label="Server"
             value="Online"
-            sub="API ej startad — UI mock"
+            sub="API not started — UI mock"
             variant="ok"
           />
           <HealthCard
             icon={Cpu}
             label="Edge"
             value="Online"
-            sub="Analys Phase 2"
+            sub="Analytics Phase 2"
             variant="ok"
           />
           <HealthCard
             icon={HardDrive}
-            label="Lagring"
+            label="Storage"
             value={`${systemHealth.diskUsedPercent}%`}
-            sub="Tröskel varning: 85%"
+            sub="Warning threshold: 85%"
             variant={systemHealth.diskUsedPercent > 80 ? 'warn' : 'default'}
           />
           <HealthCard
             icon={AlertCircle}
-            label="Kameror"
+            label="Cameras"
             value={`${systemHealth.camerasOnline}/${systemHealth.camerasTotal}`}
             sub="online"
             variant={systemHealth.camerasOnline < systemHealth.camerasTotal ? 'warn' : 'ok'}
@@ -82,13 +82,13 @@ export function DashboardPage() {
         <div>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-medium uppercase tracking-wide text-slate-500">
-              Senaste händelser
+              Recent events
             </h2>
             <Link
               to="/incidents"
               className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300"
             >
-              Alla
+              View all
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -118,13 +118,13 @@ export function DashboardPage() {
         <div>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-medium uppercase tracking-wide text-slate-500">
-              Kameror
+              Cameras
             </h2>
             <Link
               to="/cameras"
               className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300"
             >
-              Hantera
+              Manage
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>

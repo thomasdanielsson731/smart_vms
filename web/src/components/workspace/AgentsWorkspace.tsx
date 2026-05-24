@@ -10,7 +10,7 @@ export function AgentsWorkspace() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-slate-400">
-        Övervakningslarm och agenter (samma policy i produkten). Skapa nya via Larm-vyn.
+        Monitoring alarms and agents (same policy in production). Create new ones via the Alarms view.
       </p>
       <button
         type="button"
@@ -18,7 +18,7 @@ export function AgentsWorkspace() {
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-500"
       >
         <BellPlus className="h-4 w-4" />
-        Skapa nytt larm
+        Create new alarm
       </button>
       <ul className="space-y-3">
         {alarms.map((alarm) => {
@@ -42,24 +42,24 @@ export function AgentsWorkspace() {
                       : 'bg-amber-500/15 text-amber-400'
                   }`}
                 >
-                  {alarm.enabled ? 'Aktiv' : 'Pausad'}
+                  {alarm.enabled ? 'Active' : 'Paused'}
                 </span>
               </div>
               <dl className="grid gap-1 text-xs text-slate-400">
                 <div>
-                  <dt className="inline text-slate-600">Kameror: </dt>
+                  <dt className="inline text-slate-600">Cameras: </dt>
                   <dd className="inline">{camNames || '—'}</dd>
                 </div>
                 <div>
-                  <dt className="inline text-slate-600">Schema: </dt>
+                  <dt className="inline text-slate-600">Schedule: </dt>
                   <dd className="inline">{alarm.schedule}</dd>
                 </div>
                 <div>
-                  <dt className="inline text-slate-600">Utlösare: </dt>
+                  <dt className="inline text-slate-600">Trigger: </dt>
                   <dd className="inline font-mono text-slate-500">{alarm.trigger}</dd>
                 </div>
                 <div>
-                  <dt className="inline text-slate-600">Skapad: </dt>
+                  <dt className="inline text-slate-600">Created: </dt>
                   <dd className="inline">{formatRelativeTime(alarm.createdAt)}</dd>
                 </div>
               </dl>
@@ -71,11 +71,11 @@ export function AgentsWorkspace() {
                 >
                   {alarm.enabled ? (
                     <>
-                      <Pause className="h-3 w-3" /> Pausa
+                      <Pause className="h-3 w-3" /> Pause
                     </>
                   ) : (
                     <>
-                      <Play className="h-3 w-3" /> Aktivera
+                      <Play className="h-3 w-3" /> Enable
                     </>
                   )}
                 </button>

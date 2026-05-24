@@ -15,6 +15,7 @@ const validWorkspaces = new Set<string>([
   'onboarding',
   'alarms',
   'forensic',
+  'faces',
   'map',
   'settings',
 ])

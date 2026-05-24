@@ -7,7 +7,13 @@ import { vapixConfigPlugin } from './vite.vapix-config-plugin'
 import { axisCameraProxyPlugin } from './vite.axis-proxy'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), authPlugin(), vapixConfigPlugin(), axisCameraProxyPlugin()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    authPlugin(),
+    vapixConfigPlugin(),
+    axisCameraProxyPlugin(),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -15,6 +21,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    strictPort: false,
     open: true,
     proxy: {
       '/api/ollama': {

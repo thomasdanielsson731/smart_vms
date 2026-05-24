@@ -3,41 +3,55 @@ import { mockIncidents } from '@/lib/mock-data'
 import { cameraHostForIncident } from '@/lib/mock-forensic'
 import { useAppConfig } from '@/context/AppConfigContext'
 import { AlarmThumbnail } from '@/components/alarm/AlarmThumbnail'
+import { AlarmTier2Panel } from '@/components/alarm/AlarmTier2Panel'
 import { SeverityBadge } from '@/components/ui/StatusBadge'
 import { formatRelativeTime } from '@/lib/format'
+import { generateAlarmTier2Analysis } from '@/lib/alarm-tier2-analytics'
+import { useMemo } from 'react'
 
 export function DashboardWorkspace() {
-  const { cameras, alarms, storageUsage, storageSettings } = useAppConfig()
+  const { cameras, alarms, storageUsage, storageSettings, faceProfiles, faceSettings } =
+    useAppConfig()
   const openCount = mockIncidents.filter((i) => i.status === 'open').length
   const weekTotal = mockIncidents.length + alarms.length
   const camerasOnline = cameras.filter((c) => c.status === 'online').length
 
+  const latestWithTier2 = useMemo(() => {
+    const latest = mockIncidents[0]
+    if (!latest) return null
+    const analysis = generateAlarmTier2Analysis(latest, { faceProfiles, faceSettings })
+    return { incident: latest, analysis }
+  }, [faceProfiles, faceSettings])
+
   return (
     <div className="space-y-6">
       <div className="grid gap-3 sm:grid-cols-2">
-        <Stat icon={AlertCircle} label="Öppna larm" value={String(openCount)} />
-        <Stat icon={TrendingUp} label="Larm senaste 7 d" value={String(weekTotal)} />
-        <Stat icon={Server} label="Kameror online" value={`${camerasOnline}/${cameras.length}`} />
+        <Stat icon={AlertCircle} label="Open alarms" value={String(openCount)} />
+        <Stat icon={TrendingUp} label="Alarms last 7 d" value={String(weekTotal)} />
+        <Stat icon={Server} label="Cameras online" value={`${camerasOnline}/${cameras.length}`} />
         <Stat
           icon={HardDrive}
-          label="Inspelning"
+          label="Recording"
           value={`${storageUsage.recordingPercent}%`}
           sub={`max ${storageSettings.maxRecordingGiB} GiB`}
           variant={storageUsage.isOverQuota ? 'warn' : storageUsage.isWarning ? 'warn' : 'default'}
         />
-        <Stat icon={Server} label="Aktiva larm" value={String(alarms.filter((a) => a.enabled).length)} />
+        <Stat icon={Server} label="Active alarms" value={String(alarms.filter((a) => a.enabled).length)} />
       </div>
 
       <section>
         <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-          Senaste larm
+          Recent alarms
         </h3>
         <ul className="space-y-2">
-          {mockIncidents.map((inc) => (
+          {mockIncidents.map((inc) => {
+            const tier2 = generateAlarmTier2Analysis(inc, { faceProfiles, faceSettings })
+            return (
             <li
               key={inc.id}
-              className="flex items-center gap-3 rounded-lg bg-slate-800/50 px-3 py-2 text-sm"
+              className="rounded-lg bg-slate-800/50 px-3 py-2 text-sm"
             >
+              <div className="flex items-center gap-3">
               <AlarmThumbnail
                 incident={inc}
                 cameraHost={cameraHostForIncident(inc, cameras)}
@@ -49,13 +63,23 @@ export function DashboardWorkspace() {
                 <SeverityBadge severity={inc.severity} />
                 <span className="text-xs text-slate-500">{formatRelativeTime(inc.occurredAt)}</span>
               </div>
+              </div>
+              <div className="mt-2 pl-11">
+                <AlarmTier2Panel analysis={tier2} compact />
+              </div>
             </li>
-          ))}
+            )
+          })}
         </ul>
+        {latestWithTier2 && (
+          <p className="mt-2 text-xs text-slate-600">
+            Latest analysis: {latestWithTier2.analysis.headline}
+          </p>
+        )}
       </section>
 
       <div className="rounded-lg border border-dashed border-slate-700 p-4 text-center text-xs text-slate-500">
-        Diagram (detektioner/timme, falsklarm) kopplas till metrics i Phase 3
+        Charts (detections/hour, false alarms) will connect to metrics in Phase 3
       </div>
     </div>
   )

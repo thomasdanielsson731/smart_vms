@@ -17,7 +17,7 @@ export function IncidentsPage() {
   return (
     <div className="space-y-6">
       <p className="text-sm text-slate-400">
-        Larm med best picture — högst poängsatta bildruta vid utlösning (bbox markerad).
+        Alarms with best picture — highest-scoring frame at trigger (bbox highlighted).
       </p>
 
       <AlarmCardGrid incidents={all} selectedId={selectedId} onSelect={setSelectedId} />
@@ -28,11 +28,11 @@ export function IncidentsPage() {
           <div className="grid gap-4 lg:grid-cols-2">
             <AlarmBestPicturePanel incident={selected} cameraHost={host} />
             <dl className="space-y-2 text-sm">
-              <Row label="Kamera" value={selected.cameraName} />
-              <Row label="Tid" value={formatDateTime(selected.occurredAt)} />
-              <Row label="Regel" value={selected.ruleName ?? '—'} />
+              <Row label="Camera" value={selected.cameraName} />
+              <Row label="Time" value={formatDateTime(selected.occurredAt)} />
+              <Row label="Rule" value={selected.ruleName ?? '—'} />
               <Row
-                label="Best picture poäng"
+                label="Best picture score"
                 value={
                   selected.bestPicture
                     ? `${Math.round(selected.bestPicture.score * 100)} %`

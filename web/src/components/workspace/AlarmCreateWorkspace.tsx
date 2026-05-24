@@ -44,47 +44,47 @@ export function AlarmCreateWorkspace() {
 
   const triggers: { value: AlarmTrigger; label: string }[] = [
     { value: 'person', label: 'Person' },
-    { value: 'vehicle', label: 'Fordon' },
-    { value: 'vapix_motion', label: 'VAPIX rörelse' },
-    { value: 'line_cross', label: 'Linjeöverträdelse' },
+    { value: 'vehicle', label: 'Vehicle' },
+    { value: 'vapix_motion', label: 'VAPIX motion' },
+    { value: 'line_cross', label: 'Line crossing' },
   ]
 
   return (
     <div className="space-y-6">
       <p className="text-sm text-slate-400">
-        Skapa larm (övervakningsregler). Multi-konfig: samma regel på flera kameror med ett klick.
+        Create alarms (monitoring rules). Multi-config: apply the same rule to multiple cameras in one click.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Field label="Namn på larm">
+        <Field label="Alarm name">
           <input
             required
             value={draft.name}
             onChange={(e) => update('name', e.target.value)}
-            placeholder="t.ex. Natt — garage"
+            placeholder="e.g. Night — garage"
             className={inputCls}
           />
         </Field>
 
-        <Field label="Beskrivning">
+        <Field label="Description">
           <textarea
             value={draft.description}
             onChange={(e) => update('description', e.target.value)}
             rows={2}
             className={inputCls}
-            placeholder="Valfri beskrivning för dig och hushållet"
+            placeholder="Optional description for you and the household"
           />
         </Field>
 
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs text-slate-500">Kameror (välj en eller flera)</span>
+            <span className="text-xs text-slate-500">Cameras (select one or more)</span>
             <button
               type="button"
               onClick={selectAllCameras}
               className="text-xs text-blue-400 hover:text-blue-300"
             >
-              Alla kameror
+              All cameras
             </button>
           </div>
           <ul className="flex flex-wrap gap-2">
@@ -114,11 +114,11 @@ export function AlarmCreateWorkspace() {
             className="rounded"
           />
           <Copy className="h-4 w-4 text-slate-500" />
-          Skapa ett separat larm per kamera (bulk)
+          Create a separate alarm per camera (bulk)
         </label>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Utlösare">
+          <Field label="Trigger">
             <select
               value={draft.trigger}
               onChange={(e) => update('trigger', e.target.value as AlarmTrigger)}
@@ -131,7 +131,7 @@ export function AlarmCreateWorkspace() {
               ))}
             </select>
           </Field>
-          <Field label="Allvar">
+          <Field label="Severity">
             <select
               value={draft.severity}
               onChange={(e) =>
@@ -139,23 +139,23 @@ export function AlarmCreateWorkspace() {
               }
               className={inputCls}
             >
-              <option value="low">Låg</option>
+              <option value="low">Low</option>
               <option value="medium">Medium</option>
-              <option value="high">Hög</option>
+              <option value="high">High</option>
             </select>
           </Field>
         </div>
 
-        <Field label="Zon (valfritt)">
+        <Field label="Zone (optional)">
           <input
             value={draft.zoneName}
             onChange={(e) => update('zoneName', e.target.value)}
-            placeholder="t.ex. uppfart, garage"
+            placeholder="e.g. driveway, garage"
             className={inputCls}
           />
         </Field>
 
-        <Field label="Schema">
+        <Field label="Schedule">
           <input
             value={draft.schedule}
             onChange={(e) => update('schedule', e.target.value)}
@@ -163,11 +163,11 @@ export function AlarmCreateWorkspace() {
           />
         </Field>
 
-        <Field label="Tyst tid / quiet hours (valfritt)">
+        <Field label="Quiet hours (optional)">
           <input
             value={draft.quietHours}
             onChange={(e) => update('quietHours', e.target.value)}
-            placeholder="t.ex. 22:00–06:00"
+            placeholder="e.g. 22:00–06:00"
             className={inputCls}
           />
         </Field>
@@ -179,21 +179,21 @@ export function AlarmCreateWorkspace() {
         >
           <BellPlus className="h-4 w-4" />
           {bulkMode && draft.cameraIds.length > 1
-            ? `Skapa ${draft.cameraIds.length} larm`
-            : 'Skapa larm'}
+            ? `Create ${draft.cameraIds.length} alarms`
+            : 'Create alarm'}
         </button>
       </form>
 
       {savedId && (
         <p className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
-          Larm sparat (mock). Totalt {alarms.length} larm i systemet.
+          Alarm saved (mock). {alarms.length} alarms total in the system.
         </p>
       )}
 
       {alarms.length > 0 && (
         <section>
           <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-            Aktiva larm ({alarms.filter((a) => a.enabled).length})
+            Active alarms ({alarms.filter((a) => a.enabled).length})
           </h3>
           <ul className="max-h-40 space-y-1 overflow-y-auto text-sm text-slate-400">
             {alarms.slice(0, 8).map((a) => (

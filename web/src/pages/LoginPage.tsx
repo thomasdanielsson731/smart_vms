@@ -32,7 +32,7 @@ export function LoginPage() {
     try {
       await login(username.trim(), password)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Inloggning misslyckades')
+      setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
       setSubmitting(false)
     }
@@ -46,7 +46,7 @@ export function LoginPage() {
             <Shield className="h-7 w-7" />
           </div>
           <h1 className="text-xl font-semibold text-white">Smart VMS</h1>
-          <p className="mt-1 text-sm text-slate-500">Logga in för att komma åt kameror och larm</p>
+          <p className="mt-1 text-sm text-slate-500">Sign in to access cameras and alarms</p>
         </div>
 
         <form
@@ -62,15 +62,15 @@ export function LoginPage() {
 
           {!authConfigured && (
             <div className="mb-4 rounded-lg border border-amber-900/50 bg-amber-950/30 px-3 py-2.5 text-xs text-amber-200">
-              Autentisering ej konfigurerad. Sätt{' '}
-              <code className="text-amber-100">SMARTVMS_ADMIN_PASSWORD</code> i{' '}
-              <code className="text-amber-100">web/.env</code> och starta om{' '}
+              Authentication not configured. Set{' '}
+              <code className="text-amber-100">SMARTVMS_ADMIN_PASSWORD</code> in{' '}
+              <code className="text-amber-100">web/.env</code> and restart{' '}
               <code className="text-amber-100">npm run dev</code>.
             </div>
           )}
 
           <label className="mb-4 block">
-            <span className="mb-1.5 block text-xs font-medium text-slate-400">Användarnamn</span>
+            <span className="mb-1.5 block text-xs font-medium text-slate-400">Username</span>
             <input
               type="text"
               autoComplete="username"
@@ -82,7 +82,7 @@ export function LoginPage() {
           </label>
 
           <label className="mb-6 block">
-            <span className="mb-1.5 block text-xs font-medium text-slate-400">Lösenord</span>
+            <span className="mb-1.5 block text-xs font-medium text-slate-400">Password</span>
             <input
               type="password"
               autoComplete="current-password"
@@ -99,12 +99,12 @@ export function LoginPage() {
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-500 disabled:opacity-60"
           >
             <Lock className="h-4 w-4" />
-            {submitting ? 'Loggar in…' : 'Logga in'}
+            {submitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 
         <p className="mt-6 text-center text-xs text-slate-600">
-          Session via säker cookie · Lokal autentisering (Phase 1)
+          Session via secure cookie · Local authentication (Phase 1)
         </p>
       </div>
     </div>

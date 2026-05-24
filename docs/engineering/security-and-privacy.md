@@ -36,7 +36,7 @@ Home deployment threat model and product constraints. **Not a corporate complian
 
 | Topic | Policy (proposed) |
 |-------|-------------------|
-| Face **identification** | Out of scope v1 |
+| Face **identification** | Opt-in via workspace **Ansikten**; see [face-recognition.md](../product/face-recognition.md) |
 | Face **detection** (bbox) | Configurable per camera; off indoors by default |
 | License plates | Detection optional; no public LPR database |
 | Audio | Off unless explicit ADR + legal review |
@@ -62,6 +62,7 @@ Home deployment threat model and product constraints. **Not a corporate complian
 - Dependabot or equivalent
 - `gitleaks` or secret scan in CI
 - Signed container images optional for home
+- **CRA alignment:** [cyber-resilience-act.md](cyber-resilience-act.md) — EU Cyber Resilience Act mapping
 
 ## Incident response (home scale)
 

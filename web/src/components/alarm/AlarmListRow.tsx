@@ -1,8 +1,10 @@
 import { useAppConfig } from '@/context/AppConfigContext'
 import { cameraHostForIncident } from '@/lib/mock-forensic'
 import { AlarmThumbnail, AlarmBestPicturePanel } from '@/components/alarm/AlarmThumbnail'
+import { FaceMatchBadge } from '@/components/face/FaceMatchBadge'
 import { SeverityBadge, IncidentStatusBadge } from '@/components/ui/StatusBadge'
 import { formatDateTime, formatRelativeTime } from '@/lib/format'
+import { useAlarmTier2 } from '@/hooks/useAlarmTier2'
 import type { Incident } from '@/types/incident'
 
 interface AlarmListRowProps {
@@ -15,6 +17,7 @@ interface AlarmListRowProps {
 export function AlarmListRow({ incident, selected, onClick }: AlarmListRowProps) {
   const { cameras } = useAppConfig()
   const host = cameraHostForIncident(incident, cameras)
+  const tier2 = useAlarmTier2(incident)
 
   return (
     <button
@@ -27,12 +30,16 @@ export function AlarmListRow({ incident, selected, onClick }: AlarmListRowProps)
       <AlarmThumbnail incident={incident} cameraHost={host} size="md" showLabel />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-slate-200">{incident.title}</p>
+        {tier2 && (
+          <p className="truncate text-xs text-violet-300/90">{tier2.headline}</p>
+        )}
         <p className="text-xs text-slate-500">
           {incident.cameraName} · {formatRelativeTime(incident.occurredAt)}
         </p>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           <SeverityBadge severity={incident.severity} />
           <IncidentStatusBadge status={incident.status} />
+          {incident.faceMatch && <FaceMatchBadge match={incident.faceMatch} compact />}
         </div>
       </div>
     </button>

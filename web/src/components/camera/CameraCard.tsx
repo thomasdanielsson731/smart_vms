@@ -32,7 +32,7 @@ export function CameraCard({ camera }: { camera: Camera }) {
           <Wifi className="h-3.5 w-3.5" />
           {camera.host}
           <span className="text-slate-700">·</span>
-          Senast: {formatRelativeTime(camera.lastSeenAt)}
+          Last seen: {formatRelativeTime(camera.lastSeenAt)}
         </div>
         <div className="mt-auto flex gap-2 pt-2">
           <Link
@@ -45,7 +45,7 @@ export function CameraCard({ camera }: { camera: Camera }) {
             to={`/timeline?camera=${camera.id}`}
             className="flex-1 rounded-lg bg-slate-700/50 py-2 text-center text-sm font-medium text-slate-300 hover:bg-slate-700"
           >
-            Spela upp
+            Playback
           </Link>
         </div>
       </div>

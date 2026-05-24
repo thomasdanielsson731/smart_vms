@@ -11,7 +11,7 @@ const defaultBatch: OnboardingBatch = {
   vapixUser: defaultVapixUser,
   vapixPassword: '',
   recordingEnabled: true,
-  namePrefix: 'Kamera',
+  namePrefix: 'Camera',
 }
 
 export function OnboardingWorkspace() {
@@ -55,8 +55,8 @@ export function OnboardingWorkspace() {
   return (
     <div className="space-y-6">
       <p className="text-sm text-slate-400">
-        Multi-konfig: upptäck Axis-enheter på nätverket (mDNS/ONVIF mock) och onboarda flera samtidigt
-        med samma VAPIX-uppgifter.
+        Multi-config: discover Axis devices on the network (mDNS/ONVIF mock) and onboard several at once
+        with the same VAPIX credentials.
       </p>
 
       <StepIndicator current={step} />
@@ -74,10 +74,10 @@ export function OnboardingWorkspace() {
             ) : (
               <Radar className="h-4 w-4" />
             )}
-            {discoveryStatus === 'scanning' ? 'Söker på LAN…' : 'Sök kameror i nätverket'}
+            {discoveryStatus === 'scanning' ? 'Searching LAN…' : 'Search for cameras on network'}
           </button>
           <p className="text-xs text-slate-500">
-            Phase 1: riktig sökning via backend (mDNS, WS-Discovery, kända subnät).
+            Phase 1: real discovery via backend (mDNS, WS-Discovery, known subnets).
           </p>
         </section>
       )}
@@ -90,21 +90,21 @@ export function OnboardingWorkspace() {
               onClick={() => selectAllDiscovered(true)}
               className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700"
             >
-              Markera alla
+              Select all
             </button>
             <button
               type="button"
               onClick={() => selectAllDiscovered(true, true)}
               className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700"
             >
-              Endast nya ({newCount})
+              New only ({newCount})
             </button>
             <button
               type="button"
               onClick={() => selectAllDiscovered(false)}
               className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs text-slate-500 hover:bg-slate-700"
             >
-              Avmarkera alla
+              Deselect all
             </button>
           </div>
 
@@ -126,7 +126,7 @@ export function OnboardingWorkspace() {
                   <p className="truncate text-sm font-medium text-white">
                     {d.model}
                     {d.alreadyRegistered && (
-                      <span className="ml-2 text-xs font-normal text-emerald-500">registrerad</span>
+                      <span className="ml-2 text-xs font-normal text-emerald-500">registered</span>
                     )}
                   </p>
                   <p className="text-xs text-slate-500">
@@ -143,7 +143,7 @@ export function OnboardingWorkspace() {
             onClick={() => setStep('configure')}
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-40"
           >
-            Nästa: konfigurera {selectedCount} valda
+            Next: configure {selectedCount} selected
             <ChevronRight className="h-4 w-4" />
           </button>
         </section>
@@ -151,8 +151,8 @@ export function OnboardingWorkspace() {
 
       {step === 'configure' && (
         <section className="space-y-4">
-          <h3 className="text-sm font-medium text-white">Gemensam konfiguration (bulk)</h3>
-          <Field label="VAPIX-användare (per kamera om olika)">
+          <h3 className="text-sm font-medium text-white">Shared configuration (bulk)</h3>
+          <Field label="VAPIX user (per camera if different)">
             <input
               value={batch.vapixUser}
               onChange={(e) => setBatch((b) => ({ ...b, vapixUser: e.target.value }))}
@@ -160,16 +160,16 @@ export function OnboardingWorkspace() {
             />
           </Field>
           <p className="text-xs text-slate-500">
-            Gemensamt lösenord för alla kameror sätts under{' '}
-            <strong className="text-slate-400">Inställningar → Kameror (VAPIX)</strong>.
+            Shared password for all cameras is set under{' '}
+            <strong className="text-slate-400">Settings → Cameras (VAPIX)</strong>.
             {vapixReady === false && (
-              <span className="mt-1 block text-amber-400">Kamerolösenord saknas — live video fungerar inte ännu.</span>
+              <span className="mt-1 block text-amber-400">Camera password missing — live video will not work yet.</span>
             )}
             {vapixReady === true && (
-              <span className="mt-1 block text-emerald-500">Gemensamt lösenord är konfigurerat.</span>
+              <span className="mt-1 block text-emerald-500">Shared password is configured.</span>
             )}
           </p>
-          <Field label="Namnprefix">
+          <Field label="Name prefix">
             <input
               value={batch.namePrefix}
               onChange={(e) => setBatch((b) => ({ ...b, namePrefix: e.target.value }))}
@@ -183,14 +183,14 @@ export function OnboardingWorkspace() {
               onChange={(e) => setBatch((b) => ({ ...b, recordingEnabled: e.target.checked }))}
               className="rounded"
             />
-            Aktivera inspelning på alla
+            Enable recording on all
           </label>
           <button
             type="button"
             onClick={handleOnboard}
             className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-500"
           >
-            Onboarda {selectedCount} kameror
+            Onboard {selectedCount} cameras
           </button>
         </section>
       )}
@@ -199,8 +199,8 @@ export function OnboardingWorkspace() {
         <section className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-center">
           <Check className="mx-auto mb-2 h-8 w-8 text-emerald-400" />
           <p className="font-medium text-white">
-            {result.added} kameror tillagda
-            {result.skipped > 0 && ` · ${result.skipped} redan registrerade hoppades över`}
+            {result.added} cameras added
+            {result.skipped > 0 && ` · ${result.skipped} already registered were skipped`}
           </p>
           <button
             type="button"
@@ -210,7 +210,7 @@ export function OnboardingWorkspace() {
             }}
             className="mt-4 text-sm text-blue-400 hover:text-blue-300"
           >
-            Ny sökning
+            New search
           </button>
         </section>
       )}
@@ -220,10 +220,10 @@ export function OnboardingWorkspace() {
 
 function StepIndicator({ current }: { current: Step }) {
   const steps: { id: Step; label: string }[] = [
-    { id: 'scan', label: 'Sök' },
-    { id: 'select', label: 'Välj' },
-    { id: 'configure', label: 'Konfig' },
-    { id: 'done', label: 'Klar' },
+    { id: 'scan', label: 'Search' },
+    { id: 'select', label: 'Select' },
+    { id: 'configure', label: 'Config' },
+    { id: 'done', label: 'Done' },
   ]
   const order: Step[] = ['scan', 'select', 'configure', 'done']
   const idx = order.indexOf(current)

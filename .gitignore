@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 .vapix.credentials.json
+.smartvms-audit.log
 secrets/
 *.pem
 *.key

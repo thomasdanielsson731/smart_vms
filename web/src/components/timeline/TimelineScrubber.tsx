@@ -17,7 +17,7 @@ export function TimelineScrubber({ cameraName }: TimelineScrubberProps) {
   return (
     <div className="rounded-xl border border-slate-800/80 bg-[var(--color-surface-800)] p-4">
       <div className="mb-4 aspect-video rounded-lg bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
-        <p className="text-sm text-slate-500">Uppspelning · {cameraName} · mock</p>
+        <p className="text-sm text-slate-500">Playback · {cameraName} · mock</p>
       </div>
 
       <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
@@ -32,14 +32,14 @@ export function TimelineScrubber({ cameraName }: TimelineScrubberProps) {
         value={position}
         onChange={(e) => setPosition(Number(e.target.value))}
         className="timeline-slider mb-4 w-full"
-        aria-label="Tidslinje"
+        aria-label="Timeline"
       />
 
       <div className="flex items-center justify-center gap-2">
         <button
           type="button"
           className="rounded-lg p-2 text-slate-400 hover:bg-slate-700/50"
-          aria-label="10 sekunder bakåt"
+          aria-label="10 seconds back"
         >
           <SkipBack className="h-5 w-5" />
         </button>
@@ -47,21 +47,21 @@ export function TimelineScrubber({ cameraName }: TimelineScrubberProps) {
           type="button"
           onClick={() => setPlaying((p) => !p)}
           className="rounded-full bg-blue-600 p-3 text-white hover:bg-blue-500"
-          aria-label={playing ? 'Pausa' : 'Spela'}
+          aria-label={playing ? 'Pause' : 'Play'}
         >
           {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
         </button>
         <button
           type="button"
           className="rounded-lg p-2 text-slate-400 hover:bg-slate-700/50"
-          aria-label="10 sekunder framåt"
+          aria-label="10 seconds forward"
         >
           <SkipForward className="h-5 w-5" />
         </button>
       </div>
 
       <p className="mt-3 text-center text-xs text-slate-500">
-        Hastighet: 1× · Segment-index kopplas till inspelningstjänst i Phase 1
+        Speed: 1× · Segment index will connect to recording service in Phase 1
       </p>
     </div>
   )

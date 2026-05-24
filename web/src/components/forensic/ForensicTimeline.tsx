@@ -32,8 +32,8 @@ export function ForensicTimeline({
   return (
     <div className="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4">
       <div className="mb-2 flex justify-between text-xs text-slate-500">
-        <span>Tidslinje — larm</span>
-        <span>{incidents.length} händelser</span>
+        <span>Timeline — alarms</span>
+        <span>{incidents.length} events</span>
       </div>
 
       <div className="relative mb-8 h-14 rounded-lg bg-slate-800/60">

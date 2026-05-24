@@ -8,7 +8,7 @@ export function RequireAuth() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--color-surface-950)]">
-        <p className="text-sm text-slate-500">Verifierar session…</p>
+        <p className="text-sm text-slate-500">Verifying session…</p>
       </div>
     )
   }

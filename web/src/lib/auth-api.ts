@@ -3,7 +3,7 @@ import type { AuthUser } from '@/types/auth'
 const jsonHeaders = { 'Content-Type': 'application/json' }
 
 async function parseAuthResponse(res: Response): Promise<never> {
-  let message = 'Inloggning misslyckades'
+  let message = 'Login failed'
   try {
     const data = (await res.json()) as { message?: string }
     if (data.message) message = data.message
@@ -16,7 +16,7 @@ async function parseAuthResponse(res: Response): Promise<never> {
 export async function fetchCurrentUser(): Promise<AuthUser | null> {
   const res = await fetch('/api/auth/me', { credentials: 'same-origin' })
   if (res.status === 401) return null
-  if (!res.ok) throw new Error('Kunde inte verifiera session')
+  if (!res.ok) throw new Error('Could not verify session')
   const data = (await res.json()) as { user: AuthUser }
   return data.user
 }

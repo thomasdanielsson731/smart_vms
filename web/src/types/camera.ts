@@ -11,6 +11,7 @@ export interface Camera {
   streamProfile: string
   recordingEnabled: boolean
   lastSeenAt: string | null
-  vapixUser: string
+  /** Per-camera VAPIX user — only if different from shared credentials */
+  vapixUser?: string
   thumbnailUrl?: string
 }

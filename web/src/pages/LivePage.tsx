@@ -13,7 +13,7 @@ export function LivePage() {
 
       <aside className="space-y-2">
         <h2 className="text-xs font-medium uppercase tracking-wide text-slate-500">
-          Välj kamera
+          Select camera
         </h2>
         <ul className="space-y-1">
           {mockCameras.map((cam) => (

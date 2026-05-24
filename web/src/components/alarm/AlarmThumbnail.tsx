@@ -97,7 +97,7 @@ export function AlarmBestPicturePanel({
     <div className="space-y-2">
       <div className="flex items-center justify-between text-xs text-slate-500">
         <span>Best picture</span>
-        {score && <span className="text-amber-400/90">Poäng {score}</span>}
+        {score && <span className="text-amber-400/90">Score {score}</span>}
       </div>
       <AlarmThumbnail
         incident={incident}
@@ -107,8 +107,8 @@ export function AlarmBestPicturePanel({
         showBbox
       />
       <p className="text-xs text-slate-600">
-        Fångad {new Date(captured).toLocaleString('sv-SE')}
-        {incident.bestPicture?.bboxNorm && ' · bbox markerad'}
+        Captured {new Date(captured).toLocaleString('en-US')}
+        {incident.bestPicture?.bboxNorm && ' · bbox highlighted'}
       </p>
     </div>
   )

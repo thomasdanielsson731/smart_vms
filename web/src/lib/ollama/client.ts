@@ -60,7 +60,7 @@ export async function chatWithOllama(
   if (!res.ok) {
     const text = await res.text().catch(() => '')
     throw new OllamaError(
-      text || `Ollama svarade med HTTP ${res.status}. Kör "ollama serve" och kontrollera modellen.`,
+      text || `Ollama responded with HTTP ${res.status}. Run "ollama serve" and check the model.`,
       res.status,
     )
   }

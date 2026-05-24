@@ -12,8 +12,10 @@ import type { ForensicRange } from '@/types/forensic'
 import { ForensicTimeline } from '@/components/forensic/ForensicTimeline'
 import { AlarmListRow } from '@/components/alarm/AlarmListRow'
 import { AlarmBestPicturePanel } from '@/components/alarm/AlarmThumbnail'
+import { AlarmTier2Panel } from '@/components/alarm/AlarmTier2Panel'
 import { cameraHostForIncident } from '@/lib/mock-forensic'
 import { formatDateTime } from '@/lib/format'
+import { useAlarmTier2 } from '@/hooks/useAlarmTier2'
 
 export function ForensicWorkspace() {
   const { cameras } = useAppConfig()
@@ -55,13 +57,15 @@ export function ForensicWorkspace() {
   const selected =
     incidents.find((i) => i.id === selectedId) ?? incidents[0] ?? null
 
+  const tier2 = useAlarmTier2(selected)
+
   const selectIncident = (id: string) => setParam('incident', id)
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <p className="text-sm text-slate-400">
-        Forensic — granska inspelat material och alla larm på en gemensam tidslinje. Klicka på en
-        markör eller i listan för att visa klipp (mock).
+        Forensic — review recorded footage and all alarms on a shared timeline. Click a marker or
+        list item to view clips (mock).
       </p>
 
       {/* Filters */}
@@ -88,7 +92,7 @@ export function ForensicWorkspace() {
           onChange={(e) => setParam('camera', e.target.value)}
           className="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-sm text-white"
         >
-          <option value="">Alla kameror</option>
+          <option value="">All cameras</option>
           {cameras.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -97,7 +101,7 @@ export function ForensicWorkspace() {
         </select>
         <span className="text-xs text-slate-500">
           <Film className="mr-1 inline h-3.5 w-3.5" />
-          {segments.length} inspelningssegment (mock)
+          {segments.length} recording segments (mock)
         </span>
       </div>
 
@@ -113,11 +117,11 @@ export function ForensicWorkspace() {
         {/* Alarm list */}
         <aside className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-slate-800/80 bg-slate-900/30">
           <h3 className="shrink-0 border-b border-slate-800/80 px-3 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-            Larm i perioden
+            Alarms in period
           </h3>
           <ul className="min-h-0 flex-1 overflow-y-auto">
             {incidents.length === 0 && (
-              <li className="p-4 text-sm text-slate-500">Inga larm i vald period.</li>
+              <li className="p-4 text-sm text-slate-500">No alarms in selected period.</li>
             )}
             {incidents.map((inc) => (
               <li key={inc.id}>
@@ -140,10 +144,12 @@ export function ForensicWorkspace() {
                 cameraHost={cameraHostForIncident(selected, cameras)}
               />
 
+              {tier2 && <AlarmTier2Panel analysis={tier2} />}
+
               <div className="relative aspect-video overflow-hidden rounded-xl border border-slate-800/80 bg-slate-900/50">
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
                   <Play className="h-10 w-10 text-slate-600" />
-                  <p className="text-sm text-slate-400">Klippuppspelning</p>
+                  <p className="text-sm text-slate-400">Clip playback</p>
                   <p className="text-xs text-slate-500">
                     {formatDateTime(selected.clipStartAt)} — {formatDateTime(selected.clipEndAt)} (
                     {selected.durationSec}s)
@@ -152,9 +158,9 @@ export function ForensicWorkspace() {
               </div>
 
               <dl className="grid gap-2 rounded-xl border border-slate-800/80 bg-slate-800/30 p-4 text-sm sm:grid-cols-2">
-                <Item label="Tidpunkt" value={formatDateTime(selected.occurredAt)} />
-                <Item label="Kamera" value={selected.cameraName} />
-                <Item label="Regel" value={selected.ruleName ?? '—'} />
+                <Item label="Timestamp" value={formatDateTime(selected.occurredAt)} />
+                <Item label="Camera" value={selected.cameraName} />
+                <Item label="Rule" value={selected.ruleName ?? '—'} />
                 <Item
                   label="Best picture"
                   value={
@@ -164,7 +170,7 @@ export function ForensicWorkspace() {
                   }
                 />
                 <Item label="Status" value={selected.status} />
-                <Item label="Klipp-ID" value={selected.id} mono />
+                <Item label="Clip ID" value={selected.id} mono />
               </dl>
 
               <div className="flex gap-2">
@@ -173,20 +179,20 @@ export function ForensicWorkspace() {
                   className="inline-flex items-center gap-2 rounded-lg bg-blue-600/20 px-4 py-2 text-sm text-blue-300 hover:bg-blue-600/30"
                 >
                   <Play className="h-4 w-4" />
-                  Spela klipp
+                  Play clip
                 </button>
                 <button
                   type="button"
                   className="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2 text-sm text-slate-300 hover:bg-slate-700"
                 >
                   <Download className="h-4 w-4" />
-                  Exportera bevispaket
+                  Export evidence package
                 </button>
               </div>
             </>
           ) : (
             <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-slate-700 text-sm text-slate-500">
-              Välj ett larm på tidslinjen
+              Select an alarm on the timeline
             </div>
           )}
         </div>

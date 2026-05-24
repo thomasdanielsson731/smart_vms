@@ -20,6 +20,7 @@ Read `AGENTS.md` and `docs/product/vision.md` before proposing architecture or c
 ## Privacy (home)
 - No face **identification** v1; indoor face bbox off by default.
 - No secrets in repo; never log RTSP URLs with credentials.
+- Align with **EU Cyber Resilience Act** where applicable — see `docs/engineering/cyber-resilience-act.md`.
 
 ## AI output
 - Mark doc sections **Proposed** vs **Decided** (link ADR).

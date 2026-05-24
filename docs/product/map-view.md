@@ -1,8 +1,17 @@
 # Kartvy
 
-**Status:** UI mock med OpenStreetMap + Leaflet
+**Status:** Google Maps (with OpenStreetMap fallback)
 
-## Funktioner
+## Map provider
+
+- **Google Maps** when `VITE_GOOGLE_MAPS_API_KEY` is set in `web/.env`
+- **OpenStreetMap + Leaflet** as fallback when no API key is configured
+
+Enable **Maps JavaScript API** in [Google Cloud Console](https://console.cloud.google.com/google/maps-apis) and create an API key. Restart `npm run dev` after adding the key.
+
+Optional: `VITE_GOOGLE_MAPS_MAP_ID` (defaults to `DEMO_MAP_ID` for development).
+
+## Features
 
 - Zoom/pan (mus + scroll)
 - Placera kameror genom att välja kamera → «Placera» → klick på karta

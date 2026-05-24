@@ -48,7 +48,7 @@ export function formatGiB(gib: number): string {
 }
 
 export const policyLabels: Record<RecordingStorageSettings['onLimitReached'], string> = {
-  delete_oldest: 'Radera äldsta inspelningar (rekommenderat)',
-  stop_recording: 'Stoppa nya inspelningar',
-  warn_only: 'Varna endast (ingen automatisk åtgärd)',
+  delete_oldest: 'Delete oldest recordings (recommended)',
+  stop_recording: 'Stop new recordings',
+  warn_only: 'Warn only (no automatic action)',
 }

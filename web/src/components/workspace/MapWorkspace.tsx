@@ -66,7 +66,7 @@ export function MapWorkspace() {
 
   const goToMyLocation = () => {
     if (!navigator.geolocation) {
-      setLocationError('Webbläsaren stödjer inte platstjänster.')
+      setLocationError('This browser does not support location services.')
       return
     }
     setLocating(true)
@@ -90,9 +90,9 @@ export function MapWorkspace() {
       (err) => {
         setLocating(false)
         const messages: Record<number, string> = {
-          1: 'Platstillstånd nekades. Tillåt plats i webbläsaren.',
-          2: 'Plats kunde inte bestämmas.',
-          3: 'Tidsgräns för platshämtning.',
+          1: 'Location permission denied. Allow location in your browser.',
+          2: 'Location could not be determined.',
+          3: 'Location request timed out.',
         }
         setLocationError(messages[err.code] ?? err.message)
       },
@@ -120,7 +120,7 @@ export function MapWorkspace() {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
       <p className="text-sm text-slate-400">
-        Kartvy — kameror, bildfält och larm. Använd «Min plats» för att centrera kartan på dig.
+        Map view — cameras, field of view, and alarms. Use «My location» to center the map on you.
       </p>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -135,7 +135,7 @@ export function MapWorkspace() {
           ) : (
             <Navigation className="h-4 w-4" />
           )}
-          Min plats
+          My location
         </button>
         <button
           type="button"
@@ -148,7 +148,7 @@ export function MapWorkspace() {
           }`}
         >
           <Crosshair className="h-4 w-4" />
-          {placeMode ? 'Klicka på kartan…' : 'Placera kamera'}
+          {placeMode ? 'Click on the map…' : 'Place camera'}
         </button>
         <label className="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-1.5 text-sm text-slate-300">
           <input
@@ -158,7 +158,7 @@ export function MapWorkspace() {
             className="rounded"
           />
           <Bell className="h-4 w-4" />
-          Visa larm ({alarmPins.length})
+          Show alarms ({alarmPins.length})
         </label>
         <select
           value={alarmHours}
@@ -166,13 +166,13 @@ export function MapWorkspace() {
           className="rounded-lg border border-slate-700 bg-slate-900/60 px-2 py-1.5 text-xs text-white"
           disabled={!showAlarms}
         >
-          <option value={24}>Larm 24 h</option>
-          <option value={48}>Larm 48 h</option>
-          <option value={168}>Larm 7 d</option>
+          <option value={24}>Alarms 24 h</option>
+          <option value={48}>Alarms 48 h</option>
+          <option value={168}>Alarms 7 d</option>
         </select>
         {cameras.some((c) => !mapPlacements[c.id]) && (
           <span className="self-center text-xs text-amber-500">
-            {cameras.filter((c) => !mapPlacements[c.id]).length} kamera(r) ej placerade
+            {cameras.filter((c) => !mapPlacements[c.id]).length} camera(s) not placed
           </span>
         )}
         <button
@@ -180,7 +180,7 @@ export function MapWorkspace() {
           onClick={() => resetMapPlacements()}
           className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm text-slate-400 hover:text-slate-200"
         >
-          Återställ layout
+          Reset layout
         </button>
       </div>
 
@@ -191,7 +191,7 @@ export function MapWorkspace() {
       <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[200px_1fr_240px]">
         <aside className="flex max-h-[50vh] flex-col overflow-hidden rounded-xl border border-slate-800/80 bg-slate-900/40 lg:max-h-none">
           <h3 className="shrink-0 border-b border-slate-800/80 px-3 py-2 text-xs font-medium uppercase text-slate-500">
-            Kameror
+            Cameras
           </h3>
           <ul className="min-h-0 flex-1 overflow-y-auto p-1">
             {cameras.map((cam) => {
@@ -233,11 +233,11 @@ export function MapWorkspace() {
           {showAlarms && (
             <>
               <h3 className="shrink-0 border-t border-b border-slate-800/80 px-3 py-2 text-xs font-medium uppercase text-slate-500">
-                Larm på karta
+                Alarms on map
               </h3>
               <ul className="max-h-40 min-h-0 overflow-y-auto p-1">
                 {alarmPins.length === 0 && (
-                  <li className="px-2 py-2 text-xs text-slate-600">Inga larm i perioden.</li>
+                  <li className="px-2 py-2 text-xs text-slate-600">No alarms in period.</li>
                 )}
                 {alarmPins.map(({ incident }) => (
                   <li key={incident.id}>
@@ -294,10 +294,10 @@ export function MapWorkspace() {
             onSelectAlarm={selectAlarm}
           />
           <div className="pointer-events-none absolute bottom-2 left-2 rounded bg-black/60 px-2 py-1 text-[10px] text-slate-400">
-            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-slate-400" /> låg
+            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-slate-400" /> low
             <span className="mx-2 inline-block h-2 w-2 rounded-full bg-amber-400" /> medium
-            <span className="mx-2 inline-block h-2 w-2 rounded-full bg-red-500" /> hög
-            <span className="mx-2 inline-block h-2 w-2 rounded-full bg-blue-500" /> min plats
+            <span className="mx-2 inline-block h-2 w-2 rounded-full bg-red-500" /> high
+            <span className="mx-2 inline-block h-2 w-2 rounded-full bg-blue-500" /> my location
           </div>
         </div>
 
@@ -316,10 +316,10 @@ export function MapWorkspace() {
               </div>
               <p className="text-xs text-slate-400">{formatDateTime(selectedAlarm.occurredAt)}</p>
               {selectedAlarm.ruleName && (
-                <p className="text-xs text-slate-500">Regel: {selectedAlarm.ruleName}</p>
+                <p className="text-xs text-slate-500">Rule: {selectedAlarm.ruleName}</p>
               )}
               <p className="text-xs text-slate-600">
-                Plottad i kamerans bildfält. Koppla till forensic för klipp.
+                Plotted in the camera field of view. Open forensic for clips.
               </p>
             </div>
           ) : selectedCam && selected ? (
@@ -332,16 +332,16 @@ export function MapWorkspace() {
                 </div>
               </div>
 
-              <Field label="Vy / riktning (beskrivning)">
+              <Field label="View / direction (description)">
                 <input
                   value={selected.viewLabel}
                   onChange={(e) => updateSelected({ viewLabel: e.target.value })}
                   className={inputCls}
-                  placeholder="t.ex. Mot garageport"
+                  placeholder="e.g. Facing garage door"
                 />
               </Field>
 
-              <Field label={`Bäring ${selected.heading}° (0=norr)`}>
+              <Field label={`Bearing ${selected.heading}° (0=north)`}>
                 <input
                   type="range"
                   min={0}
@@ -352,7 +352,7 @@ export function MapWorkspace() {
                 />
               </Field>
 
-              <Field label={`Bildvinkel ${selected.fovDeg}°`}>
+              <Field label={`Field of view ${selected.fovDeg}°`}>
                 <input
                   type="range"
                   min={20}
@@ -363,7 +363,7 @@ export function MapWorkspace() {
                 />
               </Field>
 
-              <Field label={`Räckvidd ${selected.rangeM} m`}>
+              <Field label={`Range ${selected.rangeM} m`}>
                 <input
                   type="range"
                   min={5}
@@ -382,10 +382,10 @@ export function MapWorkspace() {
           ) : selectedCam ? (
             <div className="text-sm text-slate-400">
               <p className="mb-3 font-medium text-white">{selectedCam.name}</p>
-              <p>Inte placerad. Välj «Placera kamera» och klicka på kartan.</p>
+              <p>Not placed. Choose «Place camera» and click on the map.</p>
             </div>
           ) : (
-            <p className="text-sm text-slate-500">Välj kamera eller larm</p>
+            <p className="text-sm text-slate-500">Select a camera or alarm</p>
           )}
         </aside>
       </div>

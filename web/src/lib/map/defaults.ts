@@ -1,6 +1,6 @@
 import type { CameraMapPlacement } from '@/types/map'
 
-/** Startpositioner för demo (justera till din fastighet i kartvyn) */
+/** Default positions for demo (adjust to your property in the map view) */
 export function buildDefaultPlacements(cameraIds: string[]): Record<string, CameraMapPlacement> {
   const presets: Record<string, Omit<CameraMapPlacement, 'cameraId'>> = {
     'cam-driveway': {
@@ -9,7 +9,7 @@ export function buildDefaultPlacements(cameraIds: string[]): Record<string, Came
       heading: 200,
       fovDeg: 70,
       rangeM: 22,
-      viewLabel: 'Uppfart och infart',
+      viewLabel: 'Driveway and approach',
     },
     'cam-entry': {
       lat: 59.32935,
@@ -17,7 +17,7 @@ export function buildDefaultPlacements(cameraIds: string[]): Record<string, Came
       heading: 270,
       fovDeg: 65,
       rangeM: 12,
-      viewLabel: 'Entré och dörr',
+      viewLabel: 'Entry and door',
     },
     'cam-garden': {
       lat: 59.32915,
@@ -25,7 +25,7 @@ export function buildDefaultPlacements(cameraIds: string[]): Record<string, Came
       heading: 15,
       fovDeg: 90,
       rangeM: 25,
-      viewLabel: 'Trädgård och uteplats',
+      viewLabel: 'Garden and patio',
     },
     'cam-garage': {
       lat: 59.32945,
@@ -33,7 +33,7 @@ export function buildDefaultPlacements(cameraIds: string[]): Record<string, Came
       heading: 120,
       fovDeg: 60,
       rangeM: 15,
-      viewLabel: 'Garageport',
+      viewLabel: 'Garage door',
     },
   }
 

@@ -10,6 +10,7 @@
 - [storage-quota.md](product/storage-quota.md) — inspelningskvot och diskgränser
 - [forensic.md](product/forensic.md) — forensic tidslinje och larmgranskning
 - [map-view.md](product/map-view.md) — kartvy, kameraplatser och bildfält
+- [face-recognition.md](product/face-recognition.md) — ansiktsigenkänning (opt-in)
 - [ideas-backlog.md](product/ideas-backlog.md) — unprioritized product ideas
 
 ## Architecture
@@ -25,6 +26,7 @@
 - [testing-strategy.md](engineering/testing-strategy.md) — quality bars and layers
 - [security-and-privacy.md](engineering/security-and-privacy.md) — home threat model
 - [authentication.md](engineering/authentication.md) — inloggning, session, roller
+- [cyber-resilience-act.md](engineering/cyber-resilience-act.md) — EU CRA (cybersäkerhetskrav)
 - [observability-and-ops.md](engineering/observability-and-ops.md) — logs, metrics, runbooks
 - [ollama-copilot.md](engineering/ollama-copilot.md) — lokal Qwen via Ollama i web UI
 

@@ -13,5 +13,5 @@ export function canWriteSettings(role: UserRole): boolean {
 }
 
 export function roleLabel(role: UserRole): string {
-  return role === 'admin' ? 'Administratör' : 'Läsbehörighet'
+  return role === 'admin' ? 'Administrator' : 'Read-only'
 }
