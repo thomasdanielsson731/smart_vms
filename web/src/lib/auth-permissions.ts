@@ -1,7 +1,7 @@
 import type { WorkspaceId } from '@/types/chat'
 import type { UserRole } from '@/types/auth'
 
-const adminOnlyWorkspaces: Exclude<WorkspaceId, null>[] = ['onboarding', 'alarms', 'camera-web']
+const adminOnlyWorkspaces: Exclude<WorkspaceId, null>[] = ['config', 'onboarding', 'camera-web']
 
 export function canAccessWorkspace(role: UserRole, workspace: Exclude<WorkspaceId, null>): boolean {
   if (role === 'admin') return true

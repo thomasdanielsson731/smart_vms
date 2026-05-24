@@ -34,8 +34,8 @@ describe('auth-permissions — viewer', () => {
   })
 
   it('denies admin-only workspaces', () => {
+    expect(canAccessWorkspace('viewer', 'config')).toBe(false)
     expect(canAccessWorkspace('viewer', 'onboarding')).toBe(false)
-    expect(canAccessWorkspace('viewer', 'alarms')).toBe(false)
     expect(canAccessWorkspace('viewer', 'camera-web')).toBe(false)
   })
 

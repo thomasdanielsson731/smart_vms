@@ -3,7 +3,7 @@ import type { FaceProfile, FaceRecognitionSettings } from '@/types/face'
 import type { ForensicIncident } from '@/types/forensic'
 import type { IncidentSeverity } from '@/types/incident'
 import { isNotableIncident } from '@/lib/alarm-tier2-analytics'
-import { filterIncidentsInRange } from '@/lib/mock-forensic'
+import { filterIncidentsInRange } from '@/lib/forensic-utils'
 import { formatDateTime, formatRelativeTime } from '@/lib/format'
 
 export type ActivitySummaryPeriodDays = 1 | 7 | 30

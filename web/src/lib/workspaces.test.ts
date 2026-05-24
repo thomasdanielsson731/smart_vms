@@ -9,13 +9,24 @@ describe('parseWorkspaceId — all normal workspaces', () => {
   })
 
   it.each(WORKSPACE_IDS)('accepts %s', (id) => {
-    expect(parseWorkspaceId(id)).toBe(id)
+    const parsed = parseWorkspaceId(id)
+    if (id === 'forensic') expect(parsed).toBe('video')
+    else if (id === 'onboarding') expect(parsed).toBe('config')
+    else expect(parsed).toBe(id)
   })
 
   it('rejects unknown ids', () => {
     expect(parseWorkspaceId('not-real')).toBeNull()
     expect(parseWorkspaceId('')).toBeNull()
     expect(parseWorkspaceId(null)).toBeNull()
+  })
+
+  it('maps legacy alarms workspace to agents', () => {
+    expect(parseWorkspaceId('alarms')).toBe('agents')
+  })
+
+  it('maps legacy onboarding workspace to config', () => {
+    expect(parseWorkspaceId('onboarding')).toBe('config')
   })
 
   it('rejects faces when feature flag is off', () => {

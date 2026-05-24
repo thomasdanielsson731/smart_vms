@@ -1,5 +1,5 @@
 import { useAppConfig } from '@/context/AppConfigContext'
-import { cameraHostForIncident } from '@/lib/mock-forensic'
+import { cameraHostForIncident } from '@/lib/forensic-utils'
 import { AlarmThumbnail, AlarmBestPicturePanel } from '@/components/alarm/AlarmThumbnail'
 import { FaceMatchBadge } from '@/components/face/FaceMatchBadge'
 import { SeverityBadge, IncidentStatusBadge } from '@/components/ui/StatusBadge'

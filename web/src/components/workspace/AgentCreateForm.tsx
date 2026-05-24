@@ -3,7 +3,7 @@ import { BellPlus, Copy } from 'lucide-react'
 import { useAppConfig } from '@/context/AppConfigContext'
 import { defaultAlarmDraft, type AlarmDraft, type AlarmTrigger } from '@/types/alarm'
 
-export function AlarmCreateWorkspace() {
+export function AgentCreateForm({ onCreated }: { onCreated?: () => void }) {
   const { cameras, alarms, addAlarm, addAlarmsBulk } = useAppConfig()
   const [draft, setDraft] = useState<AlarmDraft>(defaultAlarmDraft)
   const [bulkMode, setBulkMode] = useState(false)
@@ -40,6 +40,7 @@ export function AlarmCreateWorkspace() {
       setSavedId(alarm.id)
     }
     setDraft(defaultAlarmDraft())
+    onCreated?.()
   }
 
   const triggers: { value: AlarmTrigger; label: string }[] = [
@@ -50,13 +51,13 @@ export function AlarmCreateWorkspace() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <p className="text-sm text-slate-400">
-        Create alarms (monitoring rules). Multi-config: apply the same rule to multiple cameras in one click.
+        Create a monitoring agent — one rule per camera or bulk-apply the same rule to many cameras.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Field label="Alarm name">
+        <Field label="Agent name">
           <input
             required
             value={draft.name}
@@ -72,7 +73,7 @@ export function AlarmCreateWorkspace() {
             onChange={(e) => update('description', e.target.value)}
             rows={2}
             className={inputCls}
-            placeholder="Optional description for you and the household"
+            placeholder="Optional description"
           />
         </Field>
 
@@ -114,7 +115,7 @@ export function AlarmCreateWorkspace() {
             className="rounded"
           />
           <Copy className="h-4 w-4 text-slate-500" />
-          Create a separate alarm per camera (bulk)
+          Create a separate agent per camera (bulk)
         </label>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -134,9 +135,7 @@ export function AlarmCreateWorkspace() {
           <Field label="Severity">
             <select
               value={draft.severity}
-              onChange={(e) =>
-                update('severity', e.target.value as AlarmDraft['severity'])
-              }
+              onChange={(e) => update('severity', e.target.value as AlarmDraft['severity'])}
               className={inputCls}
             >
               <option value="low">Low</option>
@@ -179,30 +178,15 @@ export function AlarmCreateWorkspace() {
         >
           <BellPlus className="h-4 w-4" />
           {bulkMode && draft.cameraIds.length > 1
-            ? `Create ${draft.cameraIds.length} alarms`
-            : 'Create alarm'}
+            ? `Create ${draft.cameraIds.length} agents`
+            : 'Create agent'}
         </button>
       </form>
 
       {savedId && (
         <p className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
-          Alarm saved (mock). {alarms.length} alarms total in the system.
+          Agent saved. {alarms.length} agent{alarms.length === 1 ? '' : 's'} total in the system.
         </p>
-      )}
-
-      {alarms.length > 0 && (
-        <section>
-          <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-            Active alarms ({alarms.filter((a) => a.enabled).length})
-          </h3>
-          <ul className="max-h-40 space-y-1 overflow-y-auto text-sm text-slate-400">
-            {alarms.slice(0, 8).map((a) => (
-              <li key={a.id} className="truncate">
-                {a.enabled ? '●' : '○'} {a.name}
-              </li>
-            ))}
-          </ul>
-        </section>
       )}
     </div>
   )

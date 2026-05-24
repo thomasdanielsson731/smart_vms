@@ -319,3 +319,105 @@ export function pickPublicDeviceInfo(params: Record<string, string>) {
     ...(streamProfile ? { streamProfile } : {}),
   }
 }
+
+export interface AxisAcapApplication {
+  name: string
+  niceName?: string
+  vendor?: string
+  version?: string
+  status?: string
+  license?: string
+}
+
+function normalizeAcapEntry(raw: Record<string, unknown>): AxisAcapApplication {
+  const name =
+    String(raw.Name ?? raw.name ?? raw.Application ?? raw.application ?? '').trim() || 'unknown'
+  return {
+    name,
+    niceName: String(raw.NiceName ?? raw.niceName ?? raw.DisplayName ?? raw.displayName ?? '').trim() || undefined,
+    vendor: String(raw.Vendor ?? raw.vendor ?? '').trim() || undefined,
+    version: String(raw.Version ?? raw.version ?? '').trim() || undefined,
+    status: String(raw.Status ?? raw.status ?? raw.State ?? raw.state ?? '').trim() || undefined,
+    license: String(raw.License ?? raw.license ?? '').trim() || undefined,
+  }
+}
+
+/** Parse Axis ACAP list responses (JSON API or legacy text). */
+export function parseAcapListResponse(text: string): AxisAcapApplication[] {
+  const trimmed = text.trim()
+  if (!trimmed) return []
+
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    try {
+      const json = JSON.parse(trimmed) as Record<string, unknown>
+      const data = (json.data ?? json) as Record<string, unknown>
+      const list =
+        data.applicationList ??
+        data.applications ??
+        data.Applications ??
+        (Array.isArray(json) ? json : null)
+      if (Array.isArray(list)) {
+        return list
+          .filter((item): item is Record<string, unknown> => item != null && typeof item === 'object')
+          .map((item) => normalizeAcapEntry(item))
+          .filter((app) => app.name !== 'unknown')
+      }
+    } catch {
+      /* fall through to text parser */
+    }
+  }
+
+  const apps: AxisAcapApplication[] = []
+  for (const line of trimmed.split('\n')) {
+    const eq = line.indexOf('=')
+    if (eq === -1) continue
+    const key = line.slice(0, eq).trim()
+    const value = line.slice(eq + 1).trim()
+    if (!/^applications?$/i.test(key) || !value) continue
+    for (const part of value.split(',')) {
+      const name = part.trim()
+      if (name) apps.push({ name, status: 'unknown' })
+    }
+  }
+  return apps
+}
+
+export async function fetchAxisAcaps(
+  client: DigestClient,
+  host: string,
+  timeoutMs = 8000,
+): Promise<AxisAcapApplication[]> {
+  const controlBody = JSON.stringify({
+    apiVersion: '1.0',
+    method: 'getApplicationList',
+    params: {},
+  })
+
+  for (const scheme of ['http', 'https'] as const) {
+    try {
+      const controlRes = await client.fetch(`${scheme}://${host}/axis-cgi/applications/control.cgi`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: controlBody,
+        signal: AbortSignal.timeout(timeoutMs),
+      })
+      if (controlRes.ok) {
+        const apps = parseAcapListResponse(await controlRes.text())
+        if (apps.length > 0) return apps
+      }
+
+      const listRes = await client.fetch(`${scheme}://${host}/axis-cgi/applications/list.cgi`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(timeoutMs),
+      })
+      if (listRes.ok) {
+        const apps = parseAcapListResponse(await listRes.text())
+        if (apps.length > 0) return apps
+      }
+    } catch {
+      if (scheme === 'http') continue
+    }
+  }
+
+  return []
+}

@@ -12,11 +12,11 @@ describe('parseCopilotResponse — normal cases', () => {
 
   it.each([
     ['video', { camera: 'cam-driveway', t: '100' }],
-    ['onboarding', undefined],
+    ['agents', { mode: 'create' }],
+    ['config', { tab: 'onboard' }],
     ['dashboard', undefined],
     ['map', undefined],
     ['settings', undefined],
-    ['forensic', { range: '48h', t: '50' }],
     ['camera-web', { camera: 'cam-entry', path: '/' }],
   ] as const)('parses %s workspace action', (workspace, params) => {
     const paramsJson = params ? `,"params":${JSON.stringify(params)}` : ''
@@ -24,6 +24,13 @@ describe('parseCopilotResponse — normal cases', () => {
     const { action } = parseCopilotResponse(raw)
     expect(action?.workspace).toBe(workspace)
     if (params) expect(action?.params).toEqual(params)
+  })
+
+  it('maps legacy forensic workspace to video', () => {
+    const raw = 'Opening.\n@@ACTION@@{"workspace":"forensic","params":{"range":"48h","t":"50"}}'
+    const { action } = parseCopilotResponse(raw)
+    expect(action?.workspace).toBe('video')
+    expect(action?.params).toEqual({ range: '48h', t: '50' })
   })
 
   it('strips action tag from displayed content', () => {
@@ -48,10 +55,9 @@ describe('parseCopilotResponse — rejection cases', () => {
     expect(parseCopilotResponse('Faces.\n@@ACTION@@{"workspace":"faces"}').action).toBeNull()
   })
 
-  it('allows faces workspace when feature flag is on', () => {
-    vi.stubEnv('VITE_FACE_RECOGNITION_ENABLED', 'true')
-    expect(parseCopilotResponse('Faces.\n@@ACTION@@{"workspace":"faces"}').action?.workspace).toBe(
-      'faces',
-    )
+  it('maps legacy alarms workspace to agents', () => {
+    const raw = 'Done.\n@@ACTION@@{"workspace":"alarms","params":{"mode":"create"}}'
+    expect(parseCopilotResponse(raw).action?.workspace).toBe('agents')
+    expect(parseCopilotResponse(raw).action?.params?.mode).toBe('create')
   })
 })

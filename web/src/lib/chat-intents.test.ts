@@ -5,9 +5,9 @@ describe('resolveChatIntent — normal workspace routes', () => {
   afterEach(() => vi.unstubAllEnvs())
 
   it.each([
-    ['discover cameras on the network', 'onboarding', undefined],
-    ['scan the LAN for Axis cameras', 'onboarding', undefined],
-    ['create a new alarm for garage', 'alarms', { mode: 'create' }],
+    ['discover cameras on the network', 'config', { tab: 'onboard' }],
+    ['scan the LAN for Axis cameras', 'config', { tab: 'onboard' }],
+    ['create a new alarm for garage', 'agents', { mode: 'create' }],
     ['open map view', 'map', undefined],
     ['floor plan map', 'map', undefined],
     ['open dashboard', 'dashboard', undefined],
@@ -95,6 +95,6 @@ describe('resolveChatIntent — no match', () => {
   })
 
   it('does not route alarm keywords inside onboarding requests', () => {
-    expect(resolveChatIntent('onboard cameras and create alarm')?.workspace).toBe('onboarding')
+    expect(resolveChatIntent('onboard cameras and create alarm')?.workspace).toBe('config')
   })
 })

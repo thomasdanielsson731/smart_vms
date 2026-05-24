@@ -1,6 +1,5 @@
-import { HardDrive, Server, Cpu, AlertCircle, TrendingUp } from 'lucide-react'
-import { mockIncidents } from '@/lib/mock-data'
-import { cameraHostForIncident } from '@/lib/mock-forensic'
+import { HardDrive, Server, AlertCircle, TrendingUp } from 'lucide-react'
+import { cameraHostForIncident } from '@/lib/forensic-utils'
 import { useAppConfig } from '@/context/AppConfigContext'
 import { AlarmThumbnail } from '@/components/alarm/AlarmThumbnail'
 import { AlarmTier2Panel } from '@/components/alarm/AlarmTier2Panel'
@@ -10,18 +9,18 @@ import { generateAlarmTier2Analysis } from '@/lib/alarm-tier2-analytics'
 import { useMemo } from 'react'
 
 export function DashboardWorkspace() {
-  const { cameras, alarms, storageUsage, storageSettings, faceProfiles, faceSettings } =
+  const { cameras, alarms, incidents, storageUsage, storageSettings, faceProfiles, faceSettings } =
     useAppConfig()
-  const openCount = mockIncidents.filter((i) => i.status === 'open').length
-  const weekTotal = mockIncidents.length + alarms.length
+  const openCount = incidents.filter((i) => i.status === 'open').length
+  const weekTotal = incidents.length + alarms.length
   const camerasOnline = cameras.filter((c) => c.status === 'online').length
 
   const latestWithTier2 = useMemo(() => {
-    const latest = mockIncidents[0]
+    const latest = incidents[0]
     if (!latest) return null
     const analysis = generateAlarmTier2Analysis(latest, { faceProfiles, faceSettings })
     return { incident: latest, analysis }
-  }, [faceProfiles, faceSettings])
+  }, [incidents, faceProfiles, faceSettings])
 
   return (
     <div className="space-y-6">
@@ -36,41 +35,47 @@ export function DashboardWorkspace() {
           sub={`max ${storageSettings.maxRecordingGiB} GiB`}
           variant={storageUsage.isOverQuota ? 'warn' : storageUsage.isWarning ? 'warn' : 'default'}
         />
-        <Stat icon={Server} label="Active alarms" value={String(alarms.filter((a) => a.enabled).length)} />
+        <Stat icon={Server} label="Active agents" value={String(alarms.filter((a) => a.enabled).length)} />
       </div>
 
       <section>
         <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
           Recent alarms
         </h3>
-        <ul className="space-y-2">
-          {mockIncidents.map((inc) => {
-            const tier2 = generateAlarmTier2Analysis(inc, { faceProfiles, faceSettings })
-            return (
-            <li
-              key={inc.id}
-              className="rounded-lg bg-slate-800/50 px-3 py-2 text-sm"
-            >
-              <div className="flex items-center gap-3">
-              <AlarmThumbnail
-                incident={inc}
-                cameraHost={cameraHostForIncident(inc, cameras)}
-                size="sm"
-                showBbox={false}
-              />
-              <span className="min-w-0 flex-1 truncate text-slate-300">{inc.title}</span>
-              <div className="flex shrink-0 items-center gap-2">
-                <SeverityBadge severity={inc.severity} />
-                <span className="text-xs text-slate-500">{formatRelativeTime(inc.occurredAt)}</span>
-              </div>
-              </div>
-              <div className="mt-2 pl-11">
-                <AlarmTier2Panel analysis={tier2} compact />
-              </div>
-            </li>
-            )
-          })}
-        </ul>
+        {incidents.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-slate-700 px-4 py-6 text-center text-sm text-slate-500">
+            No alarms yet. Agents and the recording service will populate this when connected.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {incidents.map((inc) => {
+              const tier2 = generateAlarmTier2Analysis(inc, { faceProfiles, faceSettings })
+              return (
+                <li
+                  key={inc.id}
+                  className="rounded-lg bg-slate-800/50 px-3 py-2 text-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <AlarmThumbnail
+                      incident={inc}
+                      cameraHost={cameraHostForIncident(inc, cameras)}
+                      size="sm"
+                      showBbox={false}
+                    />
+                    <span className="min-w-0 flex-1 truncate text-slate-300">{inc.title}</span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <SeverityBadge severity={inc.severity} />
+                      <span className="text-xs text-slate-500">{formatRelativeTime(inc.occurredAt)}</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 pl-11">
+                    <AlarmTier2Panel analysis={tier2} compact />
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
         {latestWithTier2 && (
           <p className="mt-2 text-xs text-slate-600">
             Latest analysis: {latestWithTier2.analysis.headline}
@@ -92,7 +97,7 @@ function Stat({
   sub,
   variant = 'default',
 }: {
-  icon: typeof Cpu
+  icon: typeof Server
   label: string
   value: string
   sub?: string

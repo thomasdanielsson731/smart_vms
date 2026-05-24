@@ -8,6 +8,7 @@ export interface CameraDeviceInfo {
   serial?: string
   ip?: string
   mac?: string
+  streamProfile?: string
 }
 
 export function useCameraDeviceInfo(host: string | undefined) {

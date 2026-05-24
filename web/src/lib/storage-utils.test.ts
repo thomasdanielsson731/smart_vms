@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatGiB, mockStorageUsage } from './storage-utils'
+import { formatGiB, storageUsageSnapshot } from './storage-utils'
 import type { RecordingStorageSettings } from '@/types/storage'
 
 const baseSettings: RecordingStorageSettings = {
@@ -10,18 +10,15 @@ const baseSettings: RecordingStorageSettings = {
   onLimitReached: 'delete_oldest',
 }
 
-describe('mockStorageUsage', () => {
-  it('computes usage percentages within quota', () => {
-    const usage = mockStorageUsage(baseSettings)
-    expect(usage.recordingUsedGiB).toBeLessThanOrEqual(baseSettings.maxRecordingGiB)
-    expect(usage.recordingPercent).toBeGreaterThan(0)
-    expect(usage.recordingPercent).toBeLessThan(100)
+describe('storageUsageSnapshot', () => {
+  it('returns zero usage until server reports values', () => {
+    const usage = storageUsageSnapshot(baseSettings)
+    expect(usage.recordingUsedGiB).toBe(0)
+    expect(usage.clipsUsedGiB).toBe(0)
+    expect(usage.recordingPercent).toBe(0)
+    expect(usage.clipsPercent).toBe(0)
     expect(usage.isOverQuota).toBe(false)
-  })
-
-  it('flags warning when usage exceeds warnAtPercent', () => {
-    const usage = mockStorageUsage({ ...baseSettings, warnAtPercent: 50 })
-    expect(usage.isWarning).toBe(usage.recordingPercent >= 50)
+    expect(usage.isWarning).toBe(false)
   })
 })
 

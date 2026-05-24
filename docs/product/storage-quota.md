@@ -1,6 +1,6 @@
 # Inspelningskvot & lagring
 
-**Status:** UI + localStorage (mock usage) — backend enforcement Phase 1
+**Status:** UI + localStorage — backend enforcement Phase 1
 
 ## Inställningar (operatör)
 

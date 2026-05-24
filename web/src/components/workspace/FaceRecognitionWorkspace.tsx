@@ -9,7 +9,7 @@ import { FaceEnrollFromVideo } from '@/components/face/FaceEnrollFromVideo'
 import { formatDateTime } from '@/lib/format'
 import type { FaceProfileRole } from '@/types/face'
 import { faceRoleLabels } from '@/types/face'
-import { profileColors } from '@/lib/mock-face-detections'
+import { profileColors } from '@/lib/face-colors'
 
 export type FaceTab = 'enroll' | 'manage' | 'activity' | 'settings'
 
@@ -197,7 +197,7 @@ export function FaceRecognitionWorkspace() {
           {!faceSettings.enabled ? (
             <p className="text-sm text-slate-500">Enable face recognition to see events.</p>
           ) : filteredEvents.length === 0 ? (
-            <p className="text-sm text-slate-500">No face matches in selected period (mock).</p>
+            <p className="text-sm text-slate-500">No face matches in selected period.</p>
           ) : (
             <ul className="space-y-2">
               {filteredEvents.map((ev) => (

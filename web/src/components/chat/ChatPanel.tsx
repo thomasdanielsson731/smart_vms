@@ -6,8 +6,6 @@ import type { ChatMessage, WorkspaceId } from '@/types/chat'
 
 import { resolveChatIntent } from '@/lib/chat-intents'
 
-import { mockForensicIncidents } from '@/lib/mock-forensic'
-
 import { useWorkspace } from '@/context/WorkspaceContext'
 
 import { useAuth } from '@/context/AuthContext'
@@ -42,9 +40,9 @@ const workspaceLabels: Record<Exclude<WorkspaceId, null>, string> = {
 
   agents: 'Open agents',
 
-  onboarding: 'Open onboarding',
+  config: 'Open configuration',
 
-  alarms: 'Create alarm',
+  onboarding: 'Open configuration',
 
   forensic: 'Open video timeline',
 
@@ -88,7 +86,7 @@ export function ChatPanel() {
 
   const { user, activitySince } = useAuth()
 
-  const { cameras, alarms, storageSettings, faceProfiles, faceSettings } = useAppConfig()
+  const { cameras, alarms, incidents, storageSettings, faceProfiles, faceSettings } = useAppConfig()
 
   const { status, modelAvailable, model } = useOllamaStatus()
 
@@ -373,7 +371,7 @@ export function ChatPanel() {
           <ChatWelcomeSummary
             displayName={user.displayName}
             sinceLastLogin={activitySince}
-            incidents={mockForensicIncidents}
+            incidents={incidents}
             cameras={cameras}
             faceProfiles={faceProfiles}
             faceSettings={faceSettings}

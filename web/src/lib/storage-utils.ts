@@ -16,29 +16,15 @@ export function saveStorageSettings(settings: RecordingStorageSettings): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
 }
 
-/** Mock förbrukning tills inspelningstjänst rapporterar riktiga värden */
-export function mockStorageUsage(settings: RecordingStorageSettings): StorageUsageSnapshot {
-  const recordingUsedGiB = Math.min(
-    settings.maxRecordingGiB * 0.62,
-    settings.maxRecordingGiB,
-  )
-  const clipsCap =
-    settings.maxClipsGiB > 0 ? settings.maxClipsGiB : settings.maxRecordingGiB * 0.1
-  const clipsUsedGiB = Math.min(clipsCap * 0.45, clipsCap)
-
-  const recordingPercent =
-    settings.maxRecordingGiB > 0
-      ? Math.round((recordingUsedGiB / settings.maxRecordingGiB) * 100)
-      : 0
-  const clipsPercent = clipsCap > 0 ? Math.round((clipsUsedGiB / clipsCap) * 100) : 0
-
+/** Usage snapshot until the recording service reports real values. */
+export function storageUsageSnapshot(_settings: RecordingStorageSettings): StorageUsageSnapshot {
   return {
-    recordingUsedGiB,
-    clipsUsedGiB,
-    recordingPercent,
-    clipsPercent,
-    isOverQuota: recordingPercent >= 100,
-    isWarning: recordingPercent >= settings.warnAtPercent,
+    recordingUsedGiB: 0,
+    clipsUsedGiB: 0,
+    recordingPercent: 0,
+    clipsPercent: 0,
+    isOverQuota: false,
+    isWarning: false,
   }
 }
 

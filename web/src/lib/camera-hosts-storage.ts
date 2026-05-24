@@ -17,7 +17,7 @@ export function saveCameraHostOverrides(hosts: Record<string, string>): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(hosts))
 }
 
-/** Comma-separated IPs in .env — overrides mock hosts by camera order */
+/** Comma-separated IPs in .env — seeds cameras when no registry is saved */
 export function getEnvCameraHosts(): string[] {
   const raw = (import.meta.env.VITE_CAMERA_HOSTS ?? '').trim()
   if (!raw) return []

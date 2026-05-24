@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Camera, Scan, UserPlus, Video } from 'lucide-react'
 import type { Camera as CameraType } from '@/types/camera'
 import type { FaceProfile } from '@/types/face'
-import { profileColors } from '@/lib/mock-face-detections'
+import { profileColors } from '@/lib/face-colors'
 import {
   profilesRememberedByCamera,
   scanFrameWithCameraMemory,

@@ -58,16 +58,23 @@ describe('buildInitialCameras', () => {
 
   it('creates one camera per VITE_CAMERA_HOSTS entry', () => {
     vi.stubEnv('VITE_CAMERA_HOSTS', '192.168.68.200')
-    const cameras = buildInitialCameras(mockCameras)
+    const cameras = buildInitialCameras()
     expect(cameras).toHaveLength(1)
     expect(cameras[0].host).toBe('192.168.68.200')
+  })
+
+  it('returns empty list when no env hosts and no registry', () => {
+    vi.unstubAllEnvs()
+    vi.stubEnv('VITE_CAMERA_HOSTS', '')
+    const cameras = buildInitialCameras()
+    expect(cameras).toEqual([])
   })
 
   it('uses persisted registry when present', () => {
     saveCameraRegistry([
       { ...mockCameras[0], id: 'cam-saved', host: '192.168.68.50', model: 'AXIS M1065-L' },
     ])
-    const cameras = buildInitialCameras(mockCameras)
+    const cameras = buildInitialCameras()
     expect(cameras).toHaveLength(1)
     expect(cameras[0].model).toBe('AXIS M1065-L')
   })

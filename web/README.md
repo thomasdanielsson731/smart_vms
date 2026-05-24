@@ -64,7 +64,7 @@ If Ollama is offline, keyword intent matching is used as fallback.
 
 ## Live video (Axis)
 
-Requires `AXIS_VAPIX_USER` / `AXIS_VAPIX_PASSWORD` in `web/.env` (or saved under Settings → Cameras) and correct camera IPs in Settings or mock data.
+Requires `AXIS_VAPIX_USER` / `AXIS_VAPIX_PASSWORD` in `web/.env` (or saved under Settings → Cameras) and camera IPs via onboarding or `VITE_CAMERA_HOSTS`.
 
 See [docs/engineering/axis-live-stream.md](../docs/engineering/axis-live-stream.md).
 
@@ -79,7 +79,7 @@ See [docs/engineering/axis-live-stream.md](../docs/engineering/axis-live-stream.
 | Map | **Map** — camera placement and field of view |
 | Video | Live, timeline and alarms (scrub right for live) |
 | Dashboard | Alarms and system stats |
-| Tracking | Cross-camera tracks (mock) |
+| Tracking | Cross-camera tracks (Phase 3) |
 | Agents | Monitoring policies |
 | Faces | Face recognition (opt-in) |
 | Globe | **Camera web** — embedded Axis device UI |

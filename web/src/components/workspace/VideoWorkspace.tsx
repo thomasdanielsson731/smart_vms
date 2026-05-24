@@ -17,11 +17,10 @@ import { AlarmTier2Panel } from '@/components/alarm/AlarmTier2Panel'
 import { profilesRememberedByCamera } from '@/lib/face-memory'
 import {
   filterIncidentsInRange,
-  mockForensicIncidents,
-  mockRecordingSegments,
+  recordingSegmentsForRange,
   rangeToMs,
   cameraHostForIncident,
-} from '@/lib/mock-forensic'
+} from '@/lib/forensic-utils'
 import type { ForensicRange } from '@/types/forensic'
 import { isTimelineLive, positionFromIncident } from '@/lib/timeline-unified'
 import { formatDateTime } from '@/lib/format'
@@ -34,7 +33,7 @@ function parseTimelinePosition(raw: string | undefined): number {
 }
 
 export function VideoWorkspace() {
-  const { cameras, faceProfiles, faceSettings } = useAppConfig()
+  const { cameras, faceProfiles, faceSettings, incidents: allIncidents } = useAppConfig()
   const { params, setParam, setParams } = useWorkspace()
 
   const cameraId = params.camera ?? cameras[0]?.id
@@ -69,17 +68,17 @@ export function VideoWorkspace() {
   const incidents = useMemo(
     () =>
       filterIncidentsInRange(
-        mockForensicIncidents,
+        allIncidents,
         rangeStart,
         rangeEnd,
         camera?.id ?? null,
       ),
-    [rangeStart, rangeEnd, camera?.id],
+    [allIncidents, rangeStart, rangeEnd, camera?.id],
   )
 
   const segments = useMemo(
     () =>
-      mockRecordingSegments(
+      recordingSegmentsForRange(
         rangeStart,
         rangeEnd,
         camera ? [camera.id] : cameras.map((c) => c.id),
@@ -158,10 +157,12 @@ export function VideoWorkspace() {
         {isLive && (
           <LiveLayoutToggle layout={layout} onChange={setLayout} cameraCount={cameras.length} />
         )}
-        <span className="text-xs text-slate-500">
-          <Film className="mr-1 inline h-3.5 w-3.5" />
-          {segments.length} segments (mock)
-        </span>
+        {segments.length > 0 && (
+          <span className="text-xs text-slate-500">
+            <Film className="mr-1 inline h-3.5 w-3.5" />
+            {segments.length} segments
+          </span>
+        )}
       </div>
 
       {(!isLive || layout === 'single') && (

@@ -6,8 +6,7 @@ import { VideoWorkspace } from './VideoWorkspace'
 import { DashboardWorkspace } from './DashboardWorkspace'
 import { TrackingWorkspace } from './TrackingWorkspace'
 import { AgentsWorkspace } from './AgentsWorkspace'
-import { OnboardingWorkspace } from './OnboardingWorkspace'
-import { AlarmCreateWorkspace } from './AlarmCreateWorkspace'
+import { ConfigurationWorkspace } from './ConfigurationWorkspace'
 import { ForensicWorkspace } from './ForensicWorkspace'
 import { MapWorkspace } from './MapWorkspace'
 import { FaceRecognitionWorkspace } from './FaceRecognitionWorkspace'
@@ -40,11 +39,11 @@ export function WorkspaceRouter({ workspace }: { workspace: Exclude<WorkspaceId,
     case 'agents':
       content = <AgentsWorkspace />
       break
-    case 'onboarding':
-      content = <OnboardingWorkspace />
+    case 'config':
+      content = <ConfigurationWorkspace />
       break
-    case 'alarms':
-      content = <AlarmCreateWorkspace />
+    case 'onboarding':
+      content = <ConfigurationWorkspace defaultTab="onboard" />
       break
     case 'forensic':
       content = <ForensicWorkspace />

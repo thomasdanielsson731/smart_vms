@@ -8,6 +8,7 @@ import {
   parseAxisParamList,
   pickDeviceInfo,
   pickPublicDeviceInfo,
+  parseAcapListResponse,
   pickStreamProfileLabel,
   prepareCameraWebHtml,
   proxyWebBasePath,
@@ -120,5 +121,27 @@ describe('VAPIX param parsing', () => {
       'root.StreamProfile.S0.Name=Sub 640x360\nroot.Properties.Image.Resolution=1920x1080\n',
     )
     expect(pickStreamProfileLabel(params)).toBe('Sub 640x360')
+  })
+})
+
+describe('parseAcapListResponse', () => {
+  it('parses legacy Applications= text format', () => {
+    const apps = parseAcapListResponse('Applications=vmd.cgi,mqtt_client')
+    expect(apps.map((a) => a.name)).toEqual(['vmd.cgi', 'mqtt_client'])
+  })
+
+  it('parses JSON application list', () => {
+    const apps = parseAcapListResponse(
+      JSON.stringify({
+        data: {
+          applicationList: [
+            { Name: 'vmd', NiceName: 'Video Motion Detection', Status: 'Running', Version: '4.5' },
+          ],
+        },
+      }),
+    )
+    expect(apps).toHaveLength(1)
+    expect(apps[0].niceName).toBe('Video Motion Detection')
+    expect(apps[0].status).toBe('Running')
   })
 })

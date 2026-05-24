@@ -26,8 +26,8 @@ export function saveCameraRegistry(cameras: Camera[]): void {
   localStorage.setItem(REGISTRY_KEY, JSON.stringify(cameras))
 }
 
-/** One camera per env IP, or full mock list when env is unset. */
-export function buildInitialCameras(mockCameras: Camera[]): Camera[] {
+/** One camera per env IP, or empty when unset. */
+export function buildInitialCameras(): Camera[] {
   const stored = loadCameraRegistry()
   if (stored) {
     return applyCameraHostOverrides(stored)
@@ -35,22 +35,22 @@ export function buildInitialCameras(mockCameras: Camera[]): Camera[] {
 
   const envHosts = getEnvCameraHosts()
   if (envHosts.length > 0) {
-    const seeded = envHosts.map((host, index) => {
-      const template = mockCameras[index] ?? mockCameras[0]
-      return {
-        ...template,
-        id: `cam-${host.replace(/\./g, '-')}`,
-        host,
-        name: index < mockCameras.length ? template.name : `Camera ${host.split('.').pop()}`,
-        model: '—',
-        firmware: '—',
-        serial: undefined,
-      }
-    })
+    const seeded = envHosts.map((host) => ({
+      id: `cam-${host.replace(/\./g, '-')}`,
+      name: `Camera ${host.split('.').pop()}`,
+      location: 'Unassigned',
+      host,
+      model: '—',
+      firmware: '—',
+      status: 'online' as const,
+      streamProfile: 'Sub 640×360',
+      recordingEnabled: true,
+      lastSeenAt: new Date().toISOString(),
+    }))
     return applyCameraHostOverrides(seeded)
   }
 
-  return applyCameraHostOverrides([...mockCameras])
+  return []
 }
 
 export function mergeProbeMetadata(

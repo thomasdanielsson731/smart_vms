@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import {
   isAllowedCameraHost,
   fetchAxisParamList,
+  fetchAxisAcaps,
   pickPublicDeviceInfo,
   localhostCameraAllowed,
   prepareCameraWebHtml,
@@ -158,6 +159,27 @@ function attachCameraProxy(
         sendJson(res, 502, {
           error: 'proxy_failed',
           message: err instanceof Error ? err.message : 'Proxy error',
+        })
+      }
+      return
+    }
+
+    // --- ACAP applications (JSON) ---
+    const acapMatch = pathname.match(/^\/api\/camera\/([^/]+)\/acaps$/)
+    if (acapMatch && req.method === 'GET') {
+      const host = decodeURIComponent(acapMatch[1])
+      const auth = resolveCameraProxyAuth(req, res, mode, cwd, host)
+      if (!auth) return
+
+      try {
+        const applications = await fetchAxisAcaps(auth.client, host)
+        sendJson(res, 200, { host, applications })
+      } catch (err) {
+        sendJson(res, 502, {
+          error: 'proxy_failed',
+          message: err instanceof Error ? err.message : 'Proxy error',
+          host,
+          applications: [],
         })
       }
       return

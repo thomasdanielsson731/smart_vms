@@ -7,7 +7,6 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { mockCameras } from '@/lib/mock-data'
 import {
   loadCameraHostOverrides,
   mergeCameraHostOverride,
@@ -19,10 +18,8 @@ import {
   probesFromDiscovered,
   saveCameraRegistry,
 } from '@/lib/camera-registry-storage'
-import { mockMonitoringAgents } from '@/lib/mock-agents'
 import { discoverCameras, probeCameraMetadata } from '@/lib/network-discovery'
 import type { Camera } from '@/types/camera'
-import type { MonitoringAgent } from '@/types/agent'
 import type { AlarmDefinition, AlarmDraft } from '@/types/alarm'
 import type { DiscoveredCamera, OnboardingBatch, DiscoveryStatus, OnboardResult } from '@/types/onboarding'
 import { testCameraStream, streamTestMessage } from '@/lib/camera-stream-test'
@@ -33,7 +30,7 @@ import {
 } from '@/types/storage'
 import {
   loadStorageSettings,
-  mockStorageUsage,
+  storageUsageSnapshot,
   saveStorageSettings,
 } from '@/lib/storage-utils'
 import type { CameraMapPlacement, MapSiteSettings } from '@/types/map'
@@ -44,31 +41,18 @@ import type {
   FaceRecognitionEvent,
   FaceRecognitionSettings,
 } from '@/types/face'
+import type { ForensicIncident } from '@/types/forensic'
 import {
   loadFaceProfiles,
   loadFaceSettings,
   saveFaceProfiles,
   saveFaceSettings,
 } from '@/lib/face-storage'
-import { defaultFaceProfiles, mockFaceEvents } from '@/lib/mock-faces'
 import { buildFaceEventsFromMemory } from '@/lib/face-memory'
-
-function agentsToAlarms(agents: MonitoringAgent[]): AlarmDefinition[] {
-  return agents.map((a) => ({
-    id: a.id,
-    name: a.name,
-    description: a.description,
-    cameraIds: [],
-    schedule: a.schedule,
-    trigger: 'person' as const,
-    severity: 'medium' as const,
-    enabled: a.status === 'active',
-    createdAt: new Date().toISOString(),
-  }))
-}
 
 interface AppConfigContextValue {
   cameras: Camera[]
+  incidents: ForensicIncident[]
   updateCameraHost: (cameraId: string, host: string) => void
   alarms: AlarmDefinition[]
   discovered: DiscoveredCamera[]
@@ -107,14 +91,13 @@ interface AppConfigContextValue {
 const AppConfigContext = createContext<AppConfigContextValue | null>(null)
 
 export function AppConfigProvider({ children }: { children: ReactNode }) {
-  const [cameras, setCameras] = useState<Camera[]>(() => buildInitialCameras(mockCameras))
+  const [cameras, setCameras] = useState<Camera[]>(() => buildInitialCameras())
+  const [incidents] = useState<ForensicIncident[]>([])
   const persistCameras = useCallback((next: Camera[]) => {
     setCameras(next)
     saveCameraRegistry(next)
   }, [])
-  const [alarms, setAlarms] = useState<AlarmDefinition[]>(() =>
-    agentsToAlarms(mockMonitoringAgents),
-  )
+  const [alarms, setAlarms] = useState<AlarmDefinition[]>([])
   const [discovered, setDiscovered] = useState<DiscoveredCamera[]>([])
   const [discoveryStatus, setDiscoveryStatus] = useState<DiscoveryStatus>('idle')
   const [discoveryError, setDiscoveryError] = useState<string | null>(null)
@@ -126,7 +109,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   })
 
   const storageUsage = useMemo(
-    () => mockStorageUsage(storageSettings),
+    () => storageUsageSnapshot(storageSettings),
     [storageSettings],
   )
 
@@ -139,7 +122,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   const [mapPlacements, setMapPlacements] = useState<Record<string, CameraMapPlacement>>(() => {
     const stored = loadMapPlacements()
     if (Object.keys(stored).length > 0) return stored
-    return buildDefaultPlacements(mockCameras.map((c) => c.id))
+    return buildDefaultPlacements(buildInitialCameras().map((c) => c.id))
   })
 
   const persistPlacements = useCallback((next: Record<string, CameraMapPlacement>) => {
@@ -175,10 +158,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const [faceSettings, setFaceSettings] = useState<FaceRecognitionSettings>(() => loadFaceSettings())
-  const [faceProfiles, setFaceProfiles] = useState<FaceProfile[]>(() => {
-    const stored = loadFaceProfiles()
-    return stored.length > 0 ? stored : defaultFaceProfiles.map((p) => ({ ...p }))
-  })
+  const [faceProfiles, setFaceProfiles] = useState<FaceProfile[]>(() => loadFaceProfiles())
 
   const updateFaceSettings = useCallback((settings: FaceRecognitionSettings) => {
     setFaceSettings(settings)
@@ -219,11 +199,10 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const faceEvents = useMemo(() => {
-    const fromMemory = buildFaceEventsFromMemory(faceProfiles, cameras, faceSettings)
-    if (fromMemory.length > 0) return fromMemory
-    return faceSettings.enabled ? mockFaceEvents : []
-  }, [faceProfiles, cameras, faceSettings])
+  const faceEvents = useMemo(
+    () => buildFaceEventsFromMemory(faceProfiles, cameras, faceSettings),
+    [faceProfiles, cameras, faceSettings],
+  )
 
   const syncCameraMetadata = useCallback((probes: ReturnType<typeof probesFromDiscovered>) => {
     setCameras((prev) => {
@@ -415,6 +394,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       cameras,
+      incidents,
       updateCameraHost,
       alarms,
       discovered,
@@ -446,6 +426,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
     }),
     [
       cameras,
+      incidents,
       updateCameraHost,
       alarms,
       discovered,

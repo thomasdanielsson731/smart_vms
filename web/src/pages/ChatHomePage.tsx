@@ -4,8 +4,7 @@ import {
   Video,
   Route,
   Bot,
-  Radar,
-  BellPlus,
+  SlidersHorizontal,
   Settings,
   Map,
   ScanFace,
@@ -25,16 +24,10 @@ const shortcuts: {
   icon: typeof Video
 }[] = [
   {
-    id: 'onboarding',
-    label: 'Onboarding',
-    description: 'Discover and add cameras',
-    icon: Radar,
-  },
-  {
-    id: 'alarms',
-    label: 'Create alarm',
-    description: 'Monitoring rules and zones',
-    icon: BellPlus,
+    id: 'config',
+    label: 'Configuration',
+    description: 'Cameras, features and ACAPs',
+    icon: SlidersHorizontal,
   },
   {
     id: 'map',
@@ -75,7 +68,7 @@ const shortcuts: {
   {
     id: 'agents',
     label: 'Agents',
-    description: 'Automated AI rules',
+    description: 'Monitoring rules and alarms',
     icon: Bot,
   },
   {
@@ -92,8 +85,10 @@ function defaultParams(id: Exclude<WorkspaceId, null>): Record<string, string> |
       return { camera: 'cam-driveway', t: '100' }
     case 'camera-web':
       return { camera: 'cam-driveway', path: '/' }
-    case 'alarms':
+    case 'agents':
       return { mode: 'create' }
+    case 'config':
+      return { tab: 'overview' }
     case 'forensic':
       return { range: '48h', t: '50' }
     case 'faces':

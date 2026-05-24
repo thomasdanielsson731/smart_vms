@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
-import { discoveryHostList, mockNetworkDiscovery, mapDiscoveryHttpError, probeCameraMetadata } from './network-discovery'
+import { mapDiscoveryHttpError, probeCameraMetadata } from './network-discovery'
 
 describe('mapDiscoveryHttpError', () => {
   it('maps 401 to sign-in message', () => {
@@ -18,25 +18,6 @@ describe('mapDiscoveryHttpError', () => {
     const err = mapDiscoveryHttpError(502, { message: 'Proxy error' })
     expect(err.code).toBe('scan_failed')
     expect(err.message).toBe('Proxy error')
-  })
-})
-
-describe('discoveryHostList', () => {
-  afterEach(() => vi.unstubAllEnvs())
-
-  it('uses VITE_CAMERA_HOSTS when set', () => {
-    vi.stubEnv('VITE_CAMERA_HOSTS', '192.168.68.200,192.168.68.201')
-    expect(discoveryHostList()).toEqual(['192.168.68.200', '192.168.68.201'])
-  })
-})
-
-describe('mockNetworkDiscovery', () => {
-  afterEach(() => vi.unstubAllEnvs())
-
-  it('does not assign fake P1465 model names', () => {
-    vi.stubEnv('VITE_CAMERA_HOSTS', '192.168.68.200')
-    const result = mockNetworkDiscovery([])
-    expect(result[0].model).not.toMatch(/P1465/)
   })
 })
 

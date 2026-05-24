@@ -47,7 +47,7 @@ export function RecordingStorageSettingsPanel() {
 
       <p className="mb-4 text-sm text-slate-400">
         Limit how much disk space recordings and clips can use. Saved locally in the browser
-        (mock until server is connected).
+        until the recording service is connected.
         {!canWrite && (
           <span className="mt-2 block text-amber-400/90">
             Only administrators can change storage settings.

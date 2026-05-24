@@ -228,24 +228,3 @@ export async function discoverCameras(registeredHosts: string[]): Promise<Discov
     errorCode: scan.errorCode,
   }
 }
-
-/** @deprecated Use discoverCameras — sync stub for tests */
-export function discoveryHostList(): string[] {
-  const envHosts = getEnvCameraHosts()
-  return envHosts.length > 0 ? envHosts : ['192.168.68.200']
-}
-
-/** @deprecated Use discoverCameras — sync stub for tests */
-export function mockNetworkDiscovery(registeredHosts: string[]): DiscoveredCamera[] {
-  return withRegistration(
-    discoveryHostList().map((host) =>
-      deviceFromProbe(host, {
-        host,
-        model: 'Use network scan to probe VAPIX',
-        serial: '—',
-        firmware: '—',
-      }),
-    ),
-    registeredHosts,
-  )
-}

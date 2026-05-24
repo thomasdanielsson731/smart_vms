@@ -4,14 +4,13 @@ import { useAppConfig } from '@/context/AppConfigContext'
 import { MapCanvas, type FlyToTarget } from '@/components/map/MapCanvas'
 import { CameraStatusBadge, SeverityBadge, IncidentStatusBadge } from '@/components/ui/StatusBadge'
 import { placementFromPartial } from '@/lib/map/geo'
-import { mockForensicIncidents } from '@/lib/mock-forensic'
 import { alarmPinsFromIncidents, filterRecentIncidents } from '@/lib/map/alarms'
 import { formatDateTime, formatRelativeTime } from '@/lib/format'
-import { cameraHostForIncident } from '@/lib/mock-forensic'
+import { cameraHostForIncident } from '@/lib/forensic-utils'
 import { AlarmThumbnail, AlarmBestPicturePanel } from '@/components/alarm/AlarmThumbnail'
 
 export function MapWorkspace() {
-  const { cameras, mapPlacements, mapSite, setCameraMapPlacement, resetMapPlacements } =
+  const { cameras, incidents, mapPlacements, mapSite, setCameraMapPlacement, resetMapPlacements } =
     useAppConfig()
 
   const [selectedId, setSelectedId] = useState<string | null>(cameras[0]?.id ?? null)
@@ -32,8 +31,8 @@ export function MapWorkspace() {
   const selectedCam = cameras.find((c) => c.id === selectedId)
 
   const recentIncidents = useMemo(
-    () => filterRecentIncidents(mockForensicIncidents, alarmHours),
-    [alarmHours],
+    () => filterRecentIncidents(incidents, alarmHours),
+    [incidents, alarmHours],
   )
 
   const alarmPins = useMemo(

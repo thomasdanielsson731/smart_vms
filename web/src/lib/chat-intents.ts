@@ -23,11 +23,37 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
     return {
 
-      workspace: 'onboarding',
+      workspace: 'config',
+
+      params: { tab: 'onboard' },
 
       reply:
 
-        'Opening network onboarding. You can search for Axis cameras on the LAN and onboard multiple with the same VAPIX settings.',
+        'Opening configuration — discover Axis cameras on the LAN and onboard multiple with the same VAPIX settings.',
+
+    }
+
+  }
+
+
+
+  if (
+
+    /configuration|configure system|feature flag|acap|camera list|registered cameras|konfiguration|systemkonfig|funktioner|acap-appar|kameror registrerade/.test(
+
+      q,
+
+    )
+
+  ) {
+
+    return {
+
+      workspace: 'config',
+
+      params: { tab: 'overview' },
+
+      reply: 'Opening configuration manager — cameras, features, ACAP apps and onboarding.',
 
     }
 
@@ -46,15 +72,10 @@ export function resolveChatIntent(input: string): ChatAction | null {
   ) {
 
     return {
-
-      workspace: 'alarms',
-
+      workspace: 'agents',
       params: { mode: 'create' },
-
       reply:
-
-        'Opening create alarm. Select one or more cameras — enable bulk for one alarm per camera.',
-
+        'Opening agents — select one or more cameras and enable bulk for one agent per camera.',
     }
 
   }
@@ -91,7 +112,7 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
         reply:
 
-          'Opening the video timeline in playback (mock). Scrub right for live when the recording service is connected.',
+          'Opening the video timeline in playback. Scrub right for live when the recording service is connected.',
 
       }
 
@@ -205,7 +226,7 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
       workspace: 'tracking',
 
-      reply: 'Opening tracking — shows mock tracks across cameras (Phase 2–3).',
+      reply: 'Opening tracking — cross-camera re-id (Phase 3).',
 
     }
 
@@ -219,7 +240,7 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
       workspace: 'agents',
 
-      reply: 'Opening your monitoring agents. Create new alarms via Create alarm or the chat.',
+      reply: 'Opening agents — view monitoring rules or create new ones.',
 
     }
 
@@ -269,17 +290,11 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
 
   if (/create agent|skapa agent/.test(q)) {
-
     return {
-
-      workspace: 'alarms',
-
+      workspace: 'agents',
       params: { mode: 'create' },
-
-      reply: 'Opening create alarm — agents and alarms share the same policy engine (mock).',
-
+      reply: 'Opening agents — create a new monitoring rule.',
     }
-
   }
 
 
@@ -293,6 +308,8 @@ export function resolveChatIntent(input: string): ChatAction | null {
 export const suggestedPrompts = [
 
   'Onboard all cameras on the network',
+
+  'Open configuration manager',
 
   'Create a new alarm for the garage after 22:00',
 

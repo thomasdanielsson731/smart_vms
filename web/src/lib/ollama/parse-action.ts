@@ -1,5 +1,5 @@
 import type { WorkspaceId } from '@/types/chat'
-import { isCopilotWorkspaceId } from '@/lib/workspaces'
+import { resolveCopilotWorkspace } from '@/lib/workspaces'
 
 const ACTION_TAG = '@@ACTION@@'
 
@@ -22,11 +22,12 @@ export function parseCopilotResponse(raw: string): {
 
   try {
     const parsed = JSON.parse(jsonPart) as { workspace?: string; params?: Record<string, string> }
-    if (parsed.workspace && isCopilotWorkspaceId(parsed.workspace)) {
+    const workspace = parsed.workspace ? resolveCopilotWorkspace(parsed.workspace) : null
+    if (workspace) {
       return {
         content,
         action: {
-          workspace: parsed.workspace,
+          workspace,
           params: parsed.params,
         },
       }

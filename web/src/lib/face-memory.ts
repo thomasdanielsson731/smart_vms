@@ -36,7 +36,7 @@ export function scanFrameWithCameraMemory(
   seed: number,
 ): DetectedFaceWithMemory[] {
   const remembered = profilesRememberedByCamera(profiles, cameraId)
-  const results: DetectedFaceWithMemory[] = remembered.map((profile, i) => {
+  return remembered.map((profile, i) => {
     const bbox =
       profile.enrollment?.cameraId === cameraId && profile.enrollment.bboxNorm
         ? jitterBbox(profile.enrollment.bboxNorm, 0.03)
@@ -44,60 +44,20 @@ export function scanFrameWithCameraMemory(
     return {
       id: `known-${profile.id}-${seed}`,
       bboxNorm: bbox,
-      detectScore: 0.9 + Math.random() * 0.08,
+      detectScore: 0.9,
       matchedProfileId: profile.id,
       matchedName: profile.name,
       unknown: false,
     }
   })
-
-  const unknownCount = remembered.length === 0 ? 1 : seed % 3 === 0 ? 1 : 0
-  for (let u = 0; u < unknownCount; u++) {
-    results.push({
-      id: `unknown-${seed}-${u}`,
-      bboxNorm: [0.5 + u * 0.1, 0.35, 0.11, 0.18],
-      detectScore: 0.78 + Math.random() * 0.1,
-      unknown: true,
-    })
-  }
-
-  return results
 }
 
 export function buildFaceEventsFromMemory(
-  profiles: FaceProfile[],
-  cameras: Camera[],
-  settings: FaceRecognitionSettings,
+  _profiles: FaceProfile[],
+  _cameras: Camera[],
+  _settings: FaceRecognitionSettings,
 ): FaceRecognitionEvent[] {
-  if (!settings.enabled) return []
-
-  const events: FaceRecognitionEvent[] = []
-  const now = Date.now()
-
-  for (const profile of profiles) {
-    for (const cameraId of profile.rememberedByCameras) {
-      const camera = cameras.find((c) => c.id === cameraId)
-      if (!camera) continue
-      if (settings.cameraIds.length > 0 && !settings.cameraIds.includes(cameraId)) continue
-
-      events.push({
-        id: `frec-mem-${profile.id}-${cameraId}`,
-        occurredAt: new Date(now - Math.random() * 48 * 3600_000).toISOString(),
-        cameraId,
-        cameraName: camera.name,
-        match: {
-          profileId: profile.id,
-          displayName: profile.name,
-          confidence: 0.85 + Math.random() * 0.12,
-          unknown: false,
-        },
-      })
-    }
-  }
-
-  return events.sort(
-    (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
-  )
+  return []
 }
 
 export function mergeRememberedCameras(

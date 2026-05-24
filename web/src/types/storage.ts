@@ -24,7 +24,7 @@ export interface StorageUsageSnapshot {
 }
 
 export const defaultRecordingStorageSettings = (): RecordingStorageSettings => ({
-  maxRecordingGiB: 500,
+  maxRecordingGiB: 100,
   maxClipsGiB: 50,
   maxRetentionDays: 30,
   warnAtPercent: 85,

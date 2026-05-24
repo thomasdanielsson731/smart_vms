@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   cameraHostForIncident,
   filterIncidentsInRange,
-  mockRecordingSegments,
+  recordingSegmentsForRange,
   rangeToMs,
-} from './mock-forensic'
+} from './forensic-utils'
 import type { ForensicIncident } from '@/types/forensic'
 
 const incidents: ForensicIncident[] = [
@@ -72,18 +72,11 @@ describe('filterIncidentsInRange', () => {
   })
 })
 
-describe('mockRecordingSegments', () => {
-  it('creates one segment per camera except garage', () => {
+describe('recordingSegmentsForRange', () => {
+  it('returns empty until recording service is connected', () => {
     const start = new Date('2026-05-23T00:00:00Z')
     const end = new Date('2026-05-24T00:00:00Z')
-    const segments = mockRecordingSegments(start, end, [
-      'cam-driveway',
-      'cam-entry',
-      'cam-garage',
-    ])
-    expect(segments).toHaveLength(2)
-    expect(segments.every((s) => s.startAt === start.toISOString())).toBe(true)
-    expect(segments.some((s) => s.cameraId === 'cam-garage')).toBe(false)
+    expect(recordingSegmentsForRange(start, end, ['cam-driveway', 'cam-entry'])).toEqual([])
   })
 })
 
