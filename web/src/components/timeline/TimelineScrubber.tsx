@@ -154,7 +154,7 @@ export function UnifiedTimelineScrubber({
   )
 }
 
-/** Legacy standalone scrubber for TimelinePage */
+/** Standalone scrubber placeholder for simple timeline demos */
 export function TimelineScrubber({ cameraName }: { cameraName: string }) {
   const now = new Date()
   const start = new Date(now.getTime() - 24 * 3600_000)

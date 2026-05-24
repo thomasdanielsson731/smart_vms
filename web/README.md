@@ -47,7 +47,7 @@ Without VAPIX credentials, live video and Camera web UI will not authenticate to
 
 - "Show live from the driveway" → video panel
 - "Open dashboard" → statistics
-- "Open forensic timeline" → alarms + recordings
+- "Open forensic timeline" → video timeline with alarms
 - "Discover cameras on the network" → onboarding wizard
 - "Create a new alarm for the garage after 22:00" → alarm form
 - "Open camera web interface" → embedded Axis UI
@@ -77,8 +77,7 @@ See [docs/engineering/axis-live-stream.md](../docs/engineering/axis-live-stream.
 | Radar | **Onboarding** — discover and register cameras |
 | Alarm | **Create alarm** — rules for one or many cameras |
 | Map | **Map** — camera placement and field of view |
-| Forensic | **Forensic** — timeline of alarms and clips |
-| Video | Live / playback |
+| Video | Live, timeline and alarms (scrub right for live) |
 | Dashboard | Alarms and system stats |
 | Tracking | Cross-camera tracks (mock) |
 | Agents | Monitoring policies |
