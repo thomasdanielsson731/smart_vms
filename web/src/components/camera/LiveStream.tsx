@@ -34,23 +34,11 @@ export function LiveStream({ camera, className = '' }: LiveStreamProps) {
   }, [])
 
   useEffect(() => {
-    if (!enabled) {
-      setError('Live video disabled (VITE_CAMERA_STREAM_ENABLED=false)')
-      setMode('error')
-      return
-    }
-    if (testing) return
-    if (blockedMessage) {
-      setError(blockedMessage)
-      setMode('error')
-      setLive(false)
-      return
-    }
+    mjpegFailedRef.current = false
     setMode('mjpeg')
     setError(null)
     setLive(false)
-    mjpegFailedRef.current = false
-  }, [camera.host, enabled, testing, blockedMessage])
+  }, [camera.host, blockedMessage])
 
   useEffect(() => {
     if (mode !== 'snapshot' || !enabled || blockedMessage) return
@@ -80,9 +68,38 @@ export function LiveStream({ camera, className = '' }: LiveStreamProps) {
     )
   }
 
+  if (blockedMessage) {
+    return (
+      <StreamShell camera={camera} live={false} className={className}>
+        <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
+          <AlertCircle className="h-10 w-10 text-amber-500" />
+          <p className="text-sm text-slate-300">{blockedMessage}</p>
+          <p className="max-w-md text-xs text-slate-500">
+            Camera IP: <code className="text-slate-400">{camera.host}</code>
+            <br />
+            Check <strong className="text-slate-400">Settings → Cameras (VAPIX)</strong> or{' '}
+            <code className="text-slate-400">AXIS_VAPIX_USER/PASSWORD</code> in{' '}
+            <code className="text-slate-400">web/.env</code>
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              retest()
+              mjpegFailedRef.current = false
+            }}
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm text-white"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Test again
+          </button>
+        </div>
+      </StreamShell>
+    )
+  }
+
   return (
     <StreamShell camera={camera} live={live} className={className}>
-      {mode === 'mjpeg' && !blockedMessage && (
+      {mode === 'mjpeg' && (
         <img
           key={camera.host}
           src={mjpegSrc}
@@ -101,7 +118,7 @@ export function LiveStream({ camera, className = '' }: LiveStreamProps) {
         />
       )}
 
-      {mode === 'snapshot' && !blockedMessage && (
+      {mode === 'snapshot' && (
         <img
           src={snapshotSrc}
           alt={`Snapshot ${camera.name}`}

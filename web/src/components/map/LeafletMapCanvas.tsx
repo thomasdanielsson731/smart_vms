@@ -56,8 +56,10 @@ export function LeafletMapCanvas({
   const placeModeRef = useRef(placeMode)
   const onMapClickRef = useRef(onMapClick)
 
-  placeModeRef.current = placeMode
-  onMapClickRef.current = onMapClick
+  useEffect(() => {
+    placeModeRef.current = placeMode
+    onMapClickRef.current = onMapClick
+  }, [placeMode, onMapClick])
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return

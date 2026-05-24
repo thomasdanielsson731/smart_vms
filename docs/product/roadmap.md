@@ -4,39 +4,47 @@ Phases are **sequential in intent** but may overlap in implementation. Each phas
 
 ---
 
-## Phase 0 — Foundation (current)
+## Phase 0 — Foundation
+
+**Status:** Complete
 
 **Deliverables**
 
 - Product and architecture documentation
 - ADR process, engineering principles, test strategy
 - Cursor rules + review skills for consistent AI feedback
+- Vitest unit tests + CI for `web/`
 
 **Exit criteria**
 
-- Architecture overview agreed (edge/server split, event model sketched)
-- Axis VAPIX integration approach documented
-- Phase 1 scope written as implementable stories
+- [x] Architecture overview agreed (edge/server split, event model sketched)
+- [x] Axis VAPIX integration approach documented
+- [x] Phase 1 scope written as implementable stories
 
 ---
 
-## Phase 1 — VMS core (no custom AI)
+## Phase 1 — VMS core + operator UI
 
-**Goal:** Trustworthy video operations on Axis cameras.
+**Status:** In progress — `web/` shell shipped; recording backend pending
 
-| Item | Notes |
-|------|--------|
-| Camera registry | Host, credentials vault, model, firmware, capabilities |
-| VAPIX discovery | Parameters, stream profiles, event capabilities |
-| Live view | Browser or dedicated client; LAN-first |
-| Recording | Continuous or scheduled; retention policy per camera |
-| Playback timeline | Seek, speed, export segment |
-| Auth | Local users; admin vs viewer |
+**Goal:** Trustworthy video operations on Axis cameras with chat-first operator UX.
+
+| Item | Notes | Status |
+|------|--------|--------|
+| Operator UI (chat-first) | Workspaces, Copilot, sidebar | **Shipped** (mock data) |
+| Auth | Session, admin/viewer | **Shipped** |
+| VAPIX live view | MJPEG proxy, stream test | **Shipped** |
+| VAPIX credential vault | Encrypted file + Settings | **Shipped** |
+| Camera web UI proxy | Embedded Axis pages | **Shipped** |
+| Camera registry | Host per camera, mock metadata | Partial |
+| Recording | Continuous, retention | **Planned** |
+| Playback timeline | Seek, export | Mock UI |
+| Unit + contract tests | Vitest, VAPIX fixtures | **Shipped** |
 
 **Exit criteria**
 
 - 24h soak: all home Axis cameras record and playback without manual intervention
-- Runbook for “camera offline” and “disk full”
+- Runbook for "camera offline" and "disk full"
 
 ---
 
@@ -70,7 +78,7 @@ Phases are **sequential in intent** but may overlap in implementation. Each phas
 | Incident store | Postgres + object storage for clips |
 | Re-analysis | Heavier models on selected clips |
 | Cross-camera rules | Same object track across views (stretch) |
-| Web UI | Cameras, live, incidents, search, settings |
+| Web UI backend | Replace mock data with real APIs |
 | Notifications | Webhook, email, mobile push (pick one for v1) |
 
 **Exit criteria**

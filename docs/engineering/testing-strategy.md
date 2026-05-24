@@ -75,6 +75,8 @@ Aligned with a senior EM background: **risk-based testing**, clear quality gates
 | E2E smoke | | ✓ |
 | Model benchmark | | ✓ (when models exist) |
 
+**Decided (Phase 1 UI):** Vitest unit and contract tests live in `web/` — `npm run test` (see `.github/workflows/ci.yml`). Golden VAPIX fixture: `web/fixtures/vapix/param-list.txt`.
+
 ## Manual home validation
 
 **7-day soak checklist** (per phase):

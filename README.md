@@ -2,7 +2,7 @@
 
 AI-native video management for home and small-site deployments, built around **Axis cameras (VAPIX)** with **edge analytics** and **central server analytics**.
 
-This repository is intentionally **documentation-first** while the product is shaped. Code will land in phased slices aligned with [docs/product/roadmap.md](docs/product/roadmap.md).
+This repository combines **documentation** and a **Phase 1 operator UI** in `web/`, aligned with [docs/product/roadmap.md](docs/product/roadmap.md).
 
 ## Who this is for
 
@@ -13,17 +13,17 @@ This repository is intentionally **documentation-first** while the product is sh
 
 | Area | Start here |
 |------|------------|
-| Product vision & ideas | [docs/product/vision.md](docs/product/vision.md) |
-| Use cases & personas | [docs/product/personas-and-use-cases.md](docs/product/personas-and-use-cases.md) |
+| **Product overview** | [docs/product/overview.md](docs/product/overview.md) |
+| Product vision | [docs/product/vision.md](docs/product/vision.md) |
+| Feature catalog | [docs/product/features.md](docs/product/features.md) |
 | Roadmap | [docs/product/roadmap.md](docs/product/roadmap.md) |
-| Architecture | [docs/architecture/overview.md](docs/architecture/overview.md) |
-| Axis / VAPIX | [docs/architecture/axis-vapix.md](docs/architecture/axis-vapix.md) |
-| Edge vs server AI | [docs/architecture/edge-vs-server.md](docs/architecture/edge-vs-server.md) |
-| Events & data model | [docs/architecture/data-model-and-events.md](docs/architecture/data-model-and-events.md) |
-| Software principles | [docs/engineering/software-principles.md](docs/engineering/software-principles.md) |
-| Testing strategy | [docs/engineering/testing-strategy.md](docs/engineering/testing-strategy.md) |
+| Architecture (full system) | [docs/architecture/overview.md](docs/architecture/overview.md) |
+| Web app (Phase 1) | [docs/architecture/web-application.md](docs/architecture/web-application.md) |
+| Engineering practices | [docs/engineering/README.md](docs/engineering/README.md) |
+| Development workflow | [docs/engineering/development-workflow.md](docs/engineering/development-workflow.md) |
+| Testing | [docs/engineering/testing-strategy.md](docs/engineering/testing-strategy.md) |
 | Security & privacy | [docs/engineering/security-and-privacy.md](docs/engineering/security-and-privacy.md) |
-| ADRs (decisions) | [docs/decisions/README.md](docs/decisions/README.md) |
+| ADRs | [docs/decisions/README.md](docs/decisions/README.md) |
 
 Full index: [docs/README.md](docs/README.md).
 
@@ -45,10 +45,15 @@ See [AGENTS.md](AGENTS.md#review-agents-skills) for the full roster and expected
 ## Web UI (started)
 
 ```bash
+# From repo root (recommended)
+npm install --prefix web
+npm run dev
+
+# Or from web/
 cd web && npm install && npm run dev
 ```
 
-See [web/README.md](web/README.md) — **AI-first** Copilot UI (chat + workspaces) with Swedish labels and mock data.
+See [web/README.md](web/README.md) — **AI-first** Copilot UI (chat + workspaces) with mock data.
 
 ## Status
 

@@ -1,34 +1,46 @@
 # UI — Phase 1 scope
 
-**Status:** Proposed — AI-first shell in `web/`
+**Status:** Decided — AI-first shell shipped in `web/` (mock data layer; real auth + live video)
 
 ## Goal
 
-Operator works primarily through **Copilot chat**; video, dashboard, tracking, and monitoring agents open as **workspace panels**. See [ux-ai-first.md](ux-ai-first.md).
+The operator works primarily through **Copilot chat**; video, dashboard, tracking, and monitoring open as **workspace panels**. See [ux-ai-first.md](ux-ai-first.md).
 
-## Surfaces (implemented as shell)
+## Workspaces
 
-| Surface | Opened via | Phase 1 acceptance |
-|---------|------------|-------------------|
-| Chat (main) | Default | LLM + tools (mock intent today) |
-| Video | Chat / rail | Live + playback per camera |
-| Dashboard | Chat / rail | Real metrics from API |
-| Tracking | Chat / rail | Cross-camera tracks (Phase 2–3) |
-| Agents | Chat / rail | CRUD monitoring policies |
-| Inställningar | Chat | Auth, retention (admin) |
+| Workspace | ID | Opened via | Phase 1 |
+|-----------|-----|------------|---------|
+| Copilot (main) | — | Default | Real Ollama + keyword intents |
+| Video | `video` | Chat / sidebar | Real live · mock playback |
+| Dashboard | `dashboard` | Chat / sidebar | Mock metrics |
+| Forensic | `forensic` | Chat / sidebar | Mock timeline |
+| Map | `map` | Chat / sidebar | Real map · mock alarm geo |
+| Faces | `faces` | Chat / sidebar | Opt-in · mock detection |
+| Camera web | `camera-web` | Chat / sidebar | Real proxied Axis UI |
+| Onboarding | `onboarding` | Chat / sidebar | Mock discovery |
+| Create alarm | `alarms` | Chat / sidebar | Mock rules |
+| Agents | `agents` | Chat / sidebar | Mock policies |
+| Tracking | `tracking` | Chat / sidebar | Mock (Phase 3) |
+| Settings | `settings` | Sidebar | Real auth + VAPIX + storage UI |
 
 ## Design decisions
 
-- **Language:** Swedish UI for home operator
+- **Language:** English UI
 - **Theme:** Dark, high contrast (typical VMS)
-- **Mock-first:** Types align with `data-model-and-events.md`; swap data layer later
+- **Auth:** Login required; admin vs viewer
+- **Data:** Types align with [../architecture/data-model-and-events.md](../architecture/data-model-and-events.md); swap mock layer for API later
+
+## Real vs mock
+
+See [features.md](features.md) for the full matrix.
 
 ## Open ADRs
 
-- Live view transport (WebRTC vs HLS)
-- API style (REST + OpenAPI)
+- Live view transport (WebRTC vs HLS) for scale
+- Extract API from Vite plugins to `server/` (Phase 3)
 
 ## Related
 
 - [roadmap.md](roadmap.md) Phase 1
-- [web/README.md](../../web/README.md)
+- [../architecture/web-application.md](../architecture/web-application.md)
+- [../../web/package.json](../../web/package.json)

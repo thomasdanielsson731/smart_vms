@@ -276,7 +276,7 @@ export function ChatPanel() {
 
         let actionLabel: string | undefined
 
-        let finalContent = content || 'Done.'
+        const finalContent = content || 'Done.'
 
 
 

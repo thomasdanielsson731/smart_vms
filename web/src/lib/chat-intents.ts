@@ -158,7 +158,7 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
   if (
 
-    /face|recogni[sz]e|known person|unknown person|face rec|name person|ansikt|igenkän|igenkan|känd person|okänd person|namnge person/.test(
+    /\bface\b|recogni[sz]e|known person|unknown person|face rec|name person|ansikt|igenkän|igenkan|känd person|okänd person|namnge person/.test(
 
       q,
 

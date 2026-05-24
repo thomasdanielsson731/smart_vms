@@ -49,6 +49,7 @@ export function FaceEnrollFromVideo({
   const [name, setName] = useState('')
   const [role, setRole] = useState<FaceProfileRole>('household')
   const [savedMsg, setSavedMsg] = useState<string | null>(null)
+  const [playbackBaseMs] = useState(() => Date.now())
 
   const camera = cameras.find((c) => c.id === cameraId) ?? cameras[0]
   const rememberedOnCamera = useMemo(
@@ -78,10 +79,9 @@ export function FaceEnrollFromVideo({
   const displayFaces = faces.length > 0 ? faces : mode === 'live' ? liveMemoryFaces : faces
 
   const playbackTimestamp = useMemo(() => {
-    const now = Date.now()
     const offsetMs = ((100 - playbackPos) / 100) * 24 * 3600_000
-    return new Date(now - offsetMs).toISOString()
-  }, [playbackPos])
+    return new Date(playbackBaseMs - offsetMs).toISOString()
+  }, [playbackBaseMs, playbackPos])
 
   const handleFaceSelect = (face: DetectedFaceWithMemory) => {
     if (face.matchedName && !face.unknown) {

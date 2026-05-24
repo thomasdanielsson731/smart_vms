@@ -117,6 +117,9 @@ Cameras should not be reachable from internet directly. See [security-and-privac
 
 ## Related documents
 
+- [web-application.md](web-application.md) — Phase 1 UI (implemented today)
+- [deployment-home.md](deployment-home.md) — home topology by phase
+- [trust-boundaries.md](trust-boundaries.md) — security zones
 - [edge-vs-server.md](edge-vs-server.md)
 - [axis-vapix.md](axis-vapix.md)
 - [data-model-and-events.md](data-model-and-events.md)
