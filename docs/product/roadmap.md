@@ -36,7 +36,9 @@ Phases are **sequential in intent** but may overlap in implementation. Each phas
 | VAPIX live view | MJPEG proxy, stream test | **Shipped** |
 | VAPIX credential vault | Encrypted file + Settings | **Shipped** |
 | Camera web UI proxy | Embedded Axis pages | **Shipped** |
-| Camera registry | Host per camera, mock metadata | Partial |
+| Camera registry | VAPIX probe, LAN /24 discovery, localStorage | **Shipped** |
+| LAN discovery | Admin-only, rate-limited subnet scan | **Shipped** |
+| Live view grid | All cameras or single | **Shipped** |
 | Recording | Continuous, retention | **Planned** |
 | Playback timeline | Seek, export | Mock UI |
 | Unit + contract tests | Vitest, VAPIX fixtures | **Shipped** |

@@ -3,13 +3,12 @@ import { Check, Loader2, Radar, ChevronRight } from 'lucide-react'
 import { useAppConfig } from '@/context/AppConfigContext'
 import { fetchVapixConfig } from '@/lib/vapix-config-api'
 import { defaultVapixUser } from '@/lib/vapix-config-storage'
-import type { OnboardingBatch } from '@/types/onboarding'
+import type { OnboardingBatch, OnboardResult } from '@/types/onboarding'
 
 type Step = 'scan' | 'select' | 'configure' | 'done'
 
 const defaultBatch: OnboardingBatch = {
   vapixUser: defaultVapixUser,
-  vapixPassword: '',
   recordingEnabled: true,
   namePrefix: 'Camera',
 }
@@ -18,6 +17,8 @@ export function OnboardingWorkspace() {
   const {
     discovered,
     discoveryStatus,
+    discoveryError,
+    discoveryScanInfo,
     scanNetwork,
     setDiscoveredSelected,
     selectAllDiscovered,
@@ -26,7 +27,9 @@ export function OnboardingWorkspace() {
 
   const [step, setStep] = useState<Step>('scan')
   const [batch, setBatch] = useState<OnboardingBatch>(defaultBatch)
-  const [result, setResult] = useState<{ added: number; skipped: number } | null>(null)
+  const [result, setResult] = useState<OnboardResult | null>(null)
+  const [onboarding, setOnboarding] = useState(false)
+  const [onboardError, setOnboardError] = useState<string | null>(null)
   const [vapixReady, setVapixReady] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -42,12 +45,21 @@ export function OnboardingWorkspace() {
   const newCount = discovered.filter((d) => !d.alreadyRegistered).length
 
   const handleScan = async () => {
-    await scanNetwork()
-    setStep('select')
+    const ok = await scanNetwork()
+    if (ok) setStep('select')
   }
 
-  const handleOnboard = () => {
-    const res = onboardSelected(batch)
+  const handleOnboard = async () => {
+    setOnboarding(true)
+    setOnboardError(null)
+    const res = await onboardSelected(batch)
+    setOnboarding(false)
+    if (res.failed.length > 0) {
+      setOnboardError(
+        res.failed.map((f) => `${f.host}: ${f.message}`).join('\n'),
+      )
+      return
+    }
     setResult(res)
     setStep('done')
   }
@@ -55,8 +67,7 @@ export function OnboardingWorkspace() {
   return (
     <div className="space-y-6">
       <p className="text-sm text-slate-400">
-        Multi-config: discover Axis devices on the network (mDNS/ONVIF mock) and onboard several at once
-        with the same VAPIX credentials.
+        Discover Axis cameras on your LAN and onboard several at once with the same VAPIX credentials.
       </p>
 
       <StepIndicator current={step} />
@@ -74,18 +85,41 @@ export function OnboardingWorkspace() {
             ) : (
               <Radar className="h-4 w-4" />
             )}
-            {discoveryStatus === 'scanning' ? 'Searching LAN…' : 'Search for cameras on network'}
+            {discoveryStatus === 'scanning'
+              ? discoveryScanInfo
+                ? `Scanning ${discoveryScanInfo.subnet} (${discoveryScanInfo.scanned} addresses)…`
+                : 'Scanning LAN for Axis cameras…'
+              : 'Search for cameras on network'}
           </button>
+          {discoveryStatus === 'error' && discoveryError && (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+              {discoveryError}
+            </p>
+          )}
+          {discoveryStatus === 'done' && discoveryError && (
+            <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+              {discoveryError}
+            </p>
+          )}
           <p className="text-xs text-slate-500">
-            Phase 1 mock: uses <code className="text-slate-400">VITE_CAMERA_HOSTS</code> from{' '}
-            <code className="text-slate-400">web/.env</code> when set. Real LAN scan in a later
-            phase.
+            Scans your /24 subnet (derived from{' '}
+            <code className="text-slate-400">VITE_CAMERA_HOSTS</code> or{' '}
+            <code className="text-slate-400">VITE_CAMERA_SUBNET</code> in{' '}
+            <code className="text-slate-400">web/.env</code>). May take up to a minute.
           </p>
         </section>
       )}
 
       {step === 'select' && (
         <section className="space-y-3">
+          {discoveryError && (
+            <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+              {discoveryError}
+            </p>
+          )}
+          <p className="text-xs text-slate-500">
+            Found {discovered.length} camera{discovered.length === 1 ? '' : 's'} on the network.
+          </p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -190,10 +224,16 @@ export function OnboardingWorkspace() {
           <button
             type="button"
             onClick={handleOnboard}
-            className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-500"
+            disabled={onboarding}
+            className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-60"
           >
-            Onboard {selectedCount} cameras
+            {onboarding ? 'Testing streams…' : `Onboard ${selectedCount} cameras`}
           </button>
+          {onboardError && (
+            <pre className="whitespace-pre-wrap rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+              {onboardError}
+            </pre>
+          )}
         </section>
       )}
 

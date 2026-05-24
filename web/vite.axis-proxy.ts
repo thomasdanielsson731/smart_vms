@@ -2,8 +2,9 @@ import type { Plugin, PreviewServer, ViteDevServer } from 'vite'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import {
   isAllowedCameraHost,
-  parseAxisParamList,
-  pickDeviceInfo,
+  fetchAxisParamList,
+  pickPublicDeviceInfo,
+  localhostCameraAllowed,
   prepareCameraWebHtml,
   readRequestBody,
   resolveCameraProxyAuth,
@@ -12,6 +13,7 @@ import {
   proxyWebBasePath,
   sendJson,
 } from './server/camera-proxy-shared'
+import { handleCameraDiscover } from './server/camera-discovery'
 
 type StreamKind = 'mjpg' | 'snapshot'
 
@@ -71,6 +73,13 @@ function attachCameraProxy(
     const url = req.url ?? ''
     const pathname = url.split('?')[0]
     const query = url.includes('?') ? url.slice(url.indexOf('?')) : ''
+    const searchParams = new URL(url, 'http://local').searchParams
+
+    // --- LAN discovery (subnet VAPIX scan) ---
+    if (pathname === '/api/camera/discover' && req.method === 'GET') {
+      await handleCameraDiscover(req, res, mode, cwd, searchParams.get('subnet'))
+      return
+    }
 
     // --- Stream connectivity test ---
     const testMatch = pathname.match(/^\/api\/camera\/([^/]+)\/stream-test$/)
@@ -78,7 +87,9 @@ function attachCameraProxy(
       const host = decodeURIComponent(testMatch[1])
       const search = new URL(url, 'http://local').searchParams
       const vapixUserOverride = search.get('vapixUser') ?? undefined
-      const auth = resolveCameraProxyAuth(req, res, mode, cwd, host, vapixUserOverride)
+      const auth = resolveCameraProxyAuth(req, res, mode, cwd, host, {
+        vapixUserOverride,
+      })
       if (!auth) return
 
       try {
@@ -130,19 +141,19 @@ function attachCameraProxy(
       if (!auth) return
 
       try {
-        const target =
-          `http://${host}/axis-cgi/param.cgi?action=list&group=Brand,Network,Properties,System`
-        const response = await auth.client.fetch(target, { method: 'GET' })
-        if (!response.ok) {
-          sendJson(res, response.status, {
+        const params = await fetchAxisParamList(
+          auth.client,
+          host,
+          'Brand,Network,Properties,System,StreamProfile',
+        )
+        if (!params) {
+          sendJson(res, 502, {
             error: 'camera_error',
-            message: `Camera returned ${response.status}`,
+            message: 'Could not read device info from camera.',
           })
           return
         }
-        const text = await response.text()
-        const params = parseAxisParamList(text)
-        sendJson(res, 200, pickDeviceInfo(params))
+        sendJson(res, 200, pickPublicDeviceInfo(params))
       } catch (err) {
         sendJson(res, 502, {
           error: 'proxy_failed',
@@ -157,7 +168,7 @@ function attachCameraProxy(
     if (webMatch && ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'].includes(req.method ?? 'GET')) {
       const host = decodeURIComponent(webMatch[1])
       const subPath = webMatch[2] ?? ''
-      const auth = resolveCameraProxyAuth(req, res, mode, cwd, host)
+      const auth = resolveCameraProxyAuth(req, res, mode, cwd, host, { requireAdmin: true })
       if (!auth) return
 
       const cameraPath = subPath ? `/${subPath}` : '/'
@@ -166,7 +177,15 @@ function attachCameraProxy(
       try {
         let body: Buffer | undefined
         if (method !== 'GET' && method !== 'HEAD') {
-          body = await readRequestBody(req)
+          try {
+            body = await readRequestBody(req)
+          } catch (err) {
+            if (err instanceof Error && err.message === 'body_too_large') {
+              sendJson(res, 413, { error: 'body_too_large', message: 'Request body too large.' })
+              return
+            }
+            throw err
+          }
         }
 
         const forwardHeaders: Record<string, string> = {}
@@ -231,13 +250,15 @@ function attachCameraProxy(
     const search = new URL(url, 'http://local').searchParams
     const vapixUserOverride = search.get('vapixUser') ?? undefined
 
-    if (!isAllowedCameraHost(host)) {
+    if (!isAllowedCameraHost(host, { allowLocalhost: localhostCameraAllowed(mode, cwd) })) {
       res.statusCode = 403
       res.end('Host not allowed')
       return
     }
 
-    const auth = resolveCameraProxyAuth(req, res, mode, cwd, host, vapixUserOverride)
+    const auth = resolveCameraProxyAuth(req, res, mode, cwd, host, {
+      vapixUserOverride: vapixUserOverride ?? undefined,
+    })
     if (!auth) return
 
     try {

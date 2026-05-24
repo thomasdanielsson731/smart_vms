@@ -13,5 +13,9 @@ export interface Camera {
   lastSeenAt: string | null
   /** Per-camera VAPIX user — only if different from shared credentials */
   vapixUser?: string
+  /** From VAPIX probe — optional until discovered */
+  serial?: string
+  /** ISO timestamp of last successful VAPIX metadata probe */
+  lastVapixProbeAt?: string
   thumbnailUrl?: string
 }

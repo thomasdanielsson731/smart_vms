@@ -1,4 +1,5 @@
 import type { ChatAction } from '@/types/chat'
+import { isFaceRecognitionEnabled } from '@/lib/feature-flags'
 
 
 
@@ -86,11 +87,11 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
         workspace: 'video',
 
-        params: { camera, mode: 'playback' },
+        params: { camera, t: '40' },
 
         reply:
 
-          'Opening the video workspace with playback (mock). When the recording service is connected I will seek to the right segment.',
+          'Opening the video timeline in playback (mock). Scrub right for live when the recording service is connected.',
 
       }
 
@@ -100,9 +101,9 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
       workspace: 'video',
 
-      params: { camera, mode: 'live' },
+      params: { camera, t: '100' },
 
-      reply: 'Opening live view for the camera. Stream connects in Phase 1 (RTSP/WebRTC).',
+      reply: 'Opening live view — scrub left on the timeline for recorded clips and alarms.',
 
     }
 
@@ -144,11 +145,11 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
     return {
 
-      workspace: 'forensic',
+      workspace: 'video',
 
-      params: { range: '48h' },
+      params: { range: '48h', t: '50' },
 
-      reply: 'Opening forensic — timeline with all alarms and linked recording clips.',
+      reply: 'Opening video timeline with alarms — scrub all the way right for live.',
 
     }
 
@@ -157,25 +158,21 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
 
   if (
-
     /\bface\b|recogni[sz]e|known person|unknown person|face rec|name person|ansikt|igenkän|igenkan|känd person|okänd person|namnge person/.test(
-
       q,
-
     )
-
   ) {
-
-    return {
-
-      workspace: 'faces',
-
-      params: { tab: 'enroll' },
-
-      reply: 'Opening face recognition — select video, scan faces and name people.',
-
+    if (!isFaceRecognitionEnabled()) {
+      return {
+        reply:
+          'Face recognition is disabled by default (privacy). Set VITE_FACE_RECOGNITION_ENABLED=true in web/.env to enable.',
+      }
     }
-
+    return {
+      workspace: 'faces',
+      params: { tab: 'enroll' },
+      reply: 'Opening face recognition — select video, scan faces and name people.',
+    }
   }
 
 
@@ -311,7 +308,7 @@ export const suggestedPrompts = [
 
   'Limit recording storage to 200 GB',
 
-  'Open forensic and show all alarms from the last 48 hours',
+  'Open video timeline and show all alarms from the last 48 hours',
 
   'Open the map and show the cameras',
 

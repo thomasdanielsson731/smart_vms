@@ -1,31 +1,63 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import DigestClient from 'digest-fetch'
+import { loadEnv } from 'vite'
 import { getSessionUser } from '../vite.auth-plugin'
+import type { UserRole } from './auth'
 import { resolveVapixCredentials } from './vapix-config'
 
-export function readRequestBody(req: IncomingMessage): Promise<Buffer> {
+const MAX_PROXY_BODY_BYTES = 5 * 1024 * 1024
+
+export function readRequestBody(
+  req: IncomingMessage,
+  maxBytes = MAX_PROXY_BODY_BYTES,
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
-    req.on('data', (chunk: Buffer) => chunks.push(chunk))
+    let total = 0
+    req.on('data', (chunk: Buffer) => {
+      total += chunk.length
+      if (total > maxBytes) {
+        req.destroy()
+        reject(new Error('body_too_large'))
+        return
+      }
+      chunks.push(chunk)
+    })
     req.on('end', () => resolve(Buffer.concat(chunks)))
     req.on('error', reject)
   })
 }
 
-export function isAllowedCameraHost(host: string): boolean {
+export interface CameraHostAllowOptions {
+  /** Dev-only: set SMARTVMS_ALLOW_LOCALHOST_CAMERA=true in web/.env */
+  allowLocalhost?: boolean
+}
+
+export function isAllowedCameraHost(host: string, options?: CameraHostAllowOptions): boolean {
   if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return false
   const parts = host.split('.').map(Number)
   if (parts.some((p) => p > 255)) return false
   if (parts[0] === 10) return true
   if (parts[0] === 192 && parts[1] === 168) return true
   if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true
-  if (host === '127.0.0.1') return true
+  if (host === '127.0.0.1') return options?.allowLocalhost === true
   return false
+}
+
+export function localhostCameraAllowed(mode: string, cwd: string): boolean {
+  const env = loadEnv(mode, cwd, '')
+  return env.SMARTVMS_ALLOW_LOCALHOST_CAMERA === 'true'
+}
+
+export interface CameraProxyAuthOptions {
+  requireAdmin?: boolean
+  vapixUserOverride?: string
 }
 
 export interface CameraProxyAuth {
   client: DigestClient
   host: string
+  role: UserRole
 }
 
 export function sendJson(res: ServerResponse, status: number, body: unknown): void {
@@ -41,9 +73,12 @@ export function resolveCameraProxyAuth(
   mode: string,
   cwd: string,
   host: string,
-  vapixUserOverride?: string,
+  options?: CameraProxyAuthOptions | string,
 ): CameraProxyAuth | null {
-  if (!isAllowedCameraHost(host)) {
+  const opts: CameraProxyAuthOptions =
+    typeof options === 'string' ? { vapixUserOverride: options } : (options ?? {})
+
+  if (!isAllowedCameraHost(host, { allowLocalhost: localhostCameraAllowed(mode, cwd) })) {
     sendJson(res, 403, { error: 'host_not_allowed', message: 'Camera host not allowed.' })
     return null
   }
@@ -51,6 +86,23 @@ export function resolveCameraProxyAuth(
   const { user: sessionUser } = getSessionUser(req, mode, cwd)
   if (!sessionUser) {
     sendJson(res, 401, { error: 'unauthenticated', message: 'Sign in to access cameras.' })
+    return null
+  }
+
+  if (opts.requireAdmin && sessionUser.role !== 'admin') {
+    sendJson(res, 403, {
+      error: 'forbidden',
+      message: 'Administrator access required for this camera operation.',
+    })
+    return null
+  }
+
+  const vapixUserOverride = opts.vapixUserOverride
+  if (vapixUserOverride && sessionUser.role !== 'admin') {
+    sendJson(res, 403, {
+      error: 'forbidden',
+      message: 'Only administrators can override VAPIX user.',
+    })
     return null
   }
 
@@ -69,7 +121,7 @@ export function resolveCameraProxyAuth(
     return null
   }
 
-  return { client: new DigestClient(vapixUser, vapixPass), host }
+  return { client: new DigestClient(vapixUser, vapixPass), host, role: sessionUser.role }
 }
 
 export function proxyWebBasePath(host: string): string {
@@ -98,7 +150,6 @@ export function rewriteCameraWebHtml(html: string, host: string): string {
       `$1${base}/$2`,
     )
     .replace(/url\(\s*\/(?!\/)/gi, `url(${base}/`)
-  // Protocol-relative URLs pointing at the camera IP
   const hostEsc = host.replace(/\./g, '\\.')
   out = out.replace(
     new RegExp(`(href|src|action)=(["'])//${hostEsc}`, 'gi'),
@@ -178,7 +229,6 @@ export function forwardProxyResponseHeaders(
 }
 
 export function stripFrameBlockingHeaders(res: ServerResponse): void {
-  // Prevent duplicate if called multiple times — Node allows setHeader overwrite
   res.removeHeader?.('X-Frame-Options')
   res.removeHeader?.('Content-Security-Policy')
 }
@@ -195,6 +245,56 @@ export function parseAxisParamList(text: string): Record<string, string> {
   return out
 }
 
+export function normalizeCameraHost(host: string): string {
+  const parts = host.trim().split('.')
+  if (parts.length !== 4) return host.trim()
+  return parts.map((p) => String(Number(p))).join('.')
+}
+
+export async function fetchAxisParamList(
+  client: DigestClient,
+  host: string,
+  group: string,
+  timeoutMs = 8000,
+): Promise<Record<string, string> | null> {
+  const path = `/axis-cgi/param.cgi?action=list&group=${encodeURIComponent(group)}`
+  for (const scheme of ['http', 'https'] as const) {
+    try {
+      const response = await client.fetch(`${scheme}://${host}${path}`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(timeoutMs),
+      })
+      if (!response.ok) continue
+      const text = await response.text()
+      const params = parseAxisParamList(text)
+      if (Object.keys(params).length === 0) continue
+      return params
+    } catch {
+      if (scheme === 'http') continue
+    }
+  }
+  return null
+}
+
+export function pickStreamProfileLabel(params: Record<string, string>): string | undefined {
+  for (const [key, value] of Object.entries(params)) {
+    if (/^root\.StreamProfile\.S\d+\.Name$/i.test(key) && value.trim()) {
+      return value.trim()
+    }
+  }
+  const resolution = params['root.Properties.Image.Resolution']?.trim()
+  return resolution || undefined
+}
+
+export function isAxisDeviceParams(params: Record<string, string>): boolean {
+  const brand = (params['root.Brand.Brand'] ?? '').trim().toUpperCase()
+  if (brand === 'AXIS') return true
+  const prod = (params['root.Brand.ProdNbr'] ?? params['root.Brand.ProdShort'] ?? '')
+    .trim()
+    .toUpperCase()
+  return prod.startsWith('AXIS ')
+}
+
 export function pickDeviceInfo(params: Record<string, string>) {
   return {
     brand: params['root.Brand.Brand'] ?? params['root.Brand.ProdShort'],
@@ -203,5 +303,19 @@ export function pickDeviceInfo(params: Record<string, string>) {
     serial: params['root.Properties.System.SerialNumber'] ?? params['root.System.SerialNumber'],
     ip: params['root.Network.Broadcast IPv4 Address'] ?? params['root.Network.eth0.IPAddress'],
     mac: params['root.Network.eth0.MACAddress'],
+  }
+}
+
+/** Device info for browser API — omits MAC (topology fingerprint). */
+export function pickPublicDeviceInfo(params: Record<string, string>) {
+  const info = pickDeviceInfo(params)
+  const streamProfile = pickStreamProfileLabel(params)
+  return {
+    brand: info.brand,
+    model: info.model,
+    firmware: info.firmware,
+    serial: info.serial,
+    ip: info.ip,
+    ...(streamProfile ? { streamProfile } : {}),
   }
 }

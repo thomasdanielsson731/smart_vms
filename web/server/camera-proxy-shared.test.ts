@@ -4,8 +4,11 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
   isAllowedCameraHost,
+  isAxisDeviceParams,
   parseAxisParamList,
   pickDeviceInfo,
+  pickPublicDeviceInfo,
+  pickStreamProfileLabel,
   prepareCameraWebHtml,
   proxyWebBasePath,
   rewriteCameraAbsoluteUrls,
@@ -24,7 +27,11 @@ describe('isAllowedCameraHost (SSRF guard)', () => {
     expect(isAllowedCameraHost('192.168.1.51')).toBe(true)
     expect(isAllowedCameraHost('10.0.0.5')).toBe(true)
     expect(isAllowedCameraHost('172.16.0.1')).toBe(true)
-    expect(isAllowedCameraHost('127.0.0.1')).toBe(true)
+  })
+
+  it('blocks localhost unless explicitly allowed', () => {
+    expect(isAllowedCameraHost('127.0.0.1')).toBe(false)
+    expect(isAllowedCameraHost('127.0.0.1', { allowLocalhost: true })).toBe(true)
   })
 
   it('blocks public and invalid hosts', () => {
@@ -80,7 +87,7 @@ describe('VAPIX param parsing', () => {
   it('parses param.cgi list format from fixture', () => {
     const text = fs.readFileSync(fixturePath, 'utf8')
     const params = parseAxisParamList(text)
-    expect(params['root.Brand.ProdShort']).toBe('P1465-LE')
+    expect(params['root.Brand.ProdShort']).toBe('M1065-L')
     expect(params['root.Network.eth0.IPAddress']).toBe('192.168.1.51')
   })
 
@@ -88,11 +95,30 @@ describe('VAPIX param parsing', () => {
     const params = parseAxisParamList(fs.readFileSync(fixturePath, 'utf8'))
     expect(pickDeviceInfo(params)).toEqual({
       brand: 'AXIS',
-      model: 'P1465-LE',
+      model: 'M1065-L',
       firmware: '10.12.65',
       serial: 'ACCC8E123456',
       ip: '192.168.1.51',
       mac: '00:40:8C:12:34:56',
     })
+  })
+
+  it('public device info omits MAC', () => {
+    const params = parseAxisParamList(fs.readFileSync(fixturePath, 'utf8'))
+    expect(pickPublicDeviceInfo(params)).not.toHaveProperty('mac')
+    expect(pickPublicDeviceInfo(params).serial).toBe('ACCC8E123456')
+  })
+
+  it('detects Axis devices from param list', () => {
+    const params = parseAxisParamList(fs.readFileSync(fixturePath, 'utf8'))
+    expect(isAxisDeviceParams(params)).toBe(true)
+    expect(isAxisDeviceParams({ 'root.Brand.Brand': 'Other' })).toBe(false)
+  })
+
+  it('reads stream profile label when present', () => {
+    const params = parseAxisParamList(
+      'root.StreamProfile.S0.Name=Sub 640x360\nroot.Properties.Image.Resolution=1920x1080\n',
+    )
+    expect(pickStreamProfileLabel(params)).toBe('Sub 640x360')
   })
 })

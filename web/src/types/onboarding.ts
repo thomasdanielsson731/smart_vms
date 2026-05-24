@@ -6,6 +6,7 @@ export interface DiscoveredCamera {
   model: string
   serial: string
   firmware: string
+  streamProfile?: string
   /** Redan i registret */
   alreadyRegistered: boolean
   /** Vald för bulk-onboarding */
@@ -14,7 +15,12 @@ export interface DiscoveredCamera {
 
 export interface OnboardingBatch {
   vapixUser: string
-  vapixPassword: string
   recordingEnabled: boolean
   namePrefix: string
+}
+
+export interface OnboardResult {
+  added: number
+  skipped: number
+  failed: Array<{ host: string; message: string }>
 }

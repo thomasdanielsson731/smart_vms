@@ -1,3 +1,12 @@
+export function cameraDiscoverUrl(subnet?: string): string {
+  if (!subnet) return '/api/camera/discover'
+  return `/api/camera/discover?subnet=${encodeURIComponent(subnet)}`
+}
+
+export function cameraDeviceInfoUrl(host: string): string {
+  return `/api/camera/${encodeURIComponent(host)}/device-info`
+}
+
 /** Direct URL to the camera's built-in web server (same LAN) */
 export function cameraDirectWebUrl(host: string, path = '/'): string {
   const normalized = path.startsWith('/') ? path : `/${path}`
@@ -10,10 +19,6 @@ export function cameraProxiedWebUrl(host: string, path = '/'): string {
   if (!path || path === '/') return base
   const normalized = path.startsWith('/') ? path.slice(1) : path
   return `${base}/${normalized}`
-}
-
-export function cameraDeviceInfoUrl(host: string): string {
-  return `/api/camera/${encodeURIComponent(host)}/device-info`
 }
 
 /** Common Axis web UI entry points */

@@ -319,7 +319,7 @@ export function MapWorkspace() {
                 <p className="text-xs text-slate-500">Rule: {selectedAlarm.ruleName}</p>
               )}
               <p className="text-xs text-slate-600">
-                Plotted in the camera field of view. Open forensic for clips.
+                Plotted in the camera field of view. Open video timeline for clips.
               </p>
             </div>
           ) : selectedCam && selected ? (

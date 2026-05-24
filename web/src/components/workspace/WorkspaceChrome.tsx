@@ -3,13 +3,13 @@ import type { WorkspaceId } from '@/types/chat'
 import { useWorkspace } from '@/context/WorkspaceContext'
 
 const titles: Record<Exclude<WorkspaceId, null>, string> = {
-  video: 'Video',
+  video: 'Video — live & timeline',
   dashboard: 'Dashboard',
   tracking: 'Tracking',
   agents: 'Monitoring agents',
   onboarding: 'Onboarding — network',
   alarms: 'Create alarm',
-  forensic: 'Forensic — timeline',
+  forensic: 'Video — live & timeline',
   map: 'Map',
   faces: 'Face recognition',
   'camera-web': 'Camera web UI',

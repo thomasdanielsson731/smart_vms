@@ -542,3 +542,12 @@ export function generateAlarmTier2Analysis(
 
 }
 
+
+
+/** High-severity alarms or tier-2 urgent/review — worth surfacing in Smart Chat summary. */
+export function isNotableIncident(incident: Incident, ctx: Tier2Context): boolean {
+  if (incident.severity === 'high') return true
+  const { assessedPriority } = generateAlarmTier2Analysis(incident, ctx)
+  return assessedPriority === 'urgent' || assessedPriority === 'review'
+}
+

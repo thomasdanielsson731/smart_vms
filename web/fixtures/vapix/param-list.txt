@@ -1,7 +1,7 @@
-# Axis param.cgi sample (sanitized fixture)
+# Axis param.cgi sample (sanitized fixture — generic model label)
 root.Brand.Brand=AXIS
-root.Brand.ProdShort=P1465-LE
-root.Brand.ProdNbr=AXIS P1465-LE
+root.Brand.ProdShort=M1065-L
+root.Brand.ProdNbr=AXIS M1065-L
 root.Properties.Firmware.Version=10.12.65
 root.Properties.System.SerialNumber=ACCC8E123456
 root.Network.eth0.IPAddress=192.168.1.51

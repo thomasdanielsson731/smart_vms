@@ -1,4 +1,5 @@
 import type { WorkspaceId } from '@/types/chat'
+import { isCopilotWorkspaceId } from '@/lib/workspaces'
 
 const ACTION_TAG = '@@ACTION@@'
 
@@ -6,19 +7,6 @@ export interface CopilotAction {
   workspace: Exclude<WorkspaceId, null>
   params?: Record<string, string>
 }
-
-const validWorkspaces = new Set<string>([
-  'video',
-  'dashboard',
-  'tracking',
-  'agents',
-  'onboarding',
-  'alarms',
-  'forensic',
-  'faces',
-  'map',
-  'settings',
-])
 
 export function parseCopilotResponse(raw: string): {
   content: string
@@ -34,11 +22,11 @@ export function parseCopilotResponse(raw: string): {
 
   try {
     const parsed = JSON.parse(jsonPart) as { workspace?: string; params?: Record<string, string> }
-    if (parsed.workspace && validWorkspaces.has(parsed.workspace)) {
+    if (parsed.workspace && isCopilotWorkspaceId(parsed.workspace)) {
       return {
         content,
         action: {
-          workspace: parsed.workspace as CopilotAction['workspace'],
+          workspace: parsed.workspace,
           params: parsed.params,
         },
       }

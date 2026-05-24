@@ -20,11 +20,12 @@ export interface ChatMessage {
   content: string
   createdAt: string
   workspaceHint?: WorkspaceId
+  workspaceParams?: Record<string, string>
   actionLabel?: string
 }
 
 export interface ChatAction {
-  workspace: Exclude<WorkspaceId, null>
+  workspace?: Exclude<WorkspaceId, null>
   params?: Record<string, string>
   reply: string
 }

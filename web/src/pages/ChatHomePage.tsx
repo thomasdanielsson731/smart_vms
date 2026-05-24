@@ -7,7 +7,6 @@ import {
   Radar,
   BellPlus,
   Settings,
-  FileSearch,
   Map,
   ScanFace,
   Globe,
@@ -16,6 +15,7 @@ import { useWorkspace } from '@/context/WorkspaceContext'
 import { useAuth } from '@/context/AuthContext'
 import { ChatPanel } from '@/components/chat/ChatPanel'
 import { WorkspaceRouter } from '@/components/workspace/WorkspaceRouter'
+import { isFaceRecognitionEnabled } from '@/lib/feature-flags'
 import type { WorkspaceId } from '@/types/chat'
 
 const shortcuts: {
@@ -43,22 +43,16 @@ const shortcuts: {
     icon: Map,
   },
   {
-    id: 'forensic',
-    label: 'Forensic',
-    description: 'Review alarms and clips',
-    icon: FileSearch,
+    id: 'video',
+    label: 'Video',
+    description: 'Live, timeline and alarms',
+    icon: Video,
   },
   {
     id: 'faces',
     label: 'Faces',
     description: 'Enrol and recognise',
     icon: ScanFace,
-  },
-  {
-    id: 'video',
-    label: 'Video',
-    description: 'Live and playback',
-    icon: Video,
   },
   {
     id: 'camera-web',
@@ -95,13 +89,13 @@ const shortcuts: {
 function defaultParams(id: Exclude<WorkspaceId, null>): Record<string, string> | undefined {
   switch (id) {
     case 'video':
-      return { camera: 'cam-driveway', mode: 'live' }
+      return { camera: 'cam-driveway', t: '100' }
     case 'camera-web':
       return { camera: 'cam-driveway', path: '/' }
     case 'alarms':
       return { mode: 'create' }
     case 'forensic':
-      return { range: '48h' }
+      return { range: '48h', t: '50' }
     case 'faces':
       return { tab: 'enroll' }
     default:
@@ -113,7 +107,10 @@ export function ChatHomePage() {
   const { workspace, openWorkspace, closeWorkspace } = useWorkspace()
   const { canAccessWorkspace } = useAuth()
   const hasWorkspace = workspace != null
-  const visibleShortcuts = shortcuts.filter((s) => canAccessWorkspace(s.id))
+  const visibleShortcuts = shortcuts.filter((s) => {
+    if (s.id === 'faces' && !isFaceRecognitionEnabled()) return false
+    return canAccessWorkspace(s.id)
+  })
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] min-h-0">
@@ -129,7 +126,7 @@ export function ChatHomePage() {
           }`}
         >
           <MessageSquare className="h-5 w-5 shrink-0" />
-          <span className="mt-1 text-[10px] font-medium leading-tight">Copilot</span>
+          <span className="mt-1 text-[10px] font-medium leading-tight">Smart Chat</span>
           <span className="mt-0.5 text-center text-[9px] leading-tight text-slate-500">
             Ask and control via AI
           </span>

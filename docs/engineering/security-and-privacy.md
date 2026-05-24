@@ -28,9 +28,16 @@ Home deployment threat model and product constraints. **Not a corporate complian
 1. **Cameras not on public internet**
 2. **Segmentation** — IoT VLAN or firewall rules camera ↔ server only
 3. **Least privilege** — dedicated VAPIX user per integration
-4. **Encryption in transit** — TLS to UI and APIs; HTTPS to cameras where supported
+4. **Encryption in transit** — TLS to UI and APIs; HTTPS to cameras where supported (Phase 1 proxy tries HTTPS fallback on LAN)
 5. **Encryption at rest** — optional LUKS/disk encryption on server (operator choice)
 6. **Minimal retention** — defaults in [data-model](../architecture/data-model-and-events.md)
+
+### Phase 1 implementation notes
+
+- **Camera proxy (Vite):** digest auth to cameras over HTTP/HTTPS on RFC1918 only; `127.0.0.1` blocked unless `SMARTVMS_ALLOW_LOCALHOST_CAMERA=true`.
+- **Roles:** viewers may watch live streams; **admin** required for onboarding, LAN discovery, and embedded camera web UI.
+- **Embedded Axis web UI:** CSP/X-Frame-Options stripped on proxied responses so iframe works — Smart VMS parent app should keep its own CSP in production builds.
+- **Device info API:** serial returned to authenticated operators; MAC address not exposed to the browser.
 
 ## Privacy (home-specific)
 

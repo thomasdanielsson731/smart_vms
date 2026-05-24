@@ -20,9 +20,9 @@ export const mockCameras: Camera[] = [
 
     host: '192.168.68.200',
 
-    model: 'AXIS P1465-LE',
+    model: '—',
 
-    firmware: '11.11.104',
+    firmware: '—',
 
     status: 'online',
 
@@ -44,9 +44,9 @@ export const mockCameras: Camera[] = [
 
     host: '192.168.68.201',
 
-    model: 'AXIS M1065-L',
+    model: '—',
 
-    firmware: '10.12.89',
+    firmware: '—',
 
     status: 'online',
 
@@ -68,9 +68,9 @@ export const mockCameras: Camera[] = [
 
     host: '192.168.68.202',
 
-    model: 'AXIS P3245-LVE',
+    model: '—',
 
-    firmware: '11.10.91',
+    firmware: '—',
 
     status: 'degraded',
 
@@ -92,9 +92,9 @@ export const mockCameras: Camera[] = [
 
     host: '192.168.68.203',
 
-    model: 'AXIS P1455-LE',
+    model: '—',
 
-    firmware: '11.11.98',
+    firmware: '—',
 
     status: 'offline',
 

@@ -24,7 +24,7 @@ export function ChatMessageBubble({
           className={`inline-block rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
             isUser
               ? 'bg-blue-600 text-white'
-              : 'bg-[var(--color-surface-700)] text-slate-200'
+              : 'bg-[var(--color-surface-700)] text-slate-200 whitespace-pre-line'
           }`}
         >
           {message.content}

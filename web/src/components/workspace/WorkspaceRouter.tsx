@@ -13,6 +13,7 @@ import { MapWorkspace } from './MapWorkspace'
 import { FaceRecognitionWorkspace } from './FaceRecognitionWorkspace'
 import { CameraWebWorkspace } from './CameraWebWorkspace'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { isFaceRecognitionEnabled } from '@/lib/feature-flags'
 
 export function WorkspaceRouter({ workspace }: { workspace: Exclude<WorkspaceId, null> }) {
   const { canAccessWorkspace } = useAuth()
@@ -52,7 +53,14 @@ export function WorkspaceRouter({ workspace }: { workspace: Exclude<WorkspaceId,
       content = <MapWorkspace />
       break
     case 'faces':
-      content = <FaceRecognitionWorkspace />
+      content = isFaceRecognitionEnabled() ? (
+        <FaceRecognitionWorkspace />
+      ) : (
+        <p className="text-sm text-slate-400">
+          Face recognition is disabled. Set{' '}
+          <code className="text-slate-300">VITE_FACE_RECOGNITION_ENABLED=true</code> to enable.
+        </p>
+      )
       break
     case 'camera-web':
       content = <CameraWebWorkspace />

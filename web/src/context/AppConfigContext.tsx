@@ -2,23 +2,30 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react'
 import { mockCameras } from '@/lib/mock-data'
 import {
-  applyCameraHostOverrides,
   loadCameraHostOverrides,
   mergeCameraHostOverride,
   saveCameraHostOverrides,
 } from '@/lib/camera-hosts-storage'
+import {
+  buildInitialCameras,
+  mergeProbeMetadata,
+  probesFromDiscovered,
+  saveCameraRegistry,
+} from '@/lib/camera-registry-storage'
 import { mockMonitoringAgents } from '@/lib/mock-agents'
-import { mockNetworkDiscovery } from '@/lib/mock-discovery'
+import { discoverCameras, probeCameraMetadata } from '@/lib/network-discovery'
 import type { Camera } from '@/types/camera'
 import type { MonitoringAgent } from '@/types/agent'
 import type { AlarmDefinition, AlarmDraft } from '@/types/alarm'
-import type { DiscoveredCamera, OnboardingBatch, DiscoveryStatus } from '@/types/onboarding'
+import type { DiscoveredCamera, OnboardingBatch, DiscoveryStatus, OnboardResult } from '@/types/onboarding'
+import { testCameraStream, streamTestMessage } from '@/lib/camera-stream-test'
 import {
   defaultRecordingStorageSettings,
   type RecordingStorageSettings,
@@ -66,10 +73,12 @@ interface AppConfigContextValue {
   alarms: AlarmDefinition[]
   discovered: DiscoveredCamera[]
   discoveryStatus: DiscoveryStatus
-  scanNetwork: () => Promise<void>
+  discoveryError: string | null
+  discoveryScanInfo: { subnet: string; scanned: number } | null
+  scanNetwork: () => Promise<boolean>
   setDiscoveredSelected: (id: string, selected: boolean) => void
   selectAllDiscovered: (selected: boolean, onlyNew?: boolean) => void
-  onboardSelected: (batch: OnboardingBatch) => { added: number; skipped: number }
+  onboardSelected: (batch: OnboardingBatch) => Promise<OnboardResult>
   addAlarm: (draft: AlarmDraft) => AlarmDefinition
   addAlarmsBulk: (draft: AlarmDraft, cameraIds: string[]) => AlarmDefinition[]
   toggleAlarm: (id: string) => void
@@ -98,12 +107,20 @@ interface AppConfigContextValue {
 const AppConfigContext = createContext<AppConfigContextValue | null>(null)
 
 export function AppConfigProvider({ children }: { children: ReactNode }) {
-  const [cameras, setCameras] = useState<Camera[]>(() => applyCameraHostOverrides([...mockCameras]))
+  const [cameras, setCameras] = useState<Camera[]>(() => buildInitialCameras(mockCameras))
+  const persistCameras = useCallback((next: Camera[]) => {
+    setCameras(next)
+    saveCameraRegistry(next)
+  }, [])
   const [alarms, setAlarms] = useState<AlarmDefinition[]>(() =>
     agentsToAlarms(mockMonitoringAgents),
   )
   const [discovered, setDiscovered] = useState<DiscoveredCamera[]>([])
   const [discoveryStatus, setDiscoveryStatus] = useState<DiscoveryStatus>('idle')
+  const [discoveryError, setDiscoveryError] = useState<string | null>(null)
+  const [discoveryScanInfo, setDiscoveryScanInfo] = useState<{ subnet: string; scanned: number } | null>(
+    null,
+  )
   const [storageSettings, setStorageSettings] = useState<RecordingStorageSettings>(() => {
     return loadStorageSettings() ?? defaultRecordingStorageSettings()
   })
@@ -208,13 +225,69 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
     return faceSettings.enabled ? mockFaceEvents : []
   }, [faceProfiles, cameras, faceSettings])
 
-  const scanNetwork = useCallback(async () => {
+  const syncCameraMetadata = useCallback((probes: ReturnType<typeof probesFromDiscovered>) => {
+    setCameras((prev) => {
+      const next = mergeProbeMetadata(prev, probes)
+      saveCameraRegistry(next)
+      return next
+    })
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function refreshPendingMetadata() {
+      const pending = cameras.filter((c) => c.model === '—' || !c.serial)
+      if (pending.length === 0) return
+
+      const probes = await Promise.all(pending.map((c) => probeCameraMetadata(c.host)))
+      if (cancelled) return
+
+      setCameras((prev) => {
+        const next = mergeProbeMetadata(prev, probes)
+        saveCameraRegistry(next)
+        return next
+      })
+    }
+
+    void refreshPendingMetadata()
+    return () => {
+      cancelled = true
+    }
+    // Probe once on mount for cameras missing VAPIX metadata
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const scanNetwork = useCallback(async (): Promise<boolean> => {
     setDiscoveryStatus('scanning')
-    await new Promise((r) => setTimeout(r, 1500))
+    setDiscoveryError(null)
+    setDiscoveryScanInfo(null)
     const hosts = cameras.map((c) => c.host)
-    setDiscovered(mockNetworkDiscovery(hosts))
-    setDiscoveryStatus('done')
-  }, [cameras])
+    try {
+      const result = await discoverCameras(hosts)
+      setDiscovered(result.devices)
+      if (result.subnet && result.scanned) {
+        setDiscoveryScanInfo({ subnet: result.subnet, scanned: result.scanned })
+      }
+      syncCameraMetadata(probesFromDiscovered(result.devices))
+
+      if (result.devices.length === 0) {
+        setDiscoveryStatus('error')
+        setDiscoveryError(
+          result.error ?? 'No Axis cameras found on the subnet. Check VAPIX credentials.',
+        )
+        return false
+      }
+
+      if (result.error) setDiscoveryError(result.error)
+      setDiscoveryStatus('done')
+      return true
+    } catch {
+      setDiscoveryStatus('error')
+      setDiscoveryError('Scan failed unexpectedly.')
+      return false
+    }
+  }, [cameras, syncCameraMetadata])
 
   const setDiscoveredSelected = useCallback((id: string, selected: boolean) => {
     setDiscovered((list) => list.map((d) => (d.id === id ? { ...d, selected } : d)))
@@ -230,11 +303,27 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const onboardSelected = useCallback(
-    (batch: OnboardingBatch) => {
+    async (batch: OnboardingBatch): Promise<OnboardResult> => {
       const toAdd = discovered.filter((d) => d.selected && !d.alreadyRegistered)
-      let added = 0
+      const skipped = discovered.filter((d) => d.selected && d.alreadyRegistered).length
+      const failed: OnboardResult['failed'] = []
+
+      for (const d of toAdd) {
+        const test = await testCameraStream(d.host)
+        if (!test.ok) {
+          failed.push({
+            host: d.host,
+            message: streamTestMessage(test) ?? test.message,
+          })
+        }
+      }
+
+      if (failed.length > 0) {
+        return { added: 0, skipped, failed }
+      }
+
+      const probedAt = new Date().toISOString()
       const newCameras: Camera[] = toAdd.map((d) => {
-        added++
         const name = `${batch.namePrefix} ${d.host.split('.').pop()}`.trim()
         return {
           id: `cam-${d.host.replace(/\./g, '-')}`,
@@ -243,22 +332,25 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
           host: d.host,
           model: d.model,
           firmware: d.firmware,
-          status: 'unknown' as const,
-          streamProfile: 'Sub 640×360',
+          serial: d.serial !== '—' ? d.serial : undefined,
+          status: 'online' as const,
+          streamProfile: d.streamProfile ?? 'Sub 640×360',
           recordingEnabled: batch.recordingEnabled,
-          lastSeenAt: null,
+          lastSeenAt: probedAt,
+          lastVapixProbeAt: probedAt,
           vapixUser: batch.vapixUser,
         }
       })
-      setCameras((prev) => [...prev, ...newCameras])
+
+      persistCameras([...cameras, ...newCameras])
       setDiscovered((list) =>
         list.map((d) =>
           toAdd.some((t) => t.id === d.id) ? { ...d, alreadyRegistered: true, selected: false } : d,
         ),
       )
-      return { added, skipped: discovered.filter((d) => d.selected && d.alreadyRegistered).length }
+      return { added: newCameras.length, skipped, failed: [] }
     },
-    [discovered],
+    [cameras, discovered, persistCameras],
   )
 
   const addAlarm = useCallback(
@@ -313,9 +405,11 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
     const trimmed = host.trim()
     const overrides = mergeCameraHostOverride(loadCameraHostOverrides(), cameraId, trimmed)
     saveCameraHostOverrides(overrides)
-    setCameras((prev) =>
-      prev.map((c) => (c.id === cameraId ? { ...c, host: trimmed || c.host } : c)),
-    )
+    setCameras((prev) => {
+      const next = prev.map((c) => (c.id === cameraId ? { ...c, host: trimmed || c.host } : c))
+      saveCameraRegistry(next)
+      return next
+    })
   }, [])
 
   const value = useMemo(
@@ -325,6 +419,8 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
       alarms,
       discovered,
       discoveryStatus,
+      discoveryError,
+      discoveryScanInfo,
       scanNetwork,
       setDiscoveredSelected,
       selectAllDiscovered,
@@ -354,6 +450,8 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
       alarms,
       discovered,
       discoveryStatus,
+      discoveryError,
+      discoveryScanInfo,
       scanNetwork,
       setDiscoveredSelected,
       selectAllDiscovered,

@@ -24,6 +24,13 @@ export function getEnvCameraHosts(): string[] {
   return raw.split(',').map((h) => h.trim()).filter(Boolean)
 }
 
+/** Normalize IP octets for stable host comparison (192.168.001.1 → 192.168.1.1). */
+export function normalizeCameraHost(host: string): string {
+  const parts = host.trim().split('.')
+  if (parts.length !== 4) return host.trim()
+  return parts.map((p) => String(Number(p))).join('.')
+}
+
 function envCameraHosts(): string[] {
   return getEnvCameraHosts()
 }

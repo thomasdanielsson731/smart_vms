@@ -298,6 +298,120 @@ export const mockForensicIncidents: ForensicIncident[] = [
 
   },
 
+  {
+
+    id: 'inc-008',
+
+    title: 'Motion — garden (night)',
+
+    cameraId: 'cam-garden',
+
+    cameraName: 'Garden',
+
+    severity: 'low',
+
+    status: 'closed',
+
+    occurredAt: new Date(Date.now() - 5 * 24 * 3600_000).toISOString(),
+
+    ruleName: 'Axis motion',
+
+    confidence: 0.62,
+
+    bestPicture: mockBestPicture(
+
+      new Date(Date.now() - 5 * 24 * 3600_000).toISOString(),
+
+      0.62,
+
+      [0.4, 0.48, 0.1, 0.18],
+
+    ),
+
+    ...clipAround(new Date(Date.now() - 5 * 24 * 3600_000).toISOString(), 5, 10),
+
+  },
+
+  {
+
+    id: 'inc-009',
+
+    title: 'Vehicle — driveway (delivery)',
+
+    cameraId: 'cam-driveway',
+
+    cameraName: 'Driveway',
+
+    severity: 'low',
+
+    status: 'closed',
+
+    occurredAt: new Date(Date.now() - 12 * 24 * 3600_000).toISOString(),
+
+    ruleName: 'Vehicle — driveway',
+
+    confidence: 0.74,
+
+    bestPicture: mockBestPicture(
+
+      new Date(Date.now() - 12 * 24 * 3600_000).toISOString(),
+
+      0.74,
+
+      [0.15, 0.38, 0.38, 0.22],
+
+    ),
+
+    ...clipAround(new Date(Date.now() - 12 * 24 * 3600_000).toISOString(), 10, 15),
+
+  },
+
+  {
+
+    id: 'inc-010',
+
+    title: 'Person — entry (unknown)',
+
+    cameraId: 'cam-entry',
+
+    cameraName: 'Entry',
+
+    severity: 'medium',
+
+    status: 'closed',
+
+    occurredAt: new Date(Date.now() - 22 * 24 * 3600_000).toISOString(),
+
+    ruleName: 'Person — entry',
+
+    confidence: 0.86,
+
+    bestPicture: mockBestPicture(
+
+      new Date(Date.now() - 22 * 24 * 3600_000).toISOString(),
+
+      0.86,
+
+      [0.5, 0.35, 0.12, 0.28],
+
+    ),
+
+    faceMatch: {
+
+      profileId: null,
+
+      displayName: 'Unknown person',
+
+      confidence: 0.71,
+
+      unknown: true,
+
+    },
+
+    ...clipAround(new Date(Date.now() - 22 * 24 * 3600_000).toISOString(), 10, 20),
+
+  },
+
 ]
 
 

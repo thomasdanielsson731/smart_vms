@@ -6,7 +6,11 @@ import type { ChatMessage, WorkspaceId } from '@/types/chat'
 
 import { resolveChatIntent } from '@/lib/chat-intents'
 
+import { mockForensicIncidents } from '@/lib/mock-forensic'
+
 import { useWorkspace } from '@/context/WorkspaceContext'
+
+import { useAuth } from '@/context/AuthContext'
 
 import { useAppConfig } from '@/context/AppConfigContext'
 
@@ -21,6 +25,8 @@ import { ollamaConfig } from '@/lib/ollama/config'
 import { useOllamaStatus } from '@/hooks/useOllamaStatus'
 
 import { ChatMessageBubble } from './ChatMessageBubble'
+
+import { ChatWelcomeSummary } from './ChatWelcomeSummary'
 
 import { QuickActions } from './QuickActions'
 
@@ -40,7 +46,7 @@ const workspaceLabels: Record<Exclude<WorkspaceId, null>, string> = {
 
   alarms: 'Create alarm',
 
-  forensic: 'Open forensic',
+  forensic: 'Open video timeline',
 
   faces: 'Open face recognition',
 
@@ -80,33 +86,18 @@ export function ChatPanel() {
 
   const { openWorkspace } = useWorkspace()
 
-  const { cameras, alarms, storageSettings } = useAppConfig()
+  const { user, activitySince } = useAuth()
+
+  const { cameras, alarms, storageSettings, faceProfiles, faceSettings } = useAppConfig()
 
   const { status, modelAvailable, model } = useOllamaStatus()
 
+  const ollamaNote =
+    status === 'online' && modelAvailable
+      ? `\n\n_AI via Ollama (${model})._`
+      : '\n\n_Ollama offline — intent matching still works._'
 
-
-  const welcome: ChatMessage = {
-
-    id: 'welcome',
-
-    role: 'assistant',
-
-    createdAt: new Date().toISOString(),
-
-    content:
-
-      status === 'online' && modelAvailable
-
-        ? `Hi! I'm running locally via Ollama (${model}). Ask me to show video, onboard cameras, create alarms or open the dashboard.`
-
-        : 'Hi! I\'m the Smart VMS copilot. Start Ollama with your Qwen model for full AI, otherwise simple intent matching is used.',
-
-  }
-
-
-
-  const [messages, setMessages] = useState<ChatMessage[]>([welcome])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
 
   const [input, setInput] = useState('')
 
@@ -115,22 +106,6 @@ export function ChatPanel() {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const abortRef = useRef<AbortController | null>(null)
-
-
-
-  useEffect(() => {
-
-    setMessages((prev) => {
-
-      if (prev.length !== 1 || prev[0]?.id !== 'welcome') return prev
-
-      return [{ ...welcome }]
-
-    })
-
-  }, [status, modelAvailable, model])
-
-
 
   useEffect(() => {
 
@@ -147,25 +122,16 @@ export function ChatPanel() {
       const action = resolveChatIntent(trimmed)
 
       if (action) {
-
-        openWorkspace(action.workspace, action.params)
-
+        if (action.workspace) openWorkspace(action.workspace, action.params)
         return {
-
           id: id(),
-
           role: 'assistant',
-
           content: `${action.reply}\n\n_(Ollama unavailable — simple intent matching.)_`,
-
           createdAt: new Date().toISOString(),
-
           workspaceHint: action.workspace,
-
-          actionLabel: workspaceLabels[action.workspace],
-
+          workspaceParams: action.params,
+          actionLabel: action.workspace ? workspaceLabels[action.workspace] : undefined,
         }
-
       }
 
       return {
@@ -248,11 +214,7 @@ export function ChatPanel() {
 
           { role: 'system', content: buildCopilotSystemPrompt(cameras, alarms, storageSettings) },
 
-          ...messages
-
-            .filter((m) => m.id !== 'welcome')
-
-            .map((m) => ({
+          ...messages.map((m) => ({
 
               role: m.role as 'user' | 'assistant',
 
@@ -273,53 +235,37 @@ export function ChatPanel() {
 
 
         let workspaceHint: WorkspaceId | undefined
-
+        let workspaceParams: Record<string, string> | undefined
         let actionLabel: string | undefined
-
         const finalContent = content || 'Done.'
 
-
-
         if (action) {
-
-          openWorkspace(action.workspace, action.params)
-
-          workspaceHint = action.workspace
-
-          actionLabel = workspaceLabels[action.workspace]
-
-        } else {
-
-          const fallback = resolveChatIntent(trimmed)
-
-          if (fallback) {
-
-            openWorkspace(fallback.workspace, fallback.params)
-
-            workspaceHint = fallback.workspace
-
-            actionLabel = workspaceLabels[fallback.workspace]
-
+          if (action.workspace) {
+            openWorkspace(action.workspace, action.params)
+            workspaceHint = action.workspace
+            workspaceParams = action.params
+            actionLabel = workspaceLabels[action.workspace]
           }
-
+        } else {
+          const fallback = resolveChatIntent(trimmed)
+          if (fallback) {
+            if (fallback.workspace) {
+              openWorkspace(fallback.workspace, fallback.params)
+              workspaceHint = fallback.workspace
+              workspaceParams = fallback.params
+              actionLabel = workspaceLabels[fallback.workspace]
+            }
+          }
         }
 
-
-
         const assistantMsg: ChatMessage = {
-
           id: id(),
-
           role: 'assistant',
-
           content: finalContent,
-
           createdAt: new Date().toISOString(),
-
           workspaceHint,
-
+          workspaceParams,
           actionLabel,
-
         }
 
         setMessages((m) => [...m, assistantMsg])
@@ -364,7 +310,7 @@ export function ChatPanel() {
 
     },
 
-    [loading, status, modelAvailable, messages, cameras, alarms, openWorkspace, fallbackReply],
+    [loading, status, modelAvailable, messages, cameras, alarms, storageSettings, openWorkspace, fallbackReply],
 
   )
 
@@ -390,7 +336,7 @@ export function ChatPanel() {
 
         <div className="min-w-0 flex-1">
 
-          <p className="text-sm font-semibold text-white">Copilot</p>
+          <p className="text-sm font-semibold text-white">Smart Chat</p>
 
           <p
 
@@ -423,6 +369,27 @@ export function ChatPanel() {
 
 
       <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
+        {user ? (
+          <ChatWelcomeSummary
+            displayName={user.displayName}
+            sinceLastLogin={activitySince}
+            incidents={mockForensicIncidents}
+            cameras={cameras}
+            faceProfiles={faceProfiles}
+            faceSettings={faceSettings}
+            ollamaNote={ollamaNote}
+            onOpenVideo={() => openWorkspace('video', { range: '48h', t: '50' })}
+          />
+        ) : (
+          <ChatMessageBubble
+            message={{
+              id: 'welcome-guest',
+              role: 'assistant',
+              content: 'Sign in to see your activity summary.',
+              createdAt: new Date().toISOString(),
+            }}
+          />
+        )}
 
         {messages.map((msg) => (
 
@@ -433,13 +400,9 @@ export function ChatPanel() {
             message={msg}
 
             onOpenWorkspace={
-
               msg.workspaceHint
-
-                ? () => openWorkspace(msg.workspaceHint!, {})
-
+                ? () => openWorkspace(msg.workspaceHint!, msg.workspaceParams)
                 : undefined
-
             }
 
           />
@@ -466,7 +429,7 @@ export function ChatPanel() {
 
       <div className="border-t border-slate-800/80 px-4 py-3">
 
-        {messages.length <= 2 && !loading && (
+        {messages.length === 0 && !loading && (
 
           <div className="mb-3">
 
@@ -488,7 +451,7 @@ export function ChatPanel() {
 
             disabled={loading}
 
-            placeholder="Ask Copilot (Qwen via Ollama)…"
+            placeholder="Ask Smart Chat (Qwen via Ollama)…"
 
             className="min-w-0 flex-1 rounded-xl border border-slate-700/80 bg-slate-900/60 px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30 disabled:opacity-60"
 
