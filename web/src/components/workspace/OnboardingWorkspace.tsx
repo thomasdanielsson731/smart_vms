@@ -77,7 +77,9 @@ export function OnboardingWorkspace() {
             {discoveryStatus === 'scanning' ? 'Searching LAN…' : 'Search for cameras on network'}
           </button>
           <p className="text-xs text-slate-500">
-            Phase 1: real discovery via backend (mDNS, WS-Discovery, known subnets).
+            Phase 1 mock: uses <code className="text-slate-400">VITE_CAMERA_HOSTS</code> from{' '}
+            <code className="text-slate-400">web/.env</code> when set. Real LAN scan in a later
+            phase.
           </p>
         </section>
       )}

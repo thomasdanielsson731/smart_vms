@@ -168,8 +168,10 @@ export function VapixConnectionSettingsPanel() {
               <h3 className="text-sm font-medium text-slate-200">Camera IP addresses</h3>
             </div>
             <p className="mb-3 text-xs text-slate-500">
-              Enter each camera&apos;s real IP (from Axis web UI or your router). Mock defaults
-              192.168.1.51–54 are placeholders.
+              Enter each camera&apos;s real IP. Defaults use 192.168.68.x — set{' '}
+              <code className="text-slate-500">VITE_CAMERA_HOSTS</code> in{' '}
+              <code className="text-slate-500">web/.env</code> (comma-separated) and restart{' '}
+              <code className="text-slate-500">npm run dev</code>.
             </p>
             <ul className="space-y-3">
               {cameras.map((cam) => {

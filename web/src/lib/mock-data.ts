@@ -18,7 +18,7 @@ export const mockCameras: Camera[] = [
 
     location: 'Front',
 
-    host: '192.168.1.51',
+    host: '192.168.68.200',
 
     model: 'AXIS P1465-LE',
 
@@ -42,7 +42,7 @@ export const mockCameras: Camera[] = [
 
     location: 'Door',
 
-    host: '192.168.1.52',
+    host: '192.168.68.201',
 
     model: 'AXIS M1065-L',
 
@@ -66,7 +66,7 @@ export const mockCameras: Camera[] = [
 
     location: 'Rear',
 
-    host: '192.168.1.53',
+    host: '192.168.68.202',
 
     model: 'AXIS P3245-LVE',
 
@@ -90,7 +90,7 @@ export const mockCameras: Camera[] = [
 
     location: 'Garage door',
 
-    host: '192.168.1.54',
+    host: '192.168.68.203',
 
     model: 'AXIS P1455-LE',
 

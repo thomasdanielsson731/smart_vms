@@ -1,56 +1,65 @@
 import type { DiscoveredCamera } from '@/types/onboarding'
+import { getEnvCameraHosts } from '@/lib/camera-hosts-storage'
 
-/** Simulerade enheter på LAN — inkl. redan registrerade + nya */
+/** Demo device metadata — hosts come from VITE_CAMERA_HOSTS or this list */
+const demoDevices: Omit<DiscoveredCamera, 'alreadyRegistered' | 'selected'>[] = [
+  {
+    id: 'disc-68-200',
+    host: '192.168.68.200',
+    model: 'AXIS P1465-LE',
+    serial: 'ACCC8E123456',
+    firmware: '11.11.104',
+  },
+  {
+    id: 'disc-68-201',
+    host: '192.168.68.201',
+    model: 'AXIS M1065-L',
+    serial: 'ACCC8E234567',
+    firmware: '10.12.89',
+  },
+  {
+    id: 'disc-68-202',
+    host: '192.168.68.202',
+    model: 'AXIS P3245-LVE',
+    serial: 'ACCC8E345678',
+    firmware: '11.10.91',
+  },
+  {
+    id: 'disc-68-203',
+    host: '192.168.68.203',
+    model: 'AXIS P1455-LE',
+    serial: 'ACCC8E456789',
+    firmware: '11.11.98',
+  },
+]
+
+function deviceForHost(host: string): Omit<DiscoveredCamera, 'alreadyRegistered' | 'selected'> {
+  const known = demoDevices.find((d) => d.host === host)
+  if (known) return known
+  return {
+    id: `disc-${host.replace(/\./g, '-')}`,
+    host,
+    model: 'AXIS Camera',
+    serial: `DISC-${host.replace(/\./g, '')}`,
+    firmware: '—',
+  }
+}
+
+/**
+ * Phase 1 mock discovery.
+ * Uses VITE_CAMERA_HOSTS from .env when set; otherwise demo IPs on 192.168.68.x.
+ */
 export function mockNetworkDiscovery(registeredHosts: string[]): DiscoveredCamera[] {
-  const devices: Omit<DiscoveredCamera, 'alreadyRegistered' | 'selected'>[] = [
-    {
-      id: 'disc-51',
-      host: '192.168.1.51',
-      model: 'AXIS P1465-LE',
-      serial: 'ACCC8E123456',
-      firmware: '11.11.104',
-    },
-    {
-      id: 'disc-52',
-      host: '192.168.1.52',
-      model: 'AXIS M1065-L',
-      serial: 'ACCC8E234567',
-      firmware: '10.12.89',
-    },
-    {
-      id: 'disc-53',
-      host: '192.168.1.53',
-      model: 'AXIS P3245-LVE',
-      serial: 'ACCC8E345678',
-      firmware: '11.10.91',
-    },
-    {
-      id: 'disc-54',
-      host: '192.168.1.54',
-      model: 'AXIS P1455-LE',
-      serial: 'ACCC8E456789',
-      firmware: '11.11.98',
-    },
-    {
-      id: 'disc-55',
-      host: '192.168.1.55',
-      model: 'AXIS P3265-LVE',
-      serial: 'ACCC8E567890',
-      firmware: '11.11.100',
-    },
-    {
-      id: 'disc-56',
-      host: '192.168.1.56',
-      model: 'AXIS M4318-PLVE',
-      serial: 'ACCC8E678901',
-      firmware: '11.9.72',
-    },
-  ]
+  const envHosts = getEnvCameraHosts()
+  const hosts = envHosts.length > 0 ? envHosts : demoDevices.map((d) => d.host)
 
-  return devices.map((d) => {
-    const alreadyRegistered = registeredHosts.includes(d.host)
+  return hosts.map((host) => {
+    const device = deviceForHost(host)
+    const alreadyRegistered = registeredHosts.includes(host)
     return {
-      ...d,
+      ...device,
+      id: `disc-${host.replace(/\./g, '-')}`,
+      host,
       alreadyRegistered,
       selected: !alreadyRegistered,
     }
