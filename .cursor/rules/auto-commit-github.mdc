@@ -1,38 +1,55 @@
 ---
-description: Auto-commit and push to GitHub after major changes or bug fixes
+description: Auto-commit and push to GitHub after each feature or bugfix
 alwaysApply: true
 ---
 
 # Auto-commit to GitHub
 
-After completing a **major feature**, **bug fix**, or **coherent batch of work**, commit and push to GitHub without waiting for the user to ask — unless they said not to commit in this session.
+Commit and push **often** — after each completed **feature**, **bug fix**, or **coherent doc/test batch**. Do not wait for the user to ask, unless they said **not to commit** in this session.
 
-## When to commit
+## When to commit (default: yes)
 
-Commit when **all** of these apply:
+Commit when the change is **done** and verifiable:
 
-- The change is **complete** (build passes if applicable; no half-finished refactor)
-- It is **major** or **fix-worthy**: new feature, user-visible bug fix, security fix, broken dev/build restored, or docs for a shipped feature
-- **Do not** commit: tiny typos, WIP mid-task, exploratory spikes, or `.env` / secrets / credentials files
+| Trigger | Commit? |
+|---------|---------|
+| New feature or user-visible enhancement | **Yes** |
+| Bug fix (including wrong mock data, broken dev flow) | **Yes** |
+| Security / auth / credential handling fix | **Yes** |
+| Docs for something just shipped or changed | **Yes** |
+| Tests added or updated for behavior that changed | **Yes** (same commit as the code, or immediately after) |
+| Refactor that builds and tests pass | **Yes**, if behavior unchanged and scope is clear |
+| WIP / half-finished / exploratory spike | **No** |
+| Typo-only, comment-only, formatting-only | **No** (batch with next real change) |
 
-## Workflow
+Run `npm run test` and `npm run build` in `web/` when code changed — fix failures before commit.
 
-1. Run `git status`, `git diff`, and `git log -3 --oneline` (parallel)
-2. Stage relevant files — **never** `.env`, `.vapix.credentials.json`, or other gitignored secrets
-3. Write a concise commit message (1–2 sentences, focus on **why**)
-4. Commit via HEREDOC message
-5. **Push** to `origin` on the current branch (`git push origin HEAD`) so GitHub stays in sync
+## Workflow (every commit)
 
-If push fails (auth, network), report the error and leave the local commit; do not force-push.
+1. Run `git status`, `git diff`, and `git log -3 --oneline`
+2. Stage relevant files — **never** `.env`, `.vapix.credentials.json`, or other secrets
+3. One logical unit per commit (feature **or** bugfix **or** docs — split if unrelated)
+4. Commit with a 1–2 sentence message focused on **why**
+5. **Push** to `origin` on the current branch: `git push origin HEAD`
+
+If push fails (auth, network), report the error and leave the local commit.
 
 ## Commit message style
 
 Match existing repo tone. Examples:
 
-- `Fix dev server CSP blocking React Refresh in Vite`
-- `Add camera web UI proxy and stream connectivity test`
-- `Translate UI to English and add menu tab descriptions`
+- `Fix onboarding mock discovery to use VITE_CAMERA_HOSTS`
+- `Add Vitest suite for VAPIX proxy and auth`
+- `Add product overview and architecture doc indexes`
 
 ## Split commits
 
-Prefer **one commit per logical unit** when several major items were done in one session (e.g. separate fix vs feature). Avoid one giant commit if changes are clearly unrelated.
+Prefer **small, frequent commits** over one large session dump:
+
+- Feature A → commit + push
+- Bugfix B → commit + push
+- Unrelated docs → separate commit
+
+## End of session
+
+Before stopping, check `git status`. If anything complete remains uncommitted, commit and push it.

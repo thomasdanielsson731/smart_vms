@@ -66,8 +66,10 @@ SMARTVMS_SESSION_SECRET=<openssl rand -hex 32>
 ## Branching and commits
 
 - `main` — integratable; CI runs test + build
+- **Commit often:** after each completed feature, bugfix, or test/doc batch — then push to GitHub
+- Agents follow [.cursor/rules/auto-commit-github.mdc](../../.cursor/rules/auto-commit-github.mdc) (auto-commit unless you opt out for the session)
 - Commit messages: **why** in 1–2 sentences (English or Swedish)
-- One logical change per commit when possible
+- One logical change per commit — prefer many small commits over one large dump
 - No secrets in git; pre-commit hooks must not be skipped without reason
 
 ## Definition of Done (implementation)
