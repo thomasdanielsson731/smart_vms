@@ -17,7 +17,8 @@ export function saveStorageSettings(settings: RecordingStorageSettings): void {
 }
 
 /** Usage snapshot until the recording service reports real values. */
-export function storageUsageSnapshot(_settings: RecordingStorageSettings): StorageUsageSnapshot {
+export function storageUsageSnapshot(settings: RecordingStorageSettings): StorageUsageSnapshot {
+  void settings
   return {
     recordingUsedGiB: 0,
     clipsUsedGiB: 0,

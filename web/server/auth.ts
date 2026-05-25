@@ -27,7 +27,9 @@ const LOGIN_WINDOW_MS = 15 * 60_000
 const loginAttempts = new Map<string, { count: number; resetAt: number }>()
 
 export function loadAuthEnv(mode: string, cwd: string): AuthEnv {
-  const env = loadEnv(mode, cwd, '')
+  const fileEnv = loadEnv(mode, cwd, '')
+  // process.env wins (Playwright webServer, CI, shell overrides)
+  const env = { ...fileEnv, ...process.env }
 
   let sessionSecret =
     env.SMARTVMS_SESSION_SECRET || env.VITE_SMARTVMS_SESSION_SECRET || ''
@@ -206,6 +208,7 @@ function clientIp(req: IncomingMessage): string {
 }
 
 export function checkLoginRateLimit(req: IncomingMessage): boolean {
+  if (process.env.SMARTVMS_DISABLE_LOGIN_RATE_LIMIT === 'true') return true
   const ip = clientIp(req)
   const now = Date.now()
   const entry = loginAttempts.get(ip)

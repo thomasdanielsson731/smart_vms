@@ -36,9 +36,12 @@ export function cameraHostForIncident(
 
 /** Recording segments from the server — empty until the recording service is connected. */
 export function recordingSegmentsForRange(
-  _rangeStart: Date,
-  _rangeEnd: Date,
-  _cameraIds: string[],
+  rangeStart: Date,
+  rangeEnd: Date,
+  cameraIds: string[],
 ): RecordingSegment[] {
+  void rangeStart
+  void rangeEnd
+  void cameraIds
   return []
 }

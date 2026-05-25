@@ -31,5 +31,13 @@ jobs:
       - name: Unit & contract tests
         run: npm run test
 
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: E2E smoke tests
+        run: npm run test:e2e
+        env:
+          CI: true
+
       - name: Production build
         run: npm run build

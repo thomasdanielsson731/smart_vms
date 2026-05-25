@@ -53,10 +53,13 @@ export function scanFrameWithCameraMemory(
 }
 
 export function buildFaceEventsFromMemory(
-  _profiles: FaceProfile[],
-  _cameras: Camera[],
-  _settings: FaceRecognitionSettings,
+  profiles: FaceProfile[],
+  cameras: Camera[],
+  settings: FaceRecognitionSettings,
 ): FaceRecognitionEvent[] {
+  void profiles
+  void cameras
+  void settings
   return []
 }
 

@@ -23,6 +23,11 @@ venv/
 node_modules/
 dist/
 build/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+web/e2e/.auth/
 
 # Media & test fixtures (large)
 recordings/

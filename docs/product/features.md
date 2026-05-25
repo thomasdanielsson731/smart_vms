@@ -78,4 +78,4 @@ Legend: **Real** = production path exists · **Mock** = UI/types only · **Plann
 |---------|--------|-----|
 | Vitest unit + contract tests | **Real** | [../engineering/testing-strategy.md](../engineering/testing-strategy.md) |
 | CI (test + build) | **Real** | `.github/workflows/ci.yml` |
-| E2E smoke (Playwright) | **Planned** | [../engineering/testing-strategy.md](../engineering/testing-strategy.md) |
+| E2E smoke (Playwright) | **Real** | [../engineering/testing-strategy.md](../engineering/testing-strategy.md) |

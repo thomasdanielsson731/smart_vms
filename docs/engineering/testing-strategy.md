@@ -77,6 +77,8 @@ Aligned with a senior EM background: **risk-based testing**, clear quality gates
 
 **Decided (Phase 1 UI):** Vitest unit and contract tests live in `web/` — `npm run test` (see `.github/workflows/ci.yml`). Golden VAPIX fixture: `web/fixtures/vapix/param-list.txt`.
 
+**Decided (Phase 1 UI):** Playwright E2E smoke in `web/e2e/` — `npm run test:e2e` from repo root. Covers login, all workspaces, map placement, chat intents, and viewer permissions.
+
 ## Manual home validation
 
 **7-day soak checklist** (per phase):
