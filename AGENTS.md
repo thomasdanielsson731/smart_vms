@@ -29,16 +29,16 @@ The maintainer is a **senior software engineering manager** (architecture, test,
 ```
 smart-vms/
 ├── docs/                 # product, architecture, engineering, ADRs
-├── edge-agent/           # (future) per-site ingest + inference
-├── server/               # (future) API, recording, analytics
-├── web/                  # (future) operator UI
-├── shared/               # (future) schemas, contracts
-├── deploy/               # (future) compose, configs
+├── shared/               # event schemas + TS types
+├── edge-agent/           # Phase 2 ingest + inference (stub)
+├── server/               # Phase 3 API + event bus (stub)
+├── deploy/               # docker-compose (MQTT, Postgres, server)
+├── web/                  # Phase 1 operator UI + dev API plugins
 ├── .cursor/rules/        # automatic conventions
 └── .cursor/skills/       # on-demand review personas
 ```
 
-Until directories exist, do not invent large codebases — extend docs and thin spikes only when asked.
+Phase 1 recording runs in `web/server/recording/`. Edge/server stubs are starting points for Phase 2–3 — not production services yet.
 
 ## Review agents (skills)
 
