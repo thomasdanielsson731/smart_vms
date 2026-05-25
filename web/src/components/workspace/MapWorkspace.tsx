@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MapPin, Crosshair, RotateCw, Bell, Navigation, Loader2 } from 'lucide-react'
 import { useAppConfig } from '@/context/AppConfigContext'
 import { MapCanvas, type FlyToTarget } from '@/components/map/MapCanvas'
@@ -8,10 +8,31 @@ import { alarmPinsFromIncidents, filterRecentIncidents } from '@/lib/map/alarms'
 import { formatDateTime, formatRelativeTime } from '@/lib/format'
 import { cameraHostForIncident } from '@/lib/forensic-utils'
 import { AlarmThumbnail, AlarmBestPicturePanel } from '@/components/alarm/AlarmThumbnail'
+import { defaultMapSite } from '@/types/map'
+
+const GEO_OPTIONS: PositionOptions = {
+  enableHighAccuracy: true,
+  timeout: 15000,
+  maximumAge: 0,
+}
+
+function isDefaultMapSite(site: { centerLat: number; centerLng: number }): boolean {
+  return (
+    Math.abs(site.centerLat - defaultMapSite.centerLat) < 0.0001 &&
+    Math.abs(site.centerLng - defaultMapSite.centerLng) < 0.0001
+  )
+}
 
 export function MapWorkspace() {
-  const { cameras, incidents, mapPlacements, mapSite, setCameraMapPlacement, resetMapPlacements } =
-    useAppConfig()
+  const {
+    cameras,
+    incidents,
+    mapPlacements,
+    mapSite,
+    setCameraMapPlacement,
+    resetMapPlacements,
+    updateMapSite,
+  } = useAppConfig()
 
   const [selectedId, setSelectedId] = useState<string | null>(cameras[0]?.id ?? null)
   const [selectedAlarmId, setSelectedAlarmId] = useState<string | null>(null)
@@ -26,6 +47,38 @@ export function MapWorkspace() {
   const [locating, setLocating] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [flyTo, setFlyTo] = useState<FlyToTarget | null>(null)
+  const autoLocateAttempted = useRef(false)
+
+  const applyUserLocation = useCallback(
+    (loc: { lat: number; lng: number; accuracyM?: number }, zoom = 19) => {
+      setUserLocation(loc)
+      updateMapSite({ centerLat: loc.lat, centerLng: loc.lng, defaultZoom: zoom })
+      setFlyTo((prev) => ({
+        lat: loc.lat,
+        lng: loc.lng,
+        zoom,
+        token: (prev?.token ?? 0) + 1,
+      }))
+    },
+    [updateMapSite],
+  )
+
+  useEffect(() => {
+    if (autoLocateAttempted.current || !navigator.geolocation || !isDefaultMapSite(mapSite)) return
+    autoLocateAttempted.current = true
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        applyUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracyM: pos.coords.accuracy,
+        })
+      },
+      () => {},
+      GEO_OPTIONS,
+    )
+  }, [mapSite, applyUserLocation])
 
   const selected = selectedId ? mapPlacements[selectedId] : null
   const selectedCam = cameras.find((c) => c.id === selectedId)
@@ -72,18 +125,11 @@ export function MapWorkspace() {
     setLocationError(null)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const loc = {
+        applyUserLocation({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
           accuracyM: pos.coords.accuracy,
-        }
-        setUserLocation(loc)
-        setFlyTo((prev) => ({
-          lat: loc.lat,
-          lng: loc.lng,
-          zoom: 19,
-          token: (prev?.token ?? 0) + 1,
-        }))
+        })
         setLocating(false)
       },
       (err) => {
@@ -95,7 +141,7 @@ export function MapWorkspace() {
         }
         setLocationError(messages[err.code] ?? err.message)
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+      GEO_OPTIONS,
     )
   }
 

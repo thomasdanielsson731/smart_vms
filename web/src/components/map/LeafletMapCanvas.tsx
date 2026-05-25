@@ -92,6 +92,14 @@ export function LeafletMapCanvas({
       alarmLayersRef.current = null
       userLayerRef.current = null
     }
+    // Init once — site changes are applied via setView below (avoid remount / view snap-back).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    map.setView([site.centerLat, site.centerLng], site.defaultZoom, { animate: false })
   }, [site.centerLat, site.centerLng, site.defaultZoom])
 
   useEffect(() => {

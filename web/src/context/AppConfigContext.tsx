@@ -122,7 +122,8 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   const [mapPlacements, setMapPlacements] = useState<Record<string, CameraMapPlacement>>(() => {
     const stored = loadMapPlacements()
     if (Object.keys(stored).length > 0) return stored
-    return buildDefaultPlacements(buildInitialCameras().map((c) => c.id))
+    const site = loadMapSite()
+    return buildDefaultPlacements(buildInitialCameras().map((c) => c.id), site)
   })
 
   const persistPlacements = useCallback((next: Record<string, CameraMapPlacement>) => {
@@ -148,9 +149,9 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const resetMapPlacements = useCallback(() => {
-    const next = buildDefaultPlacements(cameras.map((c) => c.id))
+    const next = buildDefaultPlacements(cameras.map((c) => c.id), mapSite)
     persistPlacements(next)
-  }, [cameras, persistPlacements])
+  }, [cameras, mapSite, persistPlacements])
 
   const updateMapSite = useCallback((site: MapSiteSettings) => {
     setMapSite(site)

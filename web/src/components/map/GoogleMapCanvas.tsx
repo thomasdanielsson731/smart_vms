@@ -1,11 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   APIProvider,
   Map,
   AdvancedMarker,
   Polygon,
   Circle,
-  useMap,
+  type MapCameraChangedEvent,
   type MapMouseEvent,
 } from '@vis.gl/react-google-maps'
 import type { Camera } from '@/types/camera'
@@ -13,23 +13,12 @@ import { severityToColor } from '@/lib/map/alarms'
 import { fovWedgeCoords } from '@/lib/map/geo'
 import { googleMapsApiKey, googleMapsMapId } from '@/lib/map/google-maps-config'
 import type { LeafletMapCanvasProps } from '@/components/map/LeafletMapCanvas'
-import type { FlyToTarget } from '@/components/map/map-types'
 
 const statusColor: Record<Camera['status'], string> = {
   online: '#22c55e',
   offline: '#ef4444',
   degraded: '#f59e0b',
   unknown: '#94a3b8',
-}
-
-function FlyToHandler({ flyTo }: { flyTo: FlyToTarget | null }) {
-  const map = useMap()
-  useEffect(() => {
-    if (!flyTo || !map) return
-    map.panTo({ lat: flyTo.lat, lng: flyTo.lng })
-    if (flyTo.zoom != null) map.setZoom(flyTo.zoom)
-  }, [flyTo, map])
-  return null
 }
 
 function GoogleMapLayers({
@@ -48,23 +37,42 @@ function GoogleMapLayers({
   onSelectAlarm,
   site,
 }: LeafletMapCanvasProps) {
+  const [center, setCenter] = useState({ lat: site.centerLat, lng: site.centerLng })
+  const [zoom, setZoom] = useState(site.defaultZoom)
+
+  useEffect(() => {
+    setCenter({ lat: site.centerLat, lng: site.centerLng })
+    setZoom(site.defaultZoom)
+  }, [site.centerLat, site.centerLng, site.defaultZoom])
+
+  useEffect(() => {
+    if (!flyTo) return
+    setCenter({ lat: flyTo.lat, lng: flyTo.lng })
+    if (flyTo.zoom != null) setZoom(flyTo.zoom)
+  }, [flyTo])
+
   const handleClick = (e: MapMouseEvent) => {
     if (!placeMode || !e.detail.latLng) return
     onMapClick(e.detail.latLng.lat, e.detail.latLng.lng)
   }
 
+  const handleCameraChanged = (e: MapCameraChangedEvent) => {
+    setCenter(e.detail.center)
+    setZoom(e.detail.zoom)
+  }
+
   return (
     <Map
-      defaultCenter={{ lat: site.centerLat, lng: site.centerLng }}
-      defaultZoom={site.defaultZoom}
+      center={center}
+      zoom={zoom}
       mapId={googleMapsMapId}
       gestureHandling="greedy"
       disableDefaultUI={false}
       onClick={handleClick}
+      onCameraChanged={handleCameraChanged}
       className={`h-full min-h-[320px] w-full rounded-xl ${placeMode ? 'cursor-crosshair' : ''}`}
       style={{ width: '100%', height: '100%' }}
     >
-      <FlyToHandler flyTo={flyTo} />
 
       {cameras.map((cam) => {
         const p = placements[cam.id]
