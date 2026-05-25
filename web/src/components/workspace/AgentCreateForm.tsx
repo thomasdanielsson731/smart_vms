@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BellPlus, Copy } from 'lucide-react'
 import { useAppConfig } from '@/context/AppConfigContext'
+import { AgentBacktestPanel } from '@/components/agent/AgentBacktestPanel'
 import { defaultAlarmDraft, type AlarmDraft, type AlarmTrigger } from '@/types/alarm'
 
 export function AgentCreateForm({ onCreated }: { onCreated?: () => void }) {
@@ -170,6 +171,8 @@ export function AgentCreateForm({ onCreated }: { onCreated?: () => void }) {
             className={inputCls}
           />
         </Field>
+
+        <AgentBacktestPanel rule={{ kind: 'draft', draft }} />
 
         <button
           type="submit"

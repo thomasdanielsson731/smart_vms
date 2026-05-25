@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { useAuth } from '@/context/AuthContext'
 import { useAppConfig } from '@/context/AppConfigContext'
 import { formatRelativeTime } from '@/lib/format'
 import { AgentCreateForm } from './AgentCreateForm'
+import { AgentBacktestPanel } from '@/components/agent/AgentBacktestPanel'
 import { BellPlus, Pause, Play } from 'lucide-react'
 
 type AgentsTab = 'list' | 'create'
@@ -15,6 +17,7 @@ export function AgentsWorkspace() {
   const { params, setParams } = useWorkspace()
   const { canWrite } = useAuth()
   const { alarms, cameras, toggleAlarm } = useAppConfig()
+  const [expandedBacktestId, setExpandedBacktestId] = useState<string | null>(null)
   const tab = parseAgentsTab(params.mode)
 
   const setTab = (next: AgentsTab) => {
@@ -113,7 +116,7 @@ export function AgentsWorkspace() {
                     </div>
                   </dl>
                   {canWrite && (
-                    <div className="mt-3">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={() => toggleAlarm(alarm.id)}
@@ -129,6 +132,20 @@ export function AgentsWorkspace() {
                           </>
                         )}
                       </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedBacktestId((id) => (id === alarm.id ? null : alarm.id))
+                        }
+                        className="rounded-lg bg-violet-600/20 px-3 py-1.5 text-xs text-violet-300 hover:bg-violet-600/30"
+                      >
+                        {expandedBacktestId === alarm.id ? 'Hide backtest' : 'Test on recording'}
+                      </button>
+                    </div>
+                  )}
+                  {expandedBacktestId === alarm.id && (
+                    <div className="mt-3">
+                      <AgentBacktestPanel rule={{ kind: 'alarm', alarm }} />
                     </div>
                   )}
                 </li>

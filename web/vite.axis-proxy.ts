@@ -15,6 +15,11 @@ import {
   sendJson,
 } from './server/camera-proxy-shared'
 import { handleCameraDiscover } from './server/camera-discovery'
+import {
+  fetchAxisRecordedEvents,
+  toForensicIncidents,
+} from './server/recorded-events'
+import type { AgentBacktestRange } from './src/lib/agent-backtest'
 
 type StreamKind = 'mjpg' | 'snapshot'
 
@@ -159,6 +164,36 @@ function attachCameraProxy(
         sendJson(res, 502, {
           error: 'proxy_failed',
           message: err instanceof Error ? err.message : 'Proxy error',
+        })
+      }
+      return
+    }
+
+    // --- Recorded events for agent backtest ---
+    const recordedMatch = pathname.match(/^\/api\/camera\/([^/]+)\/recorded-events$/)
+    if (recordedMatch && req.method === 'GET') {
+      const host = decodeURIComponent(recordedMatch[1])
+      const auth = resolveCameraProxyAuth(req, res, mode, cwd, host)
+      if (!auth) return
+
+      const range = (searchParams.get('range') ?? '7d') as AgentBacktestRange
+      const cameraId = searchParams.get('cameraId') ?? `cam-${host.replace(/\./g, '-')}`
+      const cameraName = searchParams.get('cameraName') ?? host
+      const rangeMs =
+        range === '24h' ? 24 * 3600_000 : range === '30d' ? 30 * 24 * 3600_000 : 7 * 24 * 3600_000
+      const rangeEnd = new Date()
+      const rangeStart = new Date(rangeEnd.getTime() - rangeMs)
+
+      try {
+        const parsed = await fetchAxisRecordedEvents(auth.client, host, range)
+        const events = toForensicIncidents(parsed, cameraId, cameraName, rangeStart, rangeEnd)
+        sendJson(res, 200, { host, events })
+      } catch (err) {
+        sendJson(res, 502, {
+          error: 'proxy_failed',
+          message: err instanceof Error ? err.message : 'Proxy error',
+          host,
+          events: [],
         })
       }
       return
