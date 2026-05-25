@@ -19,6 +19,14 @@ import {
   fetchAxisRecordedEvents,
   toForensicIncidents,
 } from './server/recorded-events'
+import {
+  AOA_DEFAULT_API_VERSION,
+  aoaErrorMessage,
+  aoaMethodRequiresAdmin,
+  callObjectAnalyticsApi,
+  isAllowedAoaMethod,
+  pickLatestAoaApiVersion,
+} from './server/object-analytics'
 import type { AgentBacktestRange } from './src/lib/agent-backtest'
 
 type StreamKind = 'mjpg' | 'snapshot'
@@ -215,6 +223,116 @@ function attachCameraProxy(
           message: err instanceof Error ? err.message : 'Proxy error',
           host,
           applications: [],
+        })
+      }
+      return
+    }
+
+    // --- AXIS Object Analytics (AOA) ---
+    const aoaStatusMatch = pathname.match(/^\/api\/camera\/([^/]+)\/aoa\/status$/)
+    if (aoaStatusMatch && req.method === 'GET') {
+      const host = decodeURIComponent(aoaStatusMatch[1])
+      const auth = resolveCameraProxyAuth(req, res, mode, cwd, host)
+      if (!auth) return
+
+      try {
+        const versionsRes = await callObjectAnalyticsApi(auth.client, host, {
+          method: 'getSupportedVersions',
+        })
+        if (!versionsRes.body) {
+          sendJson(res, 200, {
+            host,
+            available: false,
+            message: versionsRes.transportError ?? 'Object Analytics is not available on this camera.',
+          })
+          return
+        }
+        if (aoaErrorMessage(versionsRes.body)) {
+          sendJson(res, 200, {
+            host,
+            available: false,
+            message: aoaErrorMessage(versionsRes.body)!,
+          })
+          return
+        }
+
+        const apiVersion =
+          pickLatestAoaApiVersion(versionsRes.body.data) ?? AOA_DEFAULT_API_VERSION
+
+        const [configRes, capsRes] = await Promise.all([
+          callObjectAnalyticsApi(auth.client, host, { method: 'getConfiguration', apiVersion }),
+          callObjectAnalyticsApi(auth.client, host, {
+            method: 'getConfigurationCapabilities',
+            apiVersion,
+          }),
+        ])
+
+        sendJson(res, 200, {
+          host,
+          available: true,
+          apiVersion,
+          configuration: configRes.body?.data ?? null,
+          capabilities: capsRes.body?.data ?? null,
+          message: aoaErrorMessage(configRes.body ?? {}) ?? undefined,
+        })
+      } catch (err) {
+        sendJson(res, 502, {
+          host,
+          available: false,
+          message: err instanceof Error ? err.message : 'Object Analytics proxy failed',
+        })
+      }
+      return
+    }
+
+    const aoaMatch = pathname.match(/^\/api\/camera\/([^/]+)\/aoa$/)
+    if (aoaMatch && req.method === 'POST') {
+      const host = decodeURIComponent(aoaMatch[1])
+      let body: { method?: string; params?: unknown; apiVersion?: string; context?: string }
+      try {
+        body = JSON.parse((await readRequestBody(req)).toString('utf8')) as typeof body
+      } catch (err) {
+        if (err instanceof Error && err.message === 'body_too_large') {
+          sendJson(res, 413, { error: 'body_too_large', message: 'Request body too large.' })
+          return
+        }
+        sendJson(res, 400, { error: 'invalid_json', message: 'Invalid JSON body.' })
+        return
+      }
+
+      const method = (body.method ?? '').trim()
+      if (!method || !isAllowedAoaMethod(method)) {
+        sendJson(res, 400, { error: 'invalid_method', message: 'Unsupported Object Analytics method.' })
+        return
+      }
+
+      const auth = resolveCameraProxyAuth(req, res, mode, cwd, host, {
+        requireAdmin: aoaMethodRequiresAdmin(method),
+      })
+      if (!auth) return
+
+      try {
+        const result = await callObjectAnalyticsApi(auth.client, host, {
+          method,
+          params: body.params,
+          apiVersion: body.apiVersion,
+          context: body.context,
+        })
+
+        if (!result.body) {
+          sendJson(res, 502, {
+            error: 'aoa_unavailable',
+            message: result.transportError ?? 'Object Analytics is not available on this camera.',
+          })
+          return
+        }
+
+        const appError = aoaErrorMessage(result.body)
+        sendJson(res, appError ? 422 : 200, result.body)
+      } catch (err) {
+        sendJson(res, 502, {
+          error: 'proxy_failed',
+          message: err instanceof Error ? err.message : 'Object Analytics proxy failed',
         })
       }
       return

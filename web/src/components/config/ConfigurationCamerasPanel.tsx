@@ -6,6 +6,8 @@ import { CameraStatusBadge } from '@/components/ui/StatusBadge'
 import { formatRelativeTime } from '@/lib/format'
 import { useCameraAcaps } from '@/hooks/useCameraAcaps'
 import { useCameraDeviceInfo } from '@/hooks/useCameraDeviceInfo'
+import { CameraRenameSection } from '@/components/config/CameraRenameSection'
+import { CameraAoaSection } from '@/components/config/CameraAoaSection'
 
 export function ConfigurationCamerasPanel() {
   const { cameras } = useAppConfig()
@@ -74,6 +76,10 @@ function CameraConfigRow({
               value={camera.lastSeenAt ? formatRelativeTime(camera.lastSeenAt) : '—'}
             />
           </dl>
+
+          <CameraRenameSection camera={camera} />
+
+          <CameraAoaSection camera={camera} />
 
           <div className="mt-4">
             <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">

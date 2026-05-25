@@ -6,6 +6,7 @@ import { AlarmTier2Panel } from '@/components/alarm/AlarmTier2Panel'
 import { SeverityBadge } from '@/components/ui/StatusBadge'
 import { formatRelativeTime } from '@/lib/format'
 import { generateAlarmTier2Analysis } from '@/lib/alarm-tier2-analytics'
+import { SystemHealthPanel } from '@/components/dashboard/SystemHealthPanel'
 import { useMemo } from 'react'
 
 export function DashboardWorkspace() {
@@ -37,6 +38,8 @@ export function DashboardWorkspace() {
         />
         <Stat icon={Server} label="Active agents" value={String(alarms.filter((a) => a.enabled).length)} />
       </div>
+
+      <SystemHealthPanel />
 
       <section>
         <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">

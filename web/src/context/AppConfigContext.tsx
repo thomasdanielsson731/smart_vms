@@ -35,6 +35,7 @@ import {
   saveStorageSettings,
 } from '@/lib/storage-utils'
 import { fetchRecordingUsage, syncCamerasToRecordingService } from '@/lib/recording-api'
+import { fetchIncidents } from '@/lib/incidents-api'
 import type { CameraMapPlacement, MapSiteSettings } from '@/types/map'
 import { buildDefaultPlacements } from '@/lib/map/defaults'
 import { loadMapPlacements, loadMapSite, saveMapPlacements, saveMapSite } from '@/lib/map/storage'
@@ -56,6 +57,7 @@ interface AppConfigContextValue {
   cameras: Camera[]
   incidents: ForensicIncident[]
   updateCameraHost: (cameraId: string, host: string) => void
+  updateCamera: (cameraId: string, patch: Pick<Camera, 'name' | 'location'>) => void
   alarms: AlarmDefinition[]
   discovered: DiscoveredCamera[]
   discoveryStatus: DiscoveryStatus
@@ -94,7 +96,7 @@ const AppConfigContext = createContext<AppConfigContextValue | null>(null)
 
 export function AppConfigProvider({ children }: { children: ReactNode }) {
   const [cameras, setCameras] = useState<Camera[]>(() => buildInitialCameras())
-  const [incidents] = useState<ForensicIncident[]>([])
+  const [incidents, setIncidents] = useState<ForensicIncident[]>([])
   const persistCameras = useCallback((next: Camera[]) => {
     setCameras(next)
     saveCameraRegistry(next)
@@ -114,6 +116,20 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   const [storageUsage, setStorageUsage] = useState<StorageUsageSnapshot>(() =>
     storageUsageSnapshot(loadStorageSettings() ?? defaultRecordingStorageSettings()),
   )
+
+  useEffect(() => {
+    let cancelled = false
+    const loadIncidents = async () => {
+      const list = await fetchIncidents({ range: '7d' })
+      if (!cancelled) setIncidents(list)
+    }
+    void loadIncidents()
+    const timer = setInterval(loadIncidents, 30_000)
+    return () => {
+      cancelled = true
+      clearInterval(timer)
+    }
+  }, [])
 
   useEffect(() => {
     void syncCamerasToRecordingService(cameras)
@@ -409,6 +425,24 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
     setCameras((prev) => {
       const next = prev.map((c) => (c.id === cameraId ? { ...c, host: trimmed || c.host } : c))
       saveCameraRegistry(next)
+      void syncCamerasToRecordingService(next)
+      return next
+    })
+  }, [])
+
+  const updateCamera = useCallback((cameraId: string, patch: Pick<Camera, 'name' | 'location'>) => {
+    setCameras((prev) => {
+      const next = prev.map((c) =>
+        c.id === cameraId
+          ? {
+              ...c,
+              ...(patch.name !== undefined ? { name: patch.name.trim() || c.name } : {}),
+              ...(patch.location !== undefined ? { location: patch.location.trim() } : {}),
+            }
+          : c,
+      )
+      saveCameraRegistry(next)
+      void syncCamerasToRecordingService(next)
       return next
     })
   }, [])
@@ -418,6 +452,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
       cameras,
       incidents,
       updateCameraHost,
+      updateCamera,
       alarms,
       discovered,
       discoveryStatus,
@@ -450,6 +485,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
       cameras,
       incidents,
       updateCameraHost,
+      updateCamera,
       alarms,
       discovered,
       discoveryStatus,

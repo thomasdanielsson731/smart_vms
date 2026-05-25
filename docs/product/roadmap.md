@@ -73,18 +73,19 @@ Phases are **sequential in intent** but may overlap in implementation. Each phas
 
 ## Phase 3 — Server analytics & operator UX
 
-**Status:** Skeleton — `server/` + `deploy/docker-compose.yml`
+**Status:** In progress — Postgres incident store, MQTT ingress, UI proxy
 
 **Goal:** Correlation, search, and richer automation.
 
-| Item | Notes |
-|------|--------|
-| Event bus ingress | MQTT or NATS; backpressure |
-| Incident store | Postgres + object storage for clips |
-| Re-analysis | Heavier models on selected clips |
-| Cross-camera rules | Same object track across views (stretch) |
-| Web UI backend | Replace mock data with real APIs |
-| Notifications | Webhook, email, mobile push (pick one for v1) |
+| Item | Notes | Status |
+|------|--------|--------|
+| Event bus ingress | MQTT + bounded queue | **Shipped** |
+| Incident store | Postgres + in-memory fallback | **Shipped** |
+| Metadata search | `/api/events/search?q=` | **Shipped** (keyword v1) |
+| Web UI backend | `/api/vms/*` proxy → server | **Shipped** |
+| Notifications | Webhook on new incident | **Shipped** |
+| Re-analysis | Heavier models on clips | Planned |
+| Cross-camera rules | Same object track | Stretch |
 
 **Exit criteria**
 
