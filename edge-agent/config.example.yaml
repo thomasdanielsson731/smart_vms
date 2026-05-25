@@ -1,0 +1,27 @@
+# Edge agent — copy to config.yaml and adjust
+
+edge_node_id: "edge-home-1"
+site_id: "home"
+
+mqtt:
+  host: 127.0.0.1
+  port: 1883
+  topic_prefix: smart-vms/events
+
+cameras:
+  - camera_id: cam-example
+    host: 192.168.68.200
+    rtsp_url: rtsp://192.168.68.200/axis-media/media.amp
+
+detector:
+  enabled: false
+  model: yolov8n
+  classes: [person, vehicle]
+
+rules:
+  version: 1
+  zones: []
+
+clip:
+  pre_roll_sec: 5
+  post_roll_sec: 10

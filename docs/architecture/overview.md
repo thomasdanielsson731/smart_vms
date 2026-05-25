@@ -38,10 +38,11 @@ flowchart TB
 
 | Shipped (Phase 1) | Not yet built |
 |-------------------|---------------|
-| Session auth, roles | Recording service |
-| VAPIX proxy (live, device-info, web UI) | Event bus / incidents backend |
-| LAN discovery (/24 scan) | Edge agent |
-| Camera registry (localStorage) | PostgreSQL / object store |
+| Session auth, roles | Full H.264 continuous recorder |
+| VAPIX proxy (live, device-info, web UI) | Edge CV pipeline (Phase 2) |
+| LAN discovery (/24 scan) | Postgres incident store (Phase 3) |
+| Camera registry (localStorage + server sync) | Object store clips |
+| Snapshot recording + retention API | Event bus in production path |
 
 **Phase 1 critical path to exit:** continuous recording + playback soak (24h) — see [roadmap.md](../product/roadmap.md).
 

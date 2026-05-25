@@ -1,6 +1,6 @@
 # Data model and events
 
-**Status:** Proposed contract — implement in `shared/` when Phase 2 starts.
+**Status:** Decided — schemas in `shared/`; see [shared/README.md](../../shared/README.md).
 
 ## Design goals
 

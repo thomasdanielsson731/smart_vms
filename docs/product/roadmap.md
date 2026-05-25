@@ -25,9 +25,7 @@ Phases are **sequential in intent** but may overlap in implementation. Each phas
 
 ## Phase 1 — VMS core + operator UI
 
-**Status:** In progress — `web/` shell shipped; recording backend pending
-
-**Goal:** Trustworthy video operations on Axis cameras with chat-first operator UX.
+**Status:** In progress — recording service shipped (snapshot interval); 24h soak pending
 
 | Item | Notes | Status |
 |------|--------|--------|
@@ -39,8 +37,9 @@ Phases are **sequential in intent** but may overlap in implementation. Each phas
 | Camera registry | VAPIX probe, LAN /24 discovery, localStorage | **Shipped** |
 | LAN discovery | Admin-only, rate-limited subnet scan | **Shipped** |
 | Live view grid | All cameras or single | **Shipped** |
-| Recording | Continuous, retention | **Planned** |
-| Playback timeline | Seek, export | Mock UI |
+| Continuous recording | JPEG snapshot interval + retention API | **Shipped** (Phase 1 thin) |
+| Playback timeline | Segments from `/api/recording/segments` | **Shipped** (snapshot playback) |
+| E2E smoke | Playwright 44 tests | **Shipped** |
 | Unit + contract tests | Vitest, VAPIX fixtures | **Shipped** |
 
 **Exit criteria**
@@ -51,6 +50,8 @@ Phases are **sequential in intent** but may overlap in implementation. Each phas
 ---
 
 ## Phase 2 — Edge analytics
+
+**Status:** Skeleton — `edge-agent/` stub, MQTT contract in `shared/`
 
 **Goal:** Useful alerts without shipping full video upstream.
 
@@ -72,6 +73,8 @@ Phases are **sequential in intent** but may overlap in implementation. Each phas
 
 ## Phase 3 — Server analytics & operator UX
 
+**Status:** Skeleton — `server/` + `deploy/docker-compose.yml`
+
 **Goal:** Correlation, search, and richer automation.
 
 | Item | Notes |
@@ -91,6 +94,8 @@ Phases are **sequential in intent** but may overlap in implementation. Each phas
 ---
 
 ## Phase 4 — Hardening & optional remote
+
+**Status:** Documented — ADR-0004 Tailscale, runbooks, backup notes in `deploy/`
 
 | Item | Notes |
 |------|--------|

@@ -1,0 +1,35 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: smartvms
+      POSTGRES_PASSWORD: smartvms_dev
+      POSTGRES_DB: smartvms
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    environment:
+      SMARTVMS_SERVER_PORT: 8787
+      SMARTVMS_MQTT_URL: mqtt://mosquitto:1883
+      DATABASE_URL: postgres://smartvms:smartvms_dev@postgres:5432/smartvms
+    ports:
+      - "8787:8787"
+    depends_on:
+      - mosquitto
+      - postgres
+
+volumes:
+  pgdata:

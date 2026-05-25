@@ -1,0 +1,22 @@
+[project]
+name = "smart-vms-edge-agent"
+version = "0.1.0"
+description = "Smart VMS edge ingest and detection agent"
+requires-python = ">=3.11"
+dependencies = [
+  "paho-mqtt>=2.0",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+smart-vms-edge = "edge_agent.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

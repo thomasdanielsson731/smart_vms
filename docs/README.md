@@ -47,7 +47,10 @@ Start with [product/overview.md](product/overview.md) for a product summary, [ar
 - [code-review.md](engineering/code-review.md) — PR review checklist
 - [api-conventions.md](engineering/api-conventions.md) — Phase 1 `/api/*` contracts
 - [security-and-privacy.md](engineering/security-and-privacy.md) — home threat model
-- [authentication.md](engineering/authentication.md) — login, session, roles
+- [soak-test-24h.md](engineering/soak-test-24h.md) — Phase 1 exit soak checklist
+- [remote-access.md](engineering/remote-access.md) — Tailscale pattern (Phase 4)
+- [runbooks/camera-offline.md](engineering/runbooks/camera-offline.md)
+- [runbooks/disk-full.md](engineering/runbooks/disk-full.md)
 - [cyber-resilience-act.md](engineering/cyber-resilience-act.md) — EU CRA alignment
 - [observability-and-ops.md](engineering/observability-and-ops.md) — logs, metrics, runbooks
 - [axis-live-stream.md](engineering/axis-live-stream.md) — MJPEG proxy

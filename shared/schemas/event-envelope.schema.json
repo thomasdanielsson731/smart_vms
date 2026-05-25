@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smart-vms.local/schemas/event-envelope/1.0",
+  "title": "SmartVmsEventEnvelope",
+  "type": "object",
+  "required": ["schema_version", "event_id", "event_type", "occurred_at", "source", "payload"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "event_id": { "type": "string", "minLength": 8 },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "vapix.received",
+        "detection.created",
+        "rule.matched",
+        "incident.opened",
+        "incident.updated",
+        "incident.closed",
+        "clip.available",
+        "camera.health.changed",
+        "config.rules.applied"
+      ]
+    },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "ingested_at": { "type": "string", "format": "date-time" },
+    "source": {
+      "type": "object",
+      "required": ["camera_id"],
+      "properties": {
+        "camera_id": { "type": "string" },
+        "edge_node_id": { "type": "string" },
+        "software_version": { "type": "string" }
+      }
+    },
+    "trace_id": { "type": "string" },
+    "payload": { "type": "object" }
+  },
+  "additionalProperties": false
+}

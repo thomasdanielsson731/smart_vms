@@ -15,7 +15,7 @@ Legend: **Real** = production path exists · **Mock** = UI/types only · **Plann
 | Map | `map` | Camera placement, FOV, alarm pins | **Real** map · **Mock** alarm geo |
 | Face recognition | `faces` | Enroll, manage, events, settings | **Mock** detect · opt-in |
 | Camera web | `camera-web` | Embedded Axis device UI | **Real** proxied |
-| Onboarding | `onboarding` | LAN discovery, bulk register | **Mock** discovery |
+| Onboarding | `onboarding` | LAN discovery, bulk register | **Real** discovery + registry |
 | Create alarm | `alarms` | Monitoring rules, bulk per camera | **Mock** persistence |
 | Agents | `agents` | List/pause monitoring policies | **Mock** |
 | Tracking | `tracking` | Cross-camera re-id | **Planned** Phase 3 |
@@ -29,9 +29,9 @@ Legend: **Real** = production path exists · **Mock** = UI/types only · **Plann
 | Shared VAPIX credentials | **Real** (encrypted file) | [../engineering/authentication.md](../engineering/authentication.md) |
 | Live view (MJPEG / snapshot fallback) | **Real** | [../engineering/axis-live-stream.md](../engineering/axis-live-stream.md) |
 | Stream connectivity test | **Real** | — |
-| Recording storage quota UI | Mock usage | [storage-quota.md](storage-quota.md) |
-| Continuous recording | **Planned** | [roadmap.md](roadmap.md) Phase 1 |
-| Timeline playback | **Mock** | [forensic.md](forensic.md) |
+| Recording storage quota UI | **Real** usage from API | [storage-quota.md](storage-quota.md) |
+| Continuous recording | **Real** (30s JPEG + retention) | [roadmap.md](roadmap.md) Phase 1 |
+| Timeline playback | **Real** (segment API) | [forensic.md](forensic.md) |
 | Clip export | **Planned** | [forensic.md](forensic.md) |
 
 ## Analytics & alarms
