@@ -17,10 +17,10 @@ import { AlarmTier2Panel } from '@/components/alarm/AlarmTier2Panel'
 import { profilesRememberedByCamera } from '@/lib/face-memory'
 import {
   filterIncidentsInRange,
-  recordingSegmentsForRange,
   rangeToMs,
   cameraHostForIncident,
 } from '@/lib/forensic-utils'
+import { useRecordingSegments } from '@/hooks/useRecordingSegments'
 import type { ForensicRange } from '@/types/forensic'
 import { isTimelineLive, positionFromIncident } from '@/lib/timeline-unified'
 import { formatDateTime } from '@/lib/format'
@@ -76,14 +76,10 @@ export function VideoWorkspace() {
     [allIncidents, rangeStart, rangeEnd, camera?.id],
   )
 
-  const segments = useMemo(
-    () =>
-      recordingSegmentsForRange(
-        rangeStart,
-        rangeEnd,
-        camera ? [camera.id] : cameras.map((c) => c.id),
-      ),
-    [rangeStart, rangeEnd, camera, cameras],
+  const segments = useRecordingSegments(
+    rangeStart,
+    rangeEnd,
+    camera ? [camera.id] : cameras.map((c) => c.id),
   )
 
   const selectedIncidentId = params.incident ?? null

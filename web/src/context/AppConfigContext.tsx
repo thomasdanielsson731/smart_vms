@@ -34,6 +34,7 @@ import {
   storageUsageSnapshot,
   saveStorageSettings,
 } from '@/lib/storage-utils'
+import { fetchRecordingUsage, syncCamerasToRecordingService } from '@/lib/recording-api'
 import type { CameraMapPlacement, MapSiteSettings } from '@/types/map'
 import { buildDefaultPlacements } from '@/lib/map/defaults'
 import { loadMapPlacements, loadMapSite, saveMapPlacements, saveMapSite } from '@/lib/map/storage'
@@ -97,6 +98,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   const persistCameras = useCallback((next: Camera[]) => {
     setCameras(next)
     saveCameraRegistry(next)
+    void syncCamerasToRecordingService(next)
   }, [])
   const [alarms, setAlarms] = useState<AlarmDefinition[]>([])
   const [discovered, setDiscovered] = useState<DiscoveredCamera[]>([])
@@ -109,10 +111,27 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
     return loadStorageSettings() ?? defaultRecordingStorageSettings()
   })
 
-  const storageUsage = useMemo(
-    () => storageUsageSnapshot(storageSettings),
-    [storageSettings],
+  const [storageUsage, setStorageUsage] = useState<StorageUsageSnapshot>(() =>
+    storageUsageSnapshot(loadStorageSettings() ?? defaultRecordingStorageSettings()),
   )
+
+  useEffect(() => {
+    void syncCamerasToRecordingService(cameras)
+  }, []) // sync registry once on mount
+
+  useEffect(() => {
+    let cancelled = false
+    const refresh = async () => {
+      const remote = await fetchRecordingUsage()
+      if (!cancelled && remote) setStorageUsage(remote)
+    }
+    void refresh()
+    const timer = setInterval(refresh, 60_000)
+    return () => {
+      cancelled = true
+      clearInterval(timer)
+    }
+  }, [storageSettings])
 
   const updateStorageSettings = useCallback((settings: RecordingStorageSettings) => {
     setStorageSettings(settings)
