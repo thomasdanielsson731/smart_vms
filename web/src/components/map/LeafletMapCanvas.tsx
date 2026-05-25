@@ -84,6 +84,7 @@ export function LeafletMapCanvas({
     })
 
     mapRef.current = map
+    requestAnimationFrame(() => map.invalidateSize({ animate: false }))
 
     return () => {
       map.remove()
@@ -100,12 +101,31 @@ export function LeafletMapCanvas({
     const map = mapRef.current
     if (!map) return
     map.setView([site.centerLat, site.centerLng], site.defaultZoom, { animate: false })
+    map.invalidateSize({ animate: false })
   }, [site.centerLat, site.centerLng, site.defaultZoom])
 
   useEffect(() => {
     if (!flyTo || !mapRef.current) return
     mapRef.current.flyTo([flyTo.lat, flyTo.lng], flyTo.zoom ?? 18, { duration: 0.8 })
   }, [flyTo])
+
+  useEffect(() => {
+    const map = mapRef.current
+    const container = containerRef.current
+    if (!map || !container) return
+
+    const refreshSize = () => {
+      map.invalidateSize({ animate: false })
+    }
+
+    refreshSize()
+    const observer = new ResizeObserver(refreshSize)
+    observer.observe(container)
+    const parent = container.parentElement
+    if (parent) observer.observe(parent)
+
+    return () => observer.disconnect()
+  }, [placeMode, site.centerLat, site.centerLng, site.defaultZoom])
 
   useEffect(() => {
     const group = cameraLayersRef.current
@@ -124,6 +144,7 @@ export function LeafletMapCanvas({
         fillColor: color,
         fillOpacity: selected ? 0.35 : 0.2,
         weight: selected ? 2 : 1,
+        interactive: !placeMode,
       })
       wedge.bindTooltip(`${cam.name}: ${p.viewLabel || 'View'}`, { sticky: true })
       wedge.addTo(group)
@@ -141,7 +162,11 @@ export function LeafletMapCanvas({
         iconAnchor: [14, 14],
       })
 
-      const marker = L.marker([p.lat, p.lng], { icon, draggable: true })
+      const marker = L.marker([p.lat, p.lng], {
+        icon,
+        draggable: !placeMode,
+        interactive: !placeMode,
+      })
       marker.on('click', () => onSelectCamera(cam.id))
       marker.on('dragend', () => {
         const ll = marker.getLatLng()
@@ -152,7 +177,7 @@ export function LeafletMapCanvas({
       )
       marker.addTo(group)
     }
-  }, [cameras, placements, selectedCameraId, onMarkerDrag, onSelectCamera])
+  }, [cameras, placements, selectedCameraId, placeMode, onMarkerDrag, onSelectCamera])
 
   useEffect(() => {
     const group = alarmLayersRef.current
@@ -180,7 +205,7 @@ export function LeafletMapCanvas({
         iconAnchor: [selected ? 11 : 9, selected ? 11 : 9],
       })
 
-      const marker = L.marker([pin.lat, pin.lng], { icon, zIndexOffset: 500 })
+      const marker = L.marker([pin.lat, pin.lng], { icon, zIndexOffset: 500, interactive: !placeMode })
       marker.on('click', () => onSelectAlarm(incident.id))
       const time = new Date(incident.occurredAt).toLocaleString('en-US')
       marker.bindPopup(
@@ -191,7 +216,7 @@ export function LeafletMapCanvas({
       marker.bindTooltip(incident.title, { direction: 'top' })
       marker.addTo(group)
     }
-  }, [alarmPins, showAlarms, selectedAlarmId, onSelectAlarm])
+  }, [alarmPins, showAlarms, selectedAlarmId, placeMode, onSelectAlarm])
 
   useEffect(() => {
     const group = userLayerRef.current
@@ -207,6 +232,7 @@ export function LeafletMapCanvas({
         fillColor: '#3b82f6',
         fillOpacity: 0.12,
         weight: 1,
+        interactive: !placeMode,
       }).addTo(group)
     }
 
@@ -221,15 +247,16 @@ export function LeafletMapCanvas({
       iconAnchor: [8, 8],
     })
 
-    L.marker([userLocation.lat, userLocation.lng], { icon, zIndexOffset: 1000 })
+    L.marker([userLocation.lat, userLocation.lng], { icon, zIndexOffset: 1000, interactive: !placeMode })
       .bindTooltip('My location', { direction: 'top', permanent: false })
       .addTo(group)
-  }, [userLocation])
+  }, [userLocation, placeMode])
 
   return (
     <div
-      ref={containerRef}
-      className={`h-full min-h-[320px] w-full rounded-xl z-0 ${placeMode ? 'cursor-crosshair' : ''}`}
-    />
+      className={`relative h-full min-h-[280px] w-full ${placeMode ? 'cursor-crosshair' : ''}`}
+    >
+      <div ref={containerRef} className="absolute inset-0 z-0 rounded-xl" />
+    </div>
   )
 }

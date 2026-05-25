@@ -95,21 +95,24 @@ export function MapWorkspace() {
 
   const selectedAlarm = recentIncidents.find((i) => i.id === selectedAlarmId)
 
-  const handleMapClick = (lat: number, lng: number) => {
-    if (!placeMode || !selectedId) return
-    const existing = mapPlacements[selectedId]
-    setCameraMapPlacement(
-      placementFromPartial(selectedId, {
-        lat,
-        lng,
-        heading: existing?.heading ?? 180,
-        fovDeg: existing?.fovDeg ?? 75,
-        rangeM: existing?.rangeM ?? 18,
-        viewLabel: existing?.viewLabel ?? selectedCam?.location ?? '',
-      }),
-    )
-    setPlaceMode(false)
-  }
+  const handleMapClick = useCallback(
+    (lat: number, lng: number) => {
+      if (!placeMode || !selectedId) return
+      const existing = mapPlacements[selectedId]
+      setCameraMapPlacement(
+        placementFromPartial(selectedId, {
+          lat,
+          lng,
+          heading: existing?.heading ?? 180,
+          fovDeg: existing?.fovDeg ?? 75,
+          rangeM: existing?.rangeM ?? 18,
+          viewLabel: existing?.viewLabel ?? selectedCam?.location ?? '',
+        }),
+      )
+      setPlaceMode(false)
+    },
+    [placeMode, selectedId, mapPlacements, selectedCam, setCameraMapPlacement],
+  )
 
   const updateSelected = (patch: Partial<typeof selected>) => {
     if (!selectedId || !selected) return
@@ -315,7 +318,7 @@ export function MapWorkspace() {
           )}
         </aside>
 
-        <div className="relative min-h-[280px] flex-1 overflow-hidden rounded-xl border border-slate-800/80">
+        <div className="relative flex min-h-[280px] flex-1 flex-col overflow-hidden rounded-xl border border-slate-800/80">
           <MapCanvas
             site={mapSite}
             cameras={cameras}

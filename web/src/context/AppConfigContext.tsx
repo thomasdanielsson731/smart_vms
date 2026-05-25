@@ -22,6 +22,7 @@ import { discoverCameras, probeCameraMetadata } from '@/lib/network-discovery'
 import type { Camera } from '@/types/camera'
 import type { AlarmDefinition, AlarmDraft } from '@/types/alarm'
 import type { DiscoveredCamera, OnboardingBatch, DiscoveryStatus, OnboardResult } from '@/types/onboarding'
+import { buildOnboardCameraNames } from '@/lib/onboarding-names'
 import { testCameraStream, streamTestMessage } from '@/lib/camera-stream-test'
 import {
   defaultRecordingStorageSettings,
@@ -303,8 +304,9 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
       }
 
       const probedAt = new Date().toISOString()
-      const newCameras: Camera[] = toAdd.map((d) => {
-        const name = `${batch.namePrefix} ${d.host.split('.').pop()}`.trim()
+      const names = buildOnboardCameraNames(toAdd, batch)
+      const newCameras: Camera[] = toAdd.map((d, index) => {
+        const name = names[index]!
         return {
           id: `cam-${d.host.replace(/\./g, '-')}`,
           name,

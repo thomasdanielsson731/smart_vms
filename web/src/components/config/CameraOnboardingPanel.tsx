@@ -4,6 +4,7 @@ import { useAppConfig } from '@/context/AppConfigContext'
 import { fetchVapixConfig } from '@/lib/vapix-config-api'
 import { defaultVapixUser } from '@/lib/vapix-config-storage'
 import type { OnboardingBatch, OnboardResult } from '@/types/onboarding'
+import { buildOnboardCameraNames } from '@/lib/onboarding-names'
 
 type Step = 'scan' | 'select' | 'configure' | 'done'
 
@@ -11,6 +12,7 @@ const defaultBatch: OnboardingBatch = {
   vapixUser: defaultVapixUser,
   recordingEnabled: true,
   namePrefix: 'Camera',
+  nameStrategy: 'model',
 }
 
 export function CameraOnboardingPanel() {
@@ -43,6 +45,8 @@ export function CameraOnboardingPanel() {
 
   const selectedCount = discovered.filter((d) => d.selected).length
   const newCount = discovered.filter((d) => !d.alreadyRegistered).length
+  const selectedForOnboard = discovered.filter((d) => d.selected && !d.alreadyRegistered)
+  const namePreview = buildOnboardCameraNames(selectedForOnboard, batch)
 
   const handleScan = async () => {
     const ok = await scanNetwork()
@@ -205,13 +209,65 @@ export function CameraOnboardingPanel() {
               <span className="mt-1 block text-emerald-500">Shared password is configured.</span>
             )}
           </p>
-          <Field label="Name prefix">
-            <input
-              value={batch.namePrefix}
-              onChange={(e) => setBatch((b) => ({ ...b, namePrefix: e.target.value }))}
-              className={inputCls}
-            />
+          <Field label="Camera names">
+            <div className="space-y-2">
+              <label className="flex items-start gap-2 text-sm text-slate-300">
+                <input
+                  type="radio"
+                  name="nameStrategy"
+                  checked={batch.nameStrategy === 'model'}
+                  onChange={() => setBatch((b) => ({ ...b, nameStrategy: 'model' }))}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="font-medium text-white">Model number</span>
+                  <span className="block text-xs text-slate-500">
+                    Uses the Axis product name from VAPIX (e.g. P1465-LE). Duplicate models get the
+                    IP suffix appended.
+                  </span>
+                </span>
+              </label>
+              <label className="flex items-start gap-2 text-sm text-slate-300">
+                <input
+                  type="radio"
+                  name="nameStrategy"
+                  checked={batch.nameStrategy === 'prefix-ip'}
+                  onChange={() => setBatch((b) => ({ ...b, nameStrategy: 'prefix-ip' }))}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="font-medium text-white">Prefix + IP</span>
+                  <span className="block text-xs text-slate-500">
+                    e.g. Camera 200 for 192.168.1.200
+                  </span>
+                </span>
+              </label>
+            </div>
           </Field>
+          {batch.nameStrategy === 'prefix-ip' && (
+            <Field label="Name prefix">
+              <input
+                value={batch.namePrefix}
+                onChange={(e) => setBatch((b) => ({ ...b, namePrefix: e.target.value }))}
+                className={inputCls}
+              />
+            </Field>
+          )}
+          {selectedForOnboard.length > 0 && (
+            <div className="rounded-lg border border-slate-800 bg-slate-900/40 px-3 py-2">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                Name preview
+              </p>
+              <ul className="space-y-1 text-sm text-slate-300">
+                {selectedForOnboard.map((d, i) => (
+                  <li key={d.id} className="flex justify-between gap-2 text-xs">
+                    <span className="truncate text-slate-500">{d.host}</span>
+                    <span className="shrink-0 font-medium text-white">{namePreview[i]}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <label className="flex items-center gap-2 text-sm text-slate-300">
             <input
               type="checkbox"

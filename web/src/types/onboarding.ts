@@ -16,7 +16,10 @@ export interface DiscoveredCamera {
 export interface OnboardingBatch {
   vapixUser: string
   recordingEnabled: boolean
+  /** Used when nameStrategy is prefix-ip, or as fallback when model is unknown */
   namePrefix: string
+  /** model = Axis product name from VAPIX; prefix-ip = e.g. "Camera 200" */
+  nameStrategy: 'model' | 'prefix-ip'
 }
 
 export interface OnboardResult {
