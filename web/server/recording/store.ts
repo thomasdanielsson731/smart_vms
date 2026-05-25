@@ -121,7 +121,12 @@ export function framesToSegments(frames: RecordingFrameMeta[]): RecordingSegment
   return segments
 }
 
-export function computeUsage(_root: string, frames: RecordingFrameMeta[]): RecordingUsage {
+export function computeUsage(
+  _root: string,
+  frames: RecordingFrameMeta[],
+  _settings?: RecordingStorageSettings,
+): RecordingUsage {
+  void _settings
   let bytes = 0
   for (const frame of frames) {
     bytes += frame.bytes

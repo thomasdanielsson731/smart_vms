@@ -34,7 +34,8 @@ import {
   storageUsageSnapshot,
   saveStorageSettings,
 } from '@/lib/storage-utils'
-import { fetchRecordingUsage, syncCamerasToRecordingService } from '@/lib/recording-api'
+import { fetchRecordingUsage, syncCamerasToRecordingService, syncStorageSettingsToRecordingService, fetchRecordingStorageSettings, fetchRecordingCaptureHealth } from '@/lib/recording-api'
+import { healthToCameraStatus } from '@/lib/recording-health'
 import { fetchIncidents } from '@/lib/incidents-api'
 import type { CameraMapPlacement, MapSiteSettings } from '@/types/map'
 import { buildDefaultPlacements } from '@/lib/map/defaults'
@@ -132,14 +133,60 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
+    let cancelled = false
+    const bootstrap = async () => {
+      const [remoteSettings, remoteUsage, health] = await Promise.all([
+        fetchRecordingStorageSettings(),
+        fetchRecordingUsage(),
+        fetchRecordingCaptureHealth(),
+      ])
+      if (cancelled) return
+      if (remoteSettings) {
+        setStorageSettings(remoteSettings)
+        saveStorageSettings(remoteSettings)
+      }
+      if (remoteUsage) setStorageUsage(remoteUsage)
+      if (health) {
+        setCameras((prev) =>
+          prev.map((c) => {
+            if (!c.recordingEnabled) return c
+            const status = healthToCameraStatus(health[c.id], true)
+            const lastSeenAt = health[c.id]?.lastSuccessAt ?? c.lastSeenAt
+            return status === c.status && lastSeenAt === c.lastSeenAt
+              ? c
+              : { ...c, status, lastSeenAt }
+          }),
+        )
+      }
+    }
+    void bootstrap()
+  }, [])
+
+  useEffect(() => {
     void syncCamerasToRecordingService(cameras)
   }, []) // sync registry once on mount
 
   useEffect(() => {
     let cancelled = false
     const refresh = async () => {
-      const remote = await fetchRecordingUsage()
-      if (!cancelled && remote) setStorageUsage(remote)
+      const [remote, health] = await Promise.all([
+        fetchRecordingUsage(),
+        fetchRecordingCaptureHealth(),
+      ])
+      if (cancelled) return
+      if (remote) setStorageUsage(remote)
+      if (health) {
+        setCameras((prev) =>
+          prev.map((c) => {
+            if (!c.recordingEnabled) return c
+            const status = healthToCameraStatus(health[c.id], true)
+            const lastSeenAt = health[c.id]?.lastSuccessAt ?? c.lastSeenAt
+            return status === c.status && lastSeenAt === c.lastSeenAt
+              ? c
+              : { ...c, status, lastSeenAt }
+          }),
+        )
+      }
     }
     void refresh()
     const timer = setInterval(refresh, 60_000)
@@ -152,6 +199,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   const updateStorageSettings = useCallback((settings: RecordingStorageSettings) => {
     setStorageSettings(settings)
     saveStorageSettings(settings)
+    void syncStorageSettingsToRecordingService(settings)
   }, [])
 
   const [mapSite, setMapSite] = useState<MapSiteSettings>(() => loadMapSite())

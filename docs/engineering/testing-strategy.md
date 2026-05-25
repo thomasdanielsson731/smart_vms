@@ -65,19 +65,23 @@ Aligned with a senior EM background: **risk-based testing**, clear quality gates
 | Short video loops | `fixtures/video/` | Git LFS or download script |
 | Synthetic detections | generated in tests | Don't commit large tensors |
 
-## CI pipeline (proposed)
+## CI pipeline
 
-| Stage | On PR | Nightly |
-|-------|:-----:|:-------:|
-| Lint + unit | ✓ | ✓ |
-| Contract | ✓ | ✓ |
-| Integration | optional (label) | ✓ |
-| E2E smoke | | ✓ |
+| Stage | On PR | Nightly (target) |
+|-------|:-----:|:----------------:|
+| Lint + unit (`web/` + `server/`) | ✓ | ✓ |
+| Build (`web/` + `server/`) | ✓ | ✓ |
+| Contract / golden VAPIX fixtures | ✓ (Vitest) | ✓ |
+| E2E smoke (Playwright) | ✓ | ✓ |
+| Integration (compose + Postgres/MQTT) | optional (label) | ✓ |
 | Model benchmark | | ✓ (when models exist) |
+| Dependency + secret scan | **Backlog** | ✓ |
 
-**Decided (Phase 1 UI):** Vitest unit and contract tests live in `web/` — `npm run test` (see `.github/workflows/ci.yml`). Golden VAPIX fixture: `web/fixtures/vapix/param-list.txt`.
+**Decided:** Vitest in `web/` and `server/` — see `.github/workflows/ci.yml`. Golden VAPIX fixture: `web/fixtures/vapix/param-list.txt`.
 
-**Decided (Phase 1 UI):** Playwright E2E smoke in `web/e2e/` — `npm run test:e2e` from repo root. Covers login, all workspaces, map placement, chat intents, and viewer permissions.
+**Decided:** Playwright E2E in `web/e2e/` — `npm run test:e2e` from repo root (login, workspaces, map, chat intents, viewer permissions).
+
+Quality bar: [quality-and-security-bar.md](quality-and-security-bar.md).
 
 ## Manual home validation
 

@@ -4,6 +4,17 @@ import DigestClient from 'digest-fetch'
 import type { RecordingStorageSettings } from '../../src/types/storage'
 import { resolveVapixCredentials } from '../vapix-config'
 import {
+  loadCaptureHealth,
+  recordCaptureFailure,
+  recordCaptureSuccess,
+  saveCaptureHealth,
+  type CaptureHealthMap,
+} from './capture-health'
+import {
+  loadRecordingStorageSettings,
+  saveRecordingStorageSettings,
+} from './storage-settings'
+import {
   applyRetention,
   computeUsage,
   ensureRecordingDir,
@@ -21,6 +32,22 @@ import {
 } from './store'
 
 const CAPTURE_INTERVAL_MS = 30_000
+const SNAPSHOT_PATH = '/axis-cgi/jpg/image.cgi?resolution=640x480&camera=1'
+
+async function fetchSnapshotBuffer(client: DigestClient, host: string): Promise<Buffer | null> {
+  for (const scheme of ['http', 'https'] as const) {
+    try {
+      const res = await client.fetch(`${scheme}://${host}${SNAPSHOT_PATH}`, {
+        signal: AbortSignal.timeout(8000),
+      })
+      if (!res.ok) continue
+      return Buffer.from(await res.arrayBuffer())
+    } catch {
+      if (scheme === 'http') continue
+    }
+  }
+  return null
+}
 
 export class RecordingService {
   private timer: ReturnType<typeof setInterval> | null = null
@@ -57,6 +84,18 @@ export class RecordingService {
     return loadServerCameraRegistry(this.root)
   }
 
+  getStorageSettings(): RecordingStorageSettings {
+    return loadRecordingStorageSettings(this.root)
+  }
+
+  setStorageSettings(settings: RecordingStorageSettings): void {
+    saveRecordingStorageSettings(this.root, settings)
+  }
+
+  getCaptureHealth(): CaptureHealthMap {
+    return loadCaptureHealth(this.root)
+  }
+
   listSegments(from: Date, to: Date, cameraId?: string): RecordingSegmentMeta[] {
     const frames = loadManifest(this.root).filter((f) => {
       const t = new Date(f.capturedAt).getTime()
@@ -67,9 +106,9 @@ export class RecordingService {
     return framesToSegments(frames)
   }
 
-  getUsage(settings: RecordingStorageSettings): RecordingUsage {
-    void settings
-    return computeUsage(this.root, loadManifest(this.root))
+  getUsage(settings?: RecordingStorageSettings): RecordingUsage {
+    const resolved = settings ?? loadRecordingStorageSettings(this.root)
+    return computeUsage(this.root, loadManifest(this.root), resolved)
   }
 
   getFramePath(frameId: string): string | null {
@@ -93,48 +132,50 @@ export class RecordingService {
     const creds = resolveVapixCredentials(this.mode, this.cwd)
     if (!creds.password) return
 
+    const settings = loadRecordingStorageSettings(this.root)
+    const manifest = loadManifest(this.root)
+    const usage = computeUsage(this.root, manifest, settings)
+
+    if (
+      settings.onLimitReached === 'stop_recording' &&
+      usage.recordingUsedGiB >= settings.maxRecordingGiB
+    ) {
+      const retained = applyRetention(this.root, manifest, settings)
+      saveManifest(this.root, retained)
+      return
+    }
+
     const cameras = loadServerCameraRegistry(this.root).filter((c) => c.recordingEnabled)
     if (cameras.length === 0) return
 
     const client = new DigestClient(creds.user, creds.password)
-    const manifest = loadManifest(this.root)
     const capturedAt = new Date().toISOString()
+    let health = loadCaptureHealth(this.root)
 
     for (const camera of cameras) {
-      try {
-        const url = `http://${camera.host}/axis-cgi/jpg/image.cgi?resolution=640x480&camera=1`
-        const res = await client.fetch(url, { signal: AbortSignal.timeout(8000) })
-        if (!res.ok) continue
-        const buffer = Buffer.from(await res.arrayBuffer())
-        const relativePath = snapshotRelativePath(camera.id, capturedAt)
-        const abs = path.join(this.root, relativePath)
-        fs.mkdirSync(path.dirname(abs), { recursive: true })
-        fs.writeFileSync(abs, buffer)
-        manifest.push({
-          id: `frm-${camera.id}-${Date.now()}`,
-          cameraId: camera.id,
-          capturedAt,
-          bytes: buffer.length,
-          relativePath,
-        })
-      } catch {
-        /* camera offline — skip frame */
+      const buffer = await fetchSnapshotBuffer(client, camera.host)
+      if (!buffer) {
+        health = recordCaptureFailure(health, camera.id)
+        continue
       }
+
+      const relativePath = snapshotRelativePath(camera.id, capturedAt)
+      const abs = path.join(this.root, relativePath)
+      fs.mkdirSync(path.dirname(abs), { recursive: true })
+      fs.writeFileSync(abs, buffer)
+      manifest.push({
+        id: `frm-${camera.id}-${Date.now()}`,
+        cameraId: camera.id,
+        capturedAt,
+        bytes: buffer.length,
+        relativePath,
+      })
+      health = recordCaptureSuccess(health, camera.id)
     }
 
-    const settings = defaultSettings()
+    saveCaptureHealth(this.root, health)
     const retained = applyRetention(this.root, manifest, settings)
     saveManifest(this.root, retained)
-  }
-}
-
-function defaultSettings(): RecordingStorageSettings {
-  return {
-    maxRecordingGiB: 100,
-    maxClipsGiB: 50,
-    maxRetentionDays: 30,
-    warnAtPercent: 85,
-    onLimitReached: 'delete_oldest',
   }
 }
 
@@ -147,3 +188,33 @@ export function getRecordingService(mode: string, cwd: string): RecordingService
   }
   return singleton
 }
+
+function buildUsageSnapshot(
+  usage: RecordingUsage,
+  settings: RecordingStorageSettings,
+): {
+  recordingUsedGiB: number
+  clipsUsedGiB: number
+  recordingPercent: number
+  clipsPercent: number
+  isOverQuota: boolean
+  isWarning: boolean
+} {
+  const recordingPercent = Math.min(
+    100,
+    (usage.recordingUsedGiB / settings.maxRecordingGiB) * 100,
+  )
+  const clipsCap =
+    settings.maxClipsGiB > 0 ? settings.maxClipsGiB : settings.maxRecordingGiB * 0.1
+  const clipsPercent = Math.min(100, (usage.clipsUsedGiB / clipsCap) * 100)
+  return {
+    recordingUsedGiB: usage.recordingUsedGiB,
+    clipsUsedGiB: usage.clipsUsedGiB,
+    recordingPercent,
+    clipsPercent,
+    isOverQuota: usage.recordingUsedGiB >= settings.maxRecordingGiB,
+    isWarning: recordingPercent >= settings.warnAtPercent,
+  }
+}
+
+export { buildUsageSnapshot }

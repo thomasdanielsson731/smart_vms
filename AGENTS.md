@@ -2,6 +2,19 @@
 
 Instructions for AI agents (and humans pairing with them) working in this repository.
 
+## Persistent context (read first)
+
+| File | Purpose |
+|------|---------|
+| [ai/project-context.md](ai/project-context.md) | Vision, stack, principles, AI boundaries |
+| [ai/current-state.md](ai/current-state.md) | What works today, gaps, next steps |
+| [ai/agent-contracts.md](ai/agent-contracts.md) | Commits, scope, review, autonomous rules |
+| [ai/README.md](ai/README.md) | Full AI-native folder index |
+
+**Workflow:** [ai/workflows/session-start.md](ai/workflows/session-start.md)  
+**Drift check:** [ai/feedback/code-review.md](ai/feedback/code-review.md)  
+**Cursor pointers:** [.cursor/context/README.md](.cursor/context/README.md)
+
 ## Project in one paragraph
 
 Smart VMS is a home/small-site VMS using **Axis cameras via VAPIX**, with **edge analytics** (low latency, bandwidth-efficient) and **server analytics** (correlation, search, heavier models). Favor **event + clip** over raw 24/7 cloud upload. Read [docs/product/vision.md](docs/product/vision.md) and [docs/architecture/overview.md](docs/architecture/overview.md) before proposing code.
@@ -18,7 +31,7 @@ The maintainer is a **senior software engineering manager** (architecture, test,
 ## Default behaviors
 
 1. **Docs before code** when requirements or boundaries are unclear.
-2. **Match** [docs/engineering/software-principles.md](docs/engineering/software-principles.md).
+2. **Match** [docs/engineering/quality-and-security-bar.md](docs/engineering/quality-and-security-bar.md) and [docs/engineering/software-principles.md](docs/engineering/software-principles.md).
 3. **Axis-specific** work must align with [docs/architecture/axis-vapix.md](docs/architecture/axis-vapix.md).
 4. **Privacy-by-default** per [docs/engineering/security-and-privacy.md](docs/engineering/security-and-privacy.md) (home deployment).
 5. Propose **ADRs** when choosing brokers, databases, or breaking API contracts.
@@ -28,14 +41,16 @@ The maintainer is a **senior software engineering manager** (architecture, test,
 
 ```
 smart-vms/
+├── ai/                   # Persistent AI context, agents, workflows, feedback
 ├── docs/                 # product, architecture, engineering, ADRs
 ├── shared/               # event schemas + TS types
 ├── edge-agent/           # Phase 2 ingest + inference (stub)
-├── server/               # Phase 3 API + event bus (stub)
+├── server/               # Phase 3 API + event bus
 ├── deploy/               # docker-compose (MQTT, Postgres, server)
 ├── web/                  # Phase 1 operator UI + dev API plugins
 ├── .cursor/rules/        # automatic conventions
-└── .cursor/skills/       # on-demand review personas
+├── .cursor/skills/       # on-demand review personas
+└── .cursor/context/      # pointers to ai/
 ```
 
 Phase 1 recording runs in `web/server/recording/`. Edge/server stubs are starting points for Phase 2–3 — not production services yet.
@@ -57,6 +72,7 @@ Invoke these for **structured feedback** (not implementation unless asked):
 
 Each skill returns: **Summary → Findings (severity) → Recommendations → Open questions**.
 
+**Implementation role briefs** (VMS-specific): [ai/agents/README.md](ai/agents/README.md).
 Severity legend: **P0** must fix, **P1** should fix, **P2** consider, **P3** nit.
 
 ## Rules (auto-applied)

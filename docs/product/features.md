@@ -9,9 +9,9 @@ Legend: **Real** = production path exists · **Mock** = UI/types only · **Plann
 | Workspace | ID | Description | Status |
 |-----------|-----|-------------|--------|
 | Copilot chat | (home) | Main interface; opens other workspaces | **Real** LLM + intent routing |
-| Video | `video` | Live and playback per camera | **Real** live · **Mock** playback |
-| Dashboard | `dashboard` | Stats, storage, recent alarms | **Mock** metrics |
-| Forensic | `forensic` | Timeline of recordings + alarms | **Mock** data |
+| Video | `video` | Live and playback per camera | **Real** live + snapshot playback |
+| Dashboard | `dashboard` | Stats, storage, recent alarms, system health | **Real** usage · **Mock** some charts |
+| Forensic | `forensic` | Timeline of recordings + alarms | **Real** recordings · incidents need Phase 3 server |
 | Map | `map` | Camera placement, FOV, alarm pins | **Real** map · **Mock** alarm geo |
 | Face recognition | `faces` | Enroll, manage, events, settings | **Mock** detect · opt-in |
 | Camera web | `camera-web` | Embedded Axis device UI | **Real** proxied |
@@ -25,13 +25,15 @@ Legend: **Real** = production path exists · **Mock** = UI/types only · **Plann
 
 | Feature | Status | Doc |
 |---------|--------|-----|
-| Camera registry (name, host, status) | Mock + editable IP | [multi-config.md](multi-config.md) |
+| Camera registry (name, host, status) | **Real** localStorage + rename | [multi-config.md](multi-config.md) |
+| Scene-based camera naming | **Real** Ollama vision | `.env` `VITE_OLLAMA_VISION_MODEL` |
 | Shared VAPIX credentials | **Real** (encrypted file) | [../engineering/authentication.md](../engineering/authentication.md) |
 | Live view (MJPEG / snapshot fallback) | **Real** | [../engineering/axis-live-stream.md](../engineering/axis-live-stream.md) |
 | Stream connectivity test | **Real** | — |
-| Recording storage quota UI | **Real** usage from API | [storage-quota.md](storage-quota.md) |
+| Recording storage quota UI | **Real** synced to recording service | [storage-quota.md](storage-quota.md) |
 | Continuous recording | **Real** (30s JPEG + retention) | [roadmap.md](roadmap.md) Phase 1 |
 | Timeline playback | **Real** (segment API) | [forensic.md](forensic.md) |
+| Capture health → camera status | **Real** | `web/server/recording/capture-health.ts` |
 | Clip export | **Planned** | [forensic.md](forensic.md) |
 
 ## Analytics & alarms
@@ -39,10 +41,11 @@ Legend: **Real** = production path exists · **Mock** = UI/types only · **Plann
 | Feature | Status | Doc |
 |---------|--------|-----|
 | Alarm list + thumbnails | **Mock** | — |
-| Tier-2 post-alarm analysis | **Mock** | [alarm-tier2-analytics.md](alarm-tier2-analytics.md) |
+| Tier-2 post-alarm analysis | **Mock** (client-side rules) | [alarm-tier2-analytics.md](alarm-tier2-analytics.md) |
 | Face match on incidents | **Mock** | [face-recognition.md](face-recognition.md) |
 | Zone / schedule rules | UI only | — |
-| VAPIX event ingest | **Planned** | [../architecture/axis-vapix.md](../architecture/axis-vapix.md) |
+| AXIS Object Analytics (AOA) | **Real** configure via VAPIX | Axis developer docs |
+| VAPIX live event ingest | **Planned** | [../architecture/axis-vapix.md](../architecture/axis-vapix.md) |
 | Edge person/vehicle detect | **Planned** | [../architecture/edge-vs-server.md](../architecture/edge-vs-server.md) |
 
 ## AI & Copilot
@@ -70,12 +73,13 @@ Legend: **Real** = production path exists · **Mock** = UI/types only · **Plann
 |---------|--------|-----|
 | Axis VAPIX (digest) | **Real** | [../architecture/axis-vapix.md](../architecture/axis-vapix.md) |
 | OpenStreetMap (map workspace) | **Real** | [map-view.md](map-view.md) |
-| MQTT / event bus | **Planned** | [../architecture/data-model-and-events.md](../architecture/data-model-and-events.md) |
+| MQTT / event bus | **Real** in `server/` · optional compose | [../architecture/data-model-and-events.md](../architecture/data-model-and-events.md) |
+| Phase 3 server UI proxy | **Real** when `SMARTVMS_SERVER_URL` set | [../decisions/0003-postgres-incident-store.md](../decisions/0003-postgres-incident-store.md) |
 
 ## Quality
 
 | Feature | Status | Doc |
 |---------|--------|-----|
 | Vitest unit + contract tests | **Real** | [../engineering/testing-strategy.md](../engineering/testing-strategy.md) |
-| CI (test + build) | **Real** | `.github/workflows/ci.yml` |
+| CI (web + server test + build) | **Real** | `.github/workflows/ci.yml` |
 | E2E smoke (Playwright) | **Real** | [../engineering/testing-strategy.md](../engineering/testing-strategy.md) |

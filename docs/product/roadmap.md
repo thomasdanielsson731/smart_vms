@@ -25,7 +25,7 @@ Phases are **sequential in intent** but may overlap in implementation. Each phas
 
 ## Phase 1 — VMS core + operator UI
 
-**Status:** In progress — recording service shipped (snapshot interval); 24h soak pending
+**Status:** In progress — recording + quota enforced; 24h soak pending
 
 | Item | Notes | Status |
 |------|--------|--------|

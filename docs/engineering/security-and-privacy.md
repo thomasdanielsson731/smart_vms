@@ -66,10 +66,11 @@ Home deployment threat model and product constraints. **Not a corporate complian
 
 ## Secure development
 
-- Dependabot or equivalent
-- `gitleaks` or secret scan in CI
+- Dependabot or equivalent — see [security-roadmap.md](security-roadmap.md)
+- `gitleaks` or secret scan in CI — **Backlog**
 - Signed container images optional for home
 - **CRA alignment:** [cyber-resilience-act.md](cyber-resilience-act.md) — EU Cyber Resilience Act mapping
+- **Non-negotiables:** [quality-and-security-bar.md](quality-and-security-bar.md)
 
 ## Incident response (home scale)
 

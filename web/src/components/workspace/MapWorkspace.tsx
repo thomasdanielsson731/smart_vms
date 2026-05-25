@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MapPin, Crosshair, RotateCw, Bell, Navigation, Loader2 } from 'lucide-react'
 import { useAppConfig } from '@/context/AppConfigContext'
-import { MapCanvas, type FlyToTarget } from '@/components/map/MapCanvas'
+import { MapCanvas, type FitBoundsTarget, type FlyToTarget } from '@/components/map/MapCanvas'
 import { CameraStatusBadge, SeverityBadge, IncidentStatusBadge } from '@/components/ui/StatusBadge'
-import { placementFromPartial } from '@/lib/map/geo'
+import { centerOfPoints, placedCameraPoints, placementFromPartial } from '@/lib/map/geo'
 import { alarmPinsFromIncidents, filterRecentIncidents } from '@/lib/map/alarms'
 import { formatDateTime, formatRelativeTime } from '@/lib/format'
 import { cameraHostForIncident } from '@/lib/forensic-utils'
@@ -47,7 +47,34 @@ export function MapWorkspace() {
   const [locating, setLocating] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [flyTo, setFlyTo] = useState<FlyToTarget | null>(null)
+  const [fitBounds, setFitBounds] = useState<FitBoundsTarget | null>(null)
   const autoLocateAttempted = useRef(false)
+  const initialCameraFocusDone = useRef(false)
+
+  const focusPoints = useCallback(
+    (points: { lat: number; lng: number }[]) => {
+      if (points.length === 0) return
+
+      const token = Date.now()
+      if (points.length === 1) {
+        const point = points[0]!
+        setFitBounds(null)
+        setFlyTo({ lat: point.lat, lng: point.lng, zoom: 19, token })
+        updateMapSite({ centerLat: point.lat, centerLng: point.lng, defaultZoom: 19 })
+        return
+      }
+
+      setFlyTo(null)
+      setFitBounds({ points, token })
+      const center = centerOfPoints(points)
+      if (center) updateMapSite({ centerLat: center.lat, centerLng: center.lng })
+    },
+    [updateMapSite],
+  )
+
+  const focusPlacedCameras = useCallback(() => {
+    focusPoints(placedCameraPoints(mapPlacements, cameras.map((c) => c.id)))
+  }, [cameras, mapPlacements, focusPoints])
 
   const applyUserLocation = useCallback(
     (loc: { lat: number; lng: number; accuracyM?: number }, zoom = 19) => {
@@ -64,7 +91,15 @@ export function MapWorkspace() {
   )
 
   useEffect(() => {
-    if (autoLocateAttempted.current || !navigator.geolocation || !isDefaultMapSite(mapSite)) return
+    const hasPlaced = cameras.some((c) => mapPlacements[c.id])
+    if (
+      autoLocateAttempted.current ||
+      !navigator.geolocation ||
+      !isDefaultMapSite(mapSite) ||
+      hasPlaced
+    ) {
+      return
+    }
     autoLocateAttempted.current = true
 
     navigator.geolocation.getCurrentPosition(
@@ -78,7 +113,15 @@ export function MapWorkspace() {
       () => {},
       GEO_OPTIONS,
     )
-  }, [mapSite, applyUserLocation])
+  }, [mapSite, applyUserLocation, cameras, mapPlacements])
+
+  useEffect(() => {
+    if (initialCameraFocusDone.current) return
+    const points = placedCameraPoints(mapPlacements, cameras.map((c) => c.id))
+    if (points.length === 0) return
+    initialCameraFocusDone.current = true
+    focusPlacedCameras()
+  }, [cameras, mapPlacements, focusPlacedCameras])
 
   const selected = selectedId ? mapPlacements[selectedId] : null
   const selectedCam = cameras.find((c) => c.id === selectedId)
@@ -99,19 +142,21 @@ export function MapWorkspace() {
     (lat: number, lng: number) => {
       if (!placeMode || !selectedId) return
       const existing = mapPlacements[selectedId]
-      setCameraMapPlacement(
-        placementFromPartial(selectedId, {
+      const newPlacement = placementFromPartial(selectedId, {
           lat,
           lng,
           heading: existing?.heading ?? 180,
           fovDeg: existing?.fovDeg ?? 75,
           rangeM: existing?.rangeM ?? 18,
           viewLabel: existing?.viewLabel ?? selectedCam?.location ?? '',
-        }),
-      )
+        })
+      setCameraMapPlacement(newPlacement)
       setPlaceMode(false)
+      focusPoints(
+        placedCameraPoints({ ...mapPlacements, [selectedId]: newPlacement }, cameras.map((c) => c.id)),
+      )
     },
-    [placeMode, selectedId, mapPlacements, selectedCam, setCameraMapPlacement],
+    [placeMode, selectedId, mapPlacements, selectedCam, cameras, setCameraMapPlacement, focusPoints],
   )
 
   const updateSelected = (patch: Partial<typeof selected>) => {
@@ -168,7 +213,7 @@ export function MapWorkspace() {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
       <p className="text-sm text-slate-400">
-        Map view — cameras, field of view, and alarms. Use «My location» to center the map on you.
+        Map view — cameras, field of view, and alarms. The map centers on placed cameras automatically.
       </p>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -330,6 +375,7 @@ export function MapWorkspace() {
             placeMode={placeMode}
             userLocation={userLocation}
             flyTo={flyTo}
+            fitBounds={fitBounds}
             onMapClick={handleMapClick}
             onMarkerDrag={(id, lat, lng) => {
               const p = mapPlacements[id]

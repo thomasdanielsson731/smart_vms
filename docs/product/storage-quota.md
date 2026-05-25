@@ -1,32 +1,32 @@
-# Inspelningskvot & lagring
+# Recording storage quota
 
-**Status:** UI + localStorage — backend enforcement Phase 1
+**Status:** Decided — enforced by recording service
 
-## Inställningar (operatör)
+## Operator settings
 
-| Fält | Betydelse |
-|------|-----------|
-| Max inspelningar (GiB) | Hård kvot för kontinuerlig inspelning |
-| Max händelseklipp (GiB) | Separat tak för larmklipp; 0 = 10 % av inspelningskvot |
-| Max lagringstid (dagar) | Tidsbaserad gallring även om utrymme finns |
-| Varna vid % | Dashboard/larm till operatör |
-| Vid full kvot | `delete_oldest` \| `stop_recording` \| `warn_only` |
+| Field | Meaning |
+|-------|---------|
+| Max recordings (GiB) | Hard quota for continuous snapshot recording |
+| Max event clips (GiB) | Separate cap; 0 = 10% of recording quota |
+| Max retention (days) | Time-based purge even when space remains |
+| Warn at % | Dashboard warning threshold |
+| When quota full | `delete_oldest` \| `stop_recording` \| `warn_only` |
 
-## Var konfigureras
+## Where configured
 
-- **Inställningar**-workspace (chatt: «begränsa lagring», «öppna inställningar»)
-- Sparas i `localStorage` (`smart-vms-recording-storage`) tills API finns
+- **Settings** workspace (chat: "storage settings", "open settings")
+- Saved to recording service (`recordings/storage-settings.json`) and mirrored in browser `localStorage`
 
-## Backend (Phase 1)
+## API
 
-Recording service ska:
+| Method | Path | Role |
+|--------|------|------|
+| GET | `/api/recording/settings` | Read quota |
+| PUT | `/api/recording/settings` | Admin — update quota |
+| GET | `/api/recording/usage` | Used bytes + percent |
+| GET | `/api/recording/health` | Per-camera capture success/failure |
 
-1. Läsa kvot från DB (ersätter localStorage)
-2. Rapportera `recordingUsedBytes`, `clipsUsedBytes` till UI
-3. Köra gallring enligt `onLimitReached` och `maxRetentionDays`
-4. Exponera `GET/PUT /api/v1/storage/settings`
+## Related
 
-## Relaterat
-
-- [data-model-and-events.md](../architecture/data-model-and-events.md) — retention defaults
-- [security-and-privacy.md](../engineering/security-and-privacy.md)
+- [data-model-and-events.md](../architecture/data-model-and-events.md)
+- [runbooks/disk-full.md](../engineering/runbooks/disk-full.md)

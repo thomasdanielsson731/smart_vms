@@ -3,8 +3,9 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import fs from 'node:fs'
 import { getSessionUser } from './vite.auth-plugin'
 import { sendJson } from './server/camera-proxy-shared'
-import { getRecordingService } from './server/recording/service'
+import { buildUsageSnapshot, getRecordingService } from './server/recording/service'
 import type { ServerCameraRef } from './server/recording/store'
+import type { RecordingStorageSettings } from './src/types/storage'
 
 function readJsonBody<T>(req: IncomingMessage): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -50,6 +51,46 @@ function attachRecordingRoutes(
       return
     }
 
+    if (pathname === '/api/recording/settings' && req.method === 'GET') {
+      const { user } = getSessionUser(req, mode, cwd)
+      if (!user) {
+        sendJson(res, 401, { error: 'unauthenticated' })
+        return
+      }
+      sendJson(res, 200, { settings: service.getStorageSettings() })
+      return
+    }
+
+    if (pathname === '/api/recording/settings' && req.method === 'PUT') {
+      const { user } = getSessionUser(req, mode, cwd)
+      if (!user || user.role !== 'admin') {
+        sendJson(res, 403, { error: 'forbidden' })
+        return
+      }
+      try {
+        const body = await readJsonBody<{ settings: RecordingStorageSettings }>(req)
+        if (!body.settings) {
+          sendJson(res, 400, { error: 'invalid_body' })
+          return
+        }
+        service.setStorageSettings(body.settings)
+        sendJson(res, 200, { settings: service.getStorageSettings() })
+      } catch {
+        sendJson(res, 400, { error: 'invalid_body' })
+      }
+      return
+    }
+
+    if (pathname === '/api/recording/health' && req.method === 'GET') {
+      const { user } = getSessionUser(req, mode, cwd)
+      if (!user) {
+        sendJson(res, 401, { error: 'unauthenticated' })
+        return
+      }
+      sendJson(res, 200, { health: service.getCaptureHealth() })
+      return
+    }
+
     if (pathname === '/api/recording/segments' && req.method === 'GET') {
       const { user } = getSessionUser(req, mode, cwd)
       if (!user) {
@@ -70,22 +111,9 @@ function attachRecordingRoutes(
         sendJson(res, 401, { error: 'unauthenticated' })
         return
       }
-      const settings = {
-        maxRecordingGiB: 100,
-        maxClipsGiB: 50,
-        maxRetentionDays: 30,
-        warnAtPercent: 85,
-        onLimitReached: 'delete_oldest' as const,
-      }
+      const settings = service.getStorageSettings()
       const usage = service.getUsage(settings)
-      sendJson(res, 200, {
-        ...usage,
-        recordingPercent: Math.min(100, (usage.recordingUsedGiB / settings.maxRecordingGiB) * 100),
-        clipsPercent: 0,
-        isOverQuota: usage.recordingUsedGiB >= settings.maxRecordingGiB,
-        isWarning:
-          usage.recordingUsedGiB / settings.maxRecordingGiB >= settings.warnAtPercent / 100,
-      })
+      sendJson(res, 200, buildUsageSnapshot(usage, settings))
       return
     }
 

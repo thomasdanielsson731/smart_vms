@@ -1,15 +1,22 @@
 # Smart VMS server (Phase 3)
 
-Central API, event bus ingress, incident store, and recording orchestration.
+Central API, MQTT ingress, Postgres incident store, metadata search, and webhooks.
 
-Phase 1 recording still runs in the Vite dev/preview plugins (`web/server/recording/`). This package is the migration target for Phase 3.
+Phase 1 snapshot recording still runs in Vite plugins (`web/server/recording/`).
 
 ## Quick start (dev)
 
+With Docker stack:
+
 ```bash
-cd server
-npm install
-npm run dev
+cd deploy && docker compose up -d
+cd ../server && npm install && npm run dev
+```
+
+In `web/.env`:
+
+```env
+SMARTVMS_SERVER_URL=http://127.0.0.1:8787
 ```
 
 Default port: **8787**. Health: `GET /health`.
@@ -18,8 +25,9 @@ Default port: **8787**. Health: `GET /health`.
 
 | Module | Status |
 |--------|--------|
-| `event-bus/` | MQTT subscriber stub |
-| `incidents/` | In-memory store + Postgres interface |
-| `notifications/` | Webhook stub (Phase 3) |
+| `event-bus/` | MQTT subscriber with bounded queue |
+| `incidents/` | Postgres store + in-memory fallback |
+| `notifications/` | Webhook on new incident |
+| `http/` | Incidents, search, ingest, health |
 
-See [docs/architecture/overview.md](../docs/architecture/overview.md).
+See [deploy/README.md](../deploy/README.md) and [docs/decisions/0003-postgres-incident-store.md](../docs/decisions/0003-postgres-incident-store.md).

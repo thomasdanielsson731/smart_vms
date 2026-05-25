@@ -16,6 +16,8 @@ flowchart TB
     AUTH[vite.auth-plugin]
     VAPIX[vite.vapix-config-plugin]
     CAM[vite.axis-proxy]
+    REC[vite.recording-plugin]
+    VMS[vite.server-proxy]
     OLLAMA[server.proxy /api/ollama]
   end
 
@@ -27,6 +29,8 @@ flowchart TB
   SPA -->|session cookie| AUTH
   SPA --> VAPIX
   SPA --> CAM
+  SPA --> REC
+  SPA --> VMS
   SPA --> OLLAMA
   CAM -->|digest HTTP| AX
   OLLAMA --> OLL
@@ -65,7 +69,9 @@ web/src/
 |--------|------|----------------|
 | Auth | `vite.auth-plugin.ts` | Login, session HMAC, rate limit, security headers |
 | VAPIX config | `vite.vapix-config-plugin.ts` | CRUD encrypted camera credentials |
-| Camera proxy | `vite.axis-proxy.ts` | MJPEG, snapshot, stream-test, web UI, device-info |
+| Camera proxy | `vite.axis-proxy.ts` | MJPEG, snapshot, stream-test, web UI, device-info, AOA, recorded events |
+| Recording | `vite.recording-plugin.ts` | Snapshot interval capture, segments, quota, capture health |
+| Server proxy | `vite.server-proxy.ts` | Optional `/api/vms/*` → Phase 3 central server |
 
 Shared logic in `web/server/`:
 
@@ -75,15 +81,17 @@ Shared logic in `web/server/`:
 - `camera-proxy-shared.ts` — SSRF guard, HTML rewrite, VAPIX param parse
 - `audit-log.ts` — credential change audit trail
 
-## Data layer (Phase 1)
+## Data layer (Phase 1–3)
 
-| Data | Storage | Phase 3 target |
-|------|---------|----------------|
-| Session | HttpOnly cookie | Same |
-| VAPIX creds | Encrypted file | Vault / DB |
-| Cameras, map, faces | localStorage + mock | Postgres |
-| Alarms, incidents | Mock in memory | Incident service |
-| Recordings | Mock segments | Object storage + DB |
+| Data | Storage | Notes |
+|------|---------|--------|
+| Session | HttpOnly cookie | — |
+| VAPIX creds | Encrypted file | Vault / DB later |
+| Cameras, map, faces | localStorage | Registry + placements |
+| Recording quota | `recordings/storage-settings.json` + browser mirror | Enforced on capture |
+| Recordings | `recordings/` manifest + JPEG frames | 30 s interval |
+| Alarms | In-memory (session) | Persistence planned |
+| Incidents | Phase 3 server (Postgres) when `SMARTVMS_SERVER_URL` set | Else empty in UI |
 
 Types align with [data-model-and-events.md](data-model-and-events.md) for forward compatibility.
 

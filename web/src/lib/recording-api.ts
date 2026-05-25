@@ -1,6 +1,7 @@
 import type { RecordingSegment } from '@/types/forensic'
-import type { StorageUsageSnapshot } from '@/types/storage'
+import type { RecordingStorageSettings, StorageUsageSnapshot } from '@/types/storage'
 import type { Camera } from '@/types/camera'
+import type { CaptureHealthMap } from '@/lib/recording-health'
 
 export async function syncCamerasToRecordingService(cameras: Camera[]): Promise<void> {
   const body = {
@@ -20,6 +21,32 @@ export async function syncCamerasToRecordingService(cameras: Camera[]): Promise<
   if (!res.ok && res.status !== 403) {
     console.warn('[recording] camera sync failed', res.status)
   }
+}
+
+export async function syncStorageSettingsToRecordingService(
+  settings: RecordingStorageSettings,
+): Promise<boolean> {
+  const res = await fetch('/api/recording/settings', {
+    method: 'PUT',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ settings }),
+  })
+  return res.ok
+}
+
+export async function fetchRecordingStorageSettings(): Promise<RecordingStorageSettings | null> {
+  const res = await fetch('/api/recording/settings', { credentials: 'same-origin' })
+  if (!res.ok) return null
+  const data = (await res.json()) as { settings?: RecordingStorageSettings }
+  return data.settings ?? null
+}
+
+export async function fetchRecordingCaptureHealth(): Promise<CaptureHealthMap | null> {
+  const res = await fetch('/api/recording/health', { credentials: 'same-origin' })
+  if (!res.ok) return null
+  const data = (await res.json()) as { health?: CaptureHealthMap }
+  return data.health ?? null
 }
 
 export async function fetchRecordingSegments(

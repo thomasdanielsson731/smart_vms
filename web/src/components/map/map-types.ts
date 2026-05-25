@@ -6,4 +6,11 @@ export interface FlyToTarget {
   token: number
 }
 
+export interface FitBoundsTarget {
+  points: { lat: number; lng: number }[]
+  padding?: number
+  maxZoom?: number
+  token: number
+}
+
 export type MapCanvasProps = import('@/components/map/LeafletMapCanvas').LeafletMapCanvasProps

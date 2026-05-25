@@ -8,6 +8,7 @@ This folder defines **how** Smart VMS is built. Product docs define **what**; ar
 
 | Document | Purpose |
 |----------|---------|
+| [quality-and-security-bar.md](quality-and-security-bar.md) | **Non-negotiables** — top quality + high security bar |
 | [software-principles.md](software-principles.md) | Design values, Definition of Done, anti-patterns |
 | [development-workflow.md](development-workflow.md) | Setup, commands, env, daily dev |
 | [testing-strategy.md](testing-strategy.md) | Test pyramid, CI, fixtures |
@@ -19,6 +20,7 @@ This folder defines **how** Smart VMS is built. Product docs define **what**; ar
 | Document | Purpose |
 |----------|---------|
 | [security-and-privacy.md](security-and-privacy.md) | Home threat model, defaults |
+| [security-roadmap.md](security-roadmap.md) | Prioritized security backlog |
 | [authentication.md](authentication.md) | Sessions, roles, login |
 | [cyber-resilience-act.md](cyber-resilience-act.md) | EU CRA alignment |
 
@@ -41,7 +43,7 @@ Irreversible choices → [../decisions/](../decisions/) (ADRs), not long debates
 
 ## AI contributors
 
-1. Read [../../AGENTS.md](../../AGENTS.md) first
+1. Read [../../AGENTS.md](../../AGENTS.md) and [quality-and-security-bar.md](quality-and-security-bar.md) first
 2. Follow [software-principles.md](software-principles.md) §9
 3. Invoke review skills before large changes
 4. Mark speculative doc sections **Proposed** vs **Decided**

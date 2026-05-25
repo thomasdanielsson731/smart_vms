@@ -1,0 +1,71 @@
+# Current state — Smart VMS
+
+**Last updated:** 2026-05-24 (update after major merges or phase changes)
+
+Living snapshot for AI sessions. **Do not treat chat history as source of truth** — read this + [features.md](../docs/product/features.md).
+
+## What works (operator-visible)
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Login, admin/viewer | ✅ | Session cookie, rate limit |
+| Copilot + workspaces | ✅ | Ollama + keyword intents |
+| VAPIX live / snapshot | ✅ | Digest proxy, SSRF guard |
+| LAN discovery + onboarding | ✅ | /24 scan, registry in localStorage |
+| Snapshot recording + playback | ✅ | 30s JPEG, segments API, quota on server |
+| Map + camera placement | ✅ | FOV wedges, auto-center on placed cameras |
+| AOA configure via VAPIX | ✅ | Configuration → Cameras |
+| Camera rename + vision suggest | ✅ | Ollama vision model auto-detect |
+| Settings (VAPIX vault, storage) | ✅ | Quota synced to recording service |
+| E2E + unit CI | ✅ | Playwright + Vitest; server job in CI |
+
+## Partial / opt-in
+
+| Area | Status | Gap |
+|------|--------|-----|
+| Phase 3 server | ⚠️ Optional | Needs `docker compose` + `SMARTVMS_SERVER_URL` |
+| Incidents in UI | ⚠️ | Empty without server; poll every 30s |
+| Tier-2 alarm narrative | ⚠️ Mock | Client-side rules only |
+| Alarm rule persistence | ⚠️ | Session memory only |
+| Face workspace | ⚠️ Opt-in | Mock detections |
+| Semantic search UI | ❌ | API exists; no Copilot/workspace hook |
+
+## Known gaps (engineering)
+
+| Priority | Item | Doc |
+|----------|------|-----|
+| P0 | 24h recording soak not signed off | [soak-test-24h.md](../docs/engineering/soak-test-24h.md) |
+| P0 | TLS for production UI | [security-roadmap.md](../docs/engineering/security-roadmap.md) |
+| P1 | Live VAPIX event → MQTT/server | [axis-vapix.md](../docs/architecture/axis-vapix.md) |
+| P1 | Dependabot / secret scan in CI | [security-roadmap.md](../docs/engineering/security-roadmap.md) |
+| P1 | `shared/` schema validation in CI | [testing-strategy.md](../docs/engineering/testing-strategy.md) |
+| P2 | Edge agent (stub only) | `edge-agent/` |
+| P2 | H.264 continuous recorder | Phase 1+ stretch |
+
+## Recent major changes
+
+- Recording quota + capture health wired to Settings API.
+- Phase 3 server: Postgres, MQTT, webhook, UI proxy.
+- AOA VAPIX proxy + Configuration UI.
+- Map auto-center on placed cameras.
+- Docs: quality bar, security roadmap, architecture overview sync.
+- AI folder: persistent context structure (`ai/`).
+
+## Next steps (suggested order)
+
+1. Run **24h soak** on home cameras; log in `docs/validation/` (optional).
+2. **VAPIX live event ingest** or ADR deferring it.
+3. **Dependabot + gitleaks** in CI (security roadmap P1).
+4. Wire **semantic search** to Copilot or Forensic UI.
+5. **Alarm persistence** (localStorage or server).
+6. Phase 2: edge-agent ingest spike behind feature flag.
+
+## Broken / do not assume
+
+- Root README phase table may lag — trust [roadmap.md](../docs/product/roadmap.md).
+- `overview.md` target diagram includes future components; check “Shipped vs open” table.
+- Dev server (`npm run dev`) is not a hardened 24/7 production daemon.
+
+## Uncommitted work check
+
+Before large changes, run `git status`. User prefers **explicit ask** before commit/push unless project rules say otherwise.

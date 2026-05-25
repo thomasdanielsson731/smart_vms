@@ -2,6 +2,11 @@
 
 Start with [product/overview.md](product/overview.md) for a product summary, [architecture/overview.md](architecture/overview.md) for system design, and [engineering/README.md](engineering/README.md) for how we build.
 
+## Agent guide
+
+- [../AGENTS.md](../AGENTS.md) — Cursor / AI entry point
+- [../ai/README.md](../ai/README.md) — persistent context, agents, workflows, feedback
+
 ## Product
 
 | Index | [product/README.md](product/README.md) |
@@ -41,7 +46,9 @@ Start with [product/overview.md](product/overview.md) for a product summary, [ar
 | Index | [engineering/README.md](engineering/README.md) |
 |-------|-----------------------------------------------|
 
+- [quality-and-security-bar.md](engineering/quality-and-security-bar.md) — non-negotiable quality & security bar
 - [software-principles.md](engineering/software-principles.md) — how we build
+- [security-roadmap.md](engineering/security-roadmap.md) — prioritized security backlog
 - [development-workflow.md](engineering/development-workflow.md) — setup, commands, DoD
 - [testing-strategy.md](engineering/testing-strategy.md) — quality bars and layers
 - [code-review.md](engineering/code-review.md) — PR review checklist

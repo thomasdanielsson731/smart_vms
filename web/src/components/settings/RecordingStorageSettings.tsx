@@ -46,8 +46,8 @@ export function RecordingStorageSettingsPanel() {
       </div>
 
       <p className="mb-4 text-sm text-slate-400">
-        Limit how much disk space recordings and clips can use. Saved locally in the browser
-        until the recording service is connected.
+        Limit disk use for snapshot recordings and event clips. Settings are stored on the
+        recording service and mirrored in your browser.
         {!canWrite && (
           <span className="mt-2 block text-amber-400/90">
             Only administrators can change storage settings.

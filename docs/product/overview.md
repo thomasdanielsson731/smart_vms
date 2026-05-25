@@ -43,7 +43,7 @@ Traditional NVR software optimizes for **recording and scrubbing**. Cloud camera
 | Pillar | Description | Phase 1 today |
 |--------|-------------|-----------------|
 | **Copilot** | Natural-language operator interface | Ollama (Qwen) + keyword intent fallback |
-| **VMS core** | Cameras, live, timeline, retention | Live via VAPIX proxy; mock recording |
+| **VMS core** | Cameras, live, timeline, retention | Live via VAPIX proxy; snapshot recording + playback |
 | **Edge analytics** | Low-latency detect + clip | Mock / planned |
 | **Server analytics** | Correlation, tier-2 enrichment | Mock tier-2 + face registry |
 | **Axis-native** | VAPIX-first integration | Digest auth, MJPEG, device info, web UI proxy |
@@ -66,7 +66,7 @@ Traditional NVR software optimizes for **recording and scrubbing**. Cloud camera
 ### Configuration
 
 1. **Settings → Cameras (VAPIX)** — shared credentials + IP per camera
-2. **Onboarding** — discover and bulk-register cameras (mock discovery today)
+2. **Onboarding** — discover and bulk-register cameras on LAN
 3. **Create alarm** — multi-camera rules with schedules
 4. **Map** — place cameras, field of view, alarm pins
 
@@ -79,10 +79,11 @@ Traditional NVR software optimizes for **recording and scrubbing**. Cloud camera
 | VAPIX credential vault | ✓ | Central secrets manager |
 | Camera web UI proxy | ✓ | — |
 | Copilot (Ollama) | ✓ | Tool calling to real APIs |
-| Recording / playback | — | Timeline segments |
+| Recording / playback | ✓ (30 s JPEG snapshots) | RTSP / WebRTC |
 | Edge detection | — | Person/vehicle models |
 | Face recognition | Opt-in UI + mock | Edge ML enrollment |
-| Notifications | — | Push / webhook |
+| Notifications | Webhook when Phase 3 server runs | Push |
+| Object Analytics (AOA) | ✓ configure via VAPIX | Event ingest to server |
 
 Full matrix: [features.md](features.md).
 

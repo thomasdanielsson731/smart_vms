@@ -40,6 +40,7 @@ See [testing-strategy.md](testing-strategy.md).
 
 - Least privilege service accounts on cameras.
 - No secrets in git; `.env.example` documents keys only.
+- Non-negotiables: [quality-and-security-bar.md](quality-and-security-bar.md).
 - See [security-and-privacy.md](security-and-privacy.md).
 
 ## 7. Performance — measure, then optimize

@@ -6,7 +6,7 @@ import type { CameraMapPlacement, MapSiteSettings } from '@/types/map'
 import type { MapAlarmPin } from '@/lib/map/alarms'
 import { severityToColor } from '@/lib/map/alarms'
 import { fovWedgeCoords } from '@/lib/map/geo'
-import type { FlyToTarget } from '@/components/map/map-types'
+import type { FitBoundsTarget, FlyToTarget } from '@/components/map/map-types'
 
 const statusColor: Record<Camera['status'], string> = {
   online: '#22c55e',
@@ -26,6 +26,7 @@ export interface LeafletMapCanvasProps {
   placeMode: boolean
   userLocation: { lat: number; lng: number; accuracyM?: number } | null
   flyTo: FlyToTarget | null
+  fitBounds: FitBoundsTarget | null
   onMapClick: (lat: number, lng: number) => void
   onMarkerDrag: (cameraId: string, lat: number, lng: number) => void
   onSelectCamera: (cameraId: string) => void
@@ -43,6 +44,7 @@ export function LeafletMapCanvas({
   placeMode,
   userLocation,
   flyTo,
+  fitBounds,
   onMapClick,
   onMarkerDrag,
   onSelectCamera,
@@ -108,6 +110,17 @@ export function LeafletMapCanvas({
     if (!flyTo || !mapRef.current) return
     mapRef.current.flyTo([flyTo.lat, flyTo.lng], flyTo.zoom ?? 18, { duration: 0.8 })
   }, [flyTo])
+
+  useEffect(() => {
+    if (!fitBounds?.points.length || !mapRef.current) return
+    const bounds = L.latLngBounds(fitBounds.points.map((p) => [p.lat, p.lng] as [number, number]))
+    mapRef.current.fitBounds(bounds, {
+      padding: [fitBounds.padding ?? 48, fitBounds.padding ?? 48],
+      maxZoom: fitBounds.maxZoom ?? 19,
+      animate: true,
+      duration: 0.8,
+    })
+  }, [fitBounds])
 
   useEffect(() => {
     const map = mapRef.current

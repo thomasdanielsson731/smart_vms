@@ -63,3 +63,23 @@ export function placementFromPartial(
     viewLabel: partial.viewLabel ?? '',
   }
 }
+
+export function placedCameraPoints(
+  placements: Record<string, CameraMapPlacement>,
+  cameraIds: string[],
+): { lat: number; lng: number }[] {
+  return cameraIds
+    .map((id) => placements[id])
+    .filter((p): p is CameraMapPlacement => !!p)
+    .map((p) => ({ lat: p.lat, lng: p.lng }))
+}
+
+export function centerOfPoints(
+  points: { lat: number; lng: number }[],
+): { lat: number; lng: number } | null {
+  if (points.length === 0) return null
+  if (points.length === 1) return points[0]!
+  const lat = points.reduce((sum, p) => sum + p.lat, 0) / points.length
+  const lng = points.reduce((sum, p) => sum + p.lng, 0) / points.length
+  return { lat, lng }
+}

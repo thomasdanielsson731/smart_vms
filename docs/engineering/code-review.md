@@ -19,6 +19,7 @@ Use this for PRs and significant AI sessions. Severity: **P0** must fix · **P1*
 
 ## Security & privacy (home)
 
+- [ ] Meets [quality-and-security-bar.md](quality-and-security-bar.md) for touched areas
 - [ ] No secrets in repo or logs (RTSP URLs with passwords, `.env`)
 - [ ] Auth required on `/api/*` except login/status
 - [ ] Camera proxy SSRF guard (`isAllowedCameraHost`)

@@ -1,12 +1,12 @@
 # Architecture — index
 
-**Status:** Living — Phase 0–1 documented; edge/server services **Proposed** until implemented
+**Status:** Living — Phase 1 UI + recording **shipped**; Phase 3 server **optional**; edge **Proposed**
 
 ## Documents
 
 | Document | Scope |
 |----------|--------|
-| [overview.md](overview.md) | Full-system components, event flow, deployment modes |
+| [overview.md](overview.md) | Full-system components, Phase 1 as-built, target architecture |
 | [web-application.md](web-application.md) | **Decided** — React + Vite Phase 1 app |
 | [edge-vs-server.md](edge-vs-server.md) | Analytics responsibility split |
 | [axis-vapix.md](axis-vapix.md) | Axis control plane integration |
@@ -20,26 +20,33 @@
 - Label trust boundaries (browser, LAN, camera, internet)
 - State **Proposed** vs **Decided** at top of each doc
 
-## Target repository layout
+## Repository layout (today)
 
 ```text
 smart-vms/
-├── web/           Phase 1 UI + dev API plugins  ← today
-├── edge-agent/    Per-site ingest + inference   ← future
-├── server/        Recording, incidents, bus    ← future
-├── shared/        Schemas, OpenAPI, fixtures    ← future
-└── deploy/        Compose, systemd, configs     ← future
+├── web/           Phase 1 UI + Vite API plugins     ← primary operator path
+├── server/        Phase 3 API, MQTT, Postgres       ← optional compose
+├── shared/        Event schemas (JSON + TS)         ← contract-first
+├── edge-agent/    Phase 2 stub                      ← not production
+├── deploy/        docker-compose dev stack
+└── docs/          Product, architecture, ADRs
 ```
+
+## Quality & security
+
+Non-negotiables: [../engineering/quality-and-security-bar.md](../engineering/quality-and-security-bar.md)
+
+Security backlog: [../engineering/security-roadmap.md](../engineering/security-roadmap.md)
 
 ## ADRs
 
 Architecture decisions with long-lived impact → [../decisions/](../decisions/).
 
-Examples needing ADRs when implemented:
-
-- Event bus choice (MQTT vs NATS)
-- Live view transport (WebRTC vs HLS)
-- Remote access pattern
+| ADR | Topic |
+|-----|--------|
+| 0002 | MQTT event bus |
+| 0003 | Postgres incident store |
+| 0004 | Remote access (Tailscale) |
 
 ## Related product docs
 
