@@ -69,8 +69,7 @@ Legend: **Real** = production path exists · **Mock** = UI/types only · **Plann
 | Feature | Status | Doc |
 |---------|--------|-----|
 | Axis VAPIX (digest) | **Real** | [../architecture/axis-vapix.md](../architecture/axis-vapix.md) |
-| Google Maps (map workspace) | **Real** (API key) | [map-view.md](map-view.md) |
-| Leaflet fallback | **Real** | [map-view.md](map-view.md) |
+| OpenStreetMap (map workspace) | **Real** | [map-view.md](map-view.md) |
 | MQTT / event bus | **Planned** | [../architecture/data-model-and-events.md](../architecture/data-model-and-events.md) |
 
 ## Quality

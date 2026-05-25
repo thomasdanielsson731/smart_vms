@@ -4,7 +4,6 @@ import type { SystemFeature } from '@/types/config'
 import {
   isCameraStreamEnabled,
   isFaceRecognitionEnabled,
-  isGoogleMapsConfigured,
   ollamaModelName,
 } from '@/lib/feature-flags'
 
@@ -61,12 +60,12 @@ export function buildSystemFeatures(input: SystemFeatureInput): SystemFeature[] 
       configureHint: 'Faces workspace → Settings',
     },
     {
-      id: 'google-maps',
-      label: 'Google Maps',
-      description: 'Map provider for floor plan view',
-      enabled: isGoogleMapsConfigured(),
-      source: 'env',
-      configureHint: 'VITE_GOOGLE_MAPS_API_KEY in web/.env',
+      id: 'map',
+      label: 'OpenStreetMap',
+      description: 'Leaflet map view with OSM tiles',
+      enabled: true,
+      source: 'runtime',
+      configureHint: 'Map workspace',
     },
     {
       id: 'ollama',

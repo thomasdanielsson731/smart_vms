@@ -22,7 +22,6 @@ describe('buildSystemFeatures', () => {
   it('reflects env and runtime flags', () => {
     vi.stubEnv('VITE_FACE_RECOGNITION_ENABLED', 'true')
     vi.stubEnv('VITE_CAMERA_STREAM_ENABLED', 'true')
-    vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', 'test-key')
 
     const features = buildSystemFeatures({
       storageSettings: defaultRecordingStorageSettings(),
@@ -34,7 +33,7 @@ describe('buildSystemFeatures', () => {
 
     expect(features.find((f) => f.id === 'vapix')?.enabled).toBe(true)
     expect(features.find((f) => f.id === 'face-recognition')?.enabled).toBe(true)
-    expect(features.find((f) => f.id === 'google-maps')?.enabled).toBe(true)
+    expect(features.find((f) => f.id === 'map')?.enabled).toBe(true)
     expect(features.find((f) => f.id === 'cameras')?.description).toContain('2 cameras')
   })
 })
