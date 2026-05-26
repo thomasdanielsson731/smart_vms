@@ -28,7 +28,7 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 | Tier-2 alarm narrative | ⚠️ Mock | Client-side rules only |
 | Alarm rule persistence | ⚠️ | Session memory only |
 | Face workspace | ⚠️ Opt-in | Mock detections |
-| Semantic search UI | ❌ | API exists; no Copilot/workspace hook |
+| Semantic search UI | ✅ | Video workspace + Copilot `q` param; server + VAPIX fallback |
 
 ## Known gaps (engineering)
 
@@ -50,13 +50,14 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 - Map auto-center on placed cameras.
 - Docs: quality bar, security roadmap, architecture overview sync.
 - AI folder: persistent context structure (`ai/`).
+- Event search in video workspace + Copilot (`q` param, server + VAPIX fallback).
 
 ## Next steps (suggested order)
 
 1. Run **24h soak** on home cameras; log in `docs/validation/` (optional).
 2. **VAPIX live event ingest** or ADR deferring it.
 3. **Dependabot + gitleaks** in CI (security roadmap P1).
-4. Wire **semantic search** to Copilot or Forensic UI.
+4. ~~Wire **semantic search** to Copilot or Forensic UI.~~ Done — video workspace search bar + Copilot `q`.
 5. **Alarm persistence** (localStorage or server).
 6. Phase 2: edge-agent ingest spike behind feature flag.
 

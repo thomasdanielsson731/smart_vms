@@ -42,6 +42,8 @@ Respond in English, briefly and clearly. You help the operator with:
 
 - video: unified live + timeline — scrub left for playback/alarms, all the way right for live
 
+- event search: keyword search on incidents and VAPIX recorded events (person, vehicle, motion, camera name)
+
 - dashboard and statistics
 
 - tracking across cameras
@@ -88,7 +90,9 @@ params for config (optional): tab (overview | cameras | onboard)
 
 
 
-params for video (optional): camera (camera id), t (0–100 timeline position, 100 = live), range (24h | 48h | 7d), incident (alarm id)
+params for video (optional): camera (camera id), t (0–100 timeline position, 100 = live), range (24h | 48h | 7d), incident (alarm id), q (search query — opens filtered timeline)
+
+Use q when the user asks to find/search/show events (vehicles, persons, motion, alarms at a time).
 
 params for agents (optional): mode (create)
 
@@ -101,6 +105,8 @@ Examples:
 @@ACTION@@{"workspace":"config","params":{"tab":"onboard"}}
 
 @@ACTION@@{"workspace":"video","params":{"camera":"cam-driveway","t":"100"}}
+
+@@ACTION@@{"workspace":"video","params":{"q":"vehicle driveway","range":"7d","t":"50","mode":"playback"}}
 
 @@ACTION@@{"workspace":"agents","params":{"mode":"create"}}
 

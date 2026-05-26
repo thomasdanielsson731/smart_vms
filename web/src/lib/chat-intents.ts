@@ -1,7 +1,6 @@
 import type { ChatAction } from '@/types/chat'
 import { isFaceRecognitionEnabled } from '@/lib/feature-flags'
-
-
+import { parseEventSearchIntent } from '@/lib/event-search'
 
 /** Simple keyword routing — replaced by LLM + tools later */
 
@@ -178,6 +177,38 @@ export function resolveChatIntent(input: string): ChatAction | null {
 
 
 
+  const search = parseEventSearchIntent(input)
+
+  if (search) {
+
+    const params: Record<string, string> = {
+
+      q: search.query,
+
+      t: '50',
+
+      mode: 'playback',
+
+      range: search.range ?? '7d',
+
+    }
+
+    if (search.cameraId) params.camera = search.cameraId
+
+    return {
+
+      workspace: 'video',
+
+      params,
+
+      reply: `Searching events for "${search.query}" on the timeline — select a match to jump playback.`,
+
+    }
+
+  }
+
+
+
   if (
     /\bface\b|recogni[sz]e|known person|unknown person|face rec|name person|ansikt|igenkän|igenkan|känd person|okänd person|namnge person/.test(
       q,
@@ -322,6 +353,10 @@ export const suggestedPrompts = [
   'Track a person from driveway to entry',
 
   'Why did I get an alarm at 23:14?',
+
+  'Find vehicles at the driveway last week',
+
+  'Search for person motion on the entry camera',
 
   'Limit recording storage to 200 GB',
 

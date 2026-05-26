@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Download, Film, Play } from 'lucide-react'
+import { Download, Film, Loader2, Play, Search, X } from 'lucide-react'
 import { useAppConfig } from '@/context/AppConfigContext'
 import { useWorkspace } from '@/context/WorkspaceContext'
 import { CameraFaceMemoryOverlay } from '@/components/face/CameraFaceMemoryOverlay'
@@ -25,6 +25,7 @@ import type { ForensicRange } from '@/types/forensic'
 import { isTimelineLive, positionFromIncident } from '@/lib/timeline-unified'
 import { formatDateTime } from '@/lib/format'
 import { useAlarmTier2 } from '@/hooks/useAlarmTier2'
+import { useEventSearch } from '@/hooks/useEventSearch'
 
 function parseTimelinePosition(raw: string | undefined): number {
   const n = Number(raw)
@@ -40,6 +41,8 @@ export function VideoWorkspace() {
   const layout = parseLiveLayout(params.layout)
   const showFaces = params.faces === '1' || faceSettings.enabled
   const camera = cameras.find((c) => c.id === cameraId) ?? cameras[0]
+  const [searchInput, setSearchInput] = useState(params.q ?? '')
+  const searchQuery = (params.q ?? searchInput).trim()
 
   const [range, setRange] = useState<ForensicRange>(
     (params.range as ForensicRange) || '48h',
@@ -54,7 +57,10 @@ export function VideoWorkspace() {
     if (params.range) setRange(params.range as ForensicRange)
     if (params.t != null) setPosition(parseTimelinePosition(params.t))
     else if (params.mode === 'playback') setPosition(50)
-  }, [params.range, params.t, params.mode])
+    if (params.q != null) setSearchInput(params.q)
+  }, [params.range, params.t, params.mode, params.q])
+
+  const search = useEventSearch(searchQuery, range, cameras, params.camera)
 
   const rangeEnd = useMemo(() => new Date(), [])
   const rangeStart = useMemo(
@@ -65,7 +71,7 @@ export function VideoWorkspace() {
   const isLive = isTimelineLive(position)
   const remembered = camera ? profilesRememberedByCamera(faceProfiles, camera.id) : []
 
-  const incidents = useMemo(
+  const baseIncidents = useMemo(
     () =>
       filterIncidentsInRange(
         allIncidents,
@@ -75,6 +81,16 @@ export function VideoWorkspace() {
       ),
     [allIncidents, rangeStart, rangeEnd, camera?.id],
   )
+
+  const incidents = useMemo(() => {
+    if (searchQuery) {
+      return search.incidents.filter((inc) => {
+        const t = new Date(inc.occurredAt).getTime()
+        return t >= rangeStart.getTime() && t <= rangeEnd.getTime()
+      })
+    }
+    return baseIncidents
+  }, [searchQuery, search.incidents, baseIncidents, rangeStart, rangeEnd])
 
   const segments = useRecordingSegments(
     rangeStart,
@@ -108,6 +124,20 @@ export function VideoWorkspace() {
     }
   }
 
+  const applySearch = () => {
+    const next = searchInput.trim()
+    if (next) {
+      setParams({ q: next, mode: 'playback', t: '50' })
+    } else {
+      setParams({ q: undefined, mode: undefined })
+    }
+  }
+
+  const clearSearch = () => {
+    setSearchInput('')
+    setParams({ q: undefined })
+  }
+
   const selectIncident = (id: string) => {
     const inc = incidents.find((i) => i.id === id)
     setParam('incident', id)
@@ -131,6 +161,62 @@ export function VideoWorkspace() {
         Live and recorded video on one timeline — scrub left for playback and alarms, drag all the
         way right for live.
       </p>
+
+      <form
+        className="flex flex-wrap items-center gap-2"
+        onSubmit={(e) => {
+          e.preventDefault()
+          applySearch()
+        }}
+      >
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search events (person, vehicle, motion, camera)…"
+            className="w-full rounded-lg border border-slate-700/80 bg-slate-900/60 py-2 pl-9 pr-9 text-sm text-white placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
+          />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:text-slate-300"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <button
+          type="submit"
+          className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-500"
+        >
+          Search
+        </button>
+      </form>
+
+      {searchQuery && (
+        <p className="text-xs text-slate-500">
+          {search.loading ? (
+            <span className="inline-flex items-center gap-1">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Searching…
+            </span>
+          ) : search.error ? (
+            <span className="text-amber-500">{search.error}</span>
+          ) : (
+            <>
+              {incidents.length} result{incidents.length === 1 ? '' : 's'} for &ldquo;{searchQuery}
+              &rdquo;
+              {search.source === 'vapix' && ' · VAPIX recorded events'}
+              {search.source === 'server' && search.serverAvailable && ' · server index'}
+              {!search.serverAvailable && search.source === 'vapix' && ' · Phase 3 server offline'}
+            </>
+          )}
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex rounded-lg bg-slate-800/60 p-0.5">
