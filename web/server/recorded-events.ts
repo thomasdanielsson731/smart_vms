@@ -2,7 +2,7 @@ import type DigestClient from 'digest-fetch'
 import type { ForensicIncident } from '../src/types/forensic'
 import { backtestRangeToMs, type AgentBacktestRange } from '../src/lib/agent-backtest'
 
-interface ParsedAxisEvent {
+export interface ParsedAxisEvent {
   occurredAt: string
   topic: string
   title: string

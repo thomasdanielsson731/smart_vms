@@ -4,6 +4,7 @@ import fs from 'node:fs'
 import { getSessionUser } from './vite.auth-plugin'
 import { sendJson } from './server/camera-proxy-shared'
 import { buildUsageSnapshot, getRecordingService } from './server/recording/service'
+import { getVapixEventIngestService } from './server/vapix-event-ingest-service'
 import type { ServerCameraRef } from './server/recording/store'
 import type { RecordingStorageSettings } from './src/types/storage'
 
@@ -30,6 +31,7 @@ function attachRecordingRoutes(
   cwd: string,
 ) {
   const service = getRecordingService(mode, cwd)
+  const vapixEvents = getVapixEventIngestService(mode, cwd)
 
   middlewares.use(async (req, res, next) => {
     const url = req.url ?? ''
@@ -44,6 +46,7 @@ function attachRecordingRoutes(
       try {
         const body = await readJsonBody<{ cameras: ServerCameraRef[] }>(req)
         service.syncCameras(body.cameras ?? [])
+        vapixEvents.syncCameras(body.cameras ?? [])
         sendJson(res, 200, { ok: true })
       } catch {
         sendJson(res, 400, { error: 'invalid_body' })

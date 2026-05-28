@@ -45,7 +45,7 @@ Legend: **Real** = production path exists · **Mock** = UI/types only · **Plann
 | Face match on incidents | **Mock** | [face-recognition.md](face-recognition.md) |
 | Zone / schedule rules | UI only | — |
 | AXIS Object Analytics (AOA) | **Real** configure via VAPIX | Axis developer docs |
-| VAPIX live event ingest | **Planned** | [../architecture/axis-vapix.md](../architecture/axis-vapix.md) |
+| VAPIX live event ingest | **Shipped** (stream + poll fallback → server) | [../architecture/axis-vapix.md](../architecture/axis-vapix.md) |
 | Edge person/vehicle detect | **Planned** | [../architecture/edge-vs-server.md](../architecture/edge-vs-server.md) |
 
 ## AI & Copilot

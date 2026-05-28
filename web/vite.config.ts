@@ -6,6 +6,7 @@ import { authPlugin } from './vite.auth-plugin'
 import { vapixConfigPlugin } from './vite.vapix-config-plugin'
 import { axisCameraProxyPlugin } from './vite.axis-proxy'
 import { recordingPlugin } from './vite.recording-plugin'
+import { vapixEventsPlugin } from './vite.vapix-events-plugin'
 import { serverProxyPlugin } from './vite.server-proxy'
 
 export default defineConfig({
@@ -16,6 +17,7 @@ export default defineConfig({
     vapixConfigPlugin(),
     axisCameraProxyPlugin(),
     recordingPlugin(),
+    vapixEventsPlugin(),
     serverProxyPlugin(),
   ],
   resolve: {

@@ -36,7 +36,7 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 |----------|------|-----|
 | P0 | 24h recording soak not signed off | [soak-test-24h.md](../docs/engineering/soak-test-24h.md) |
 | P0 | TLS for production UI | [security-roadmap.md](../docs/engineering/security-roadmap.md) |
-| P1 | Live VAPIX event → MQTT/server | [axis-vapix.md](../docs/architecture/axis-vapix.md) |
+| P1 | Live VAPIX event → MQTT/server | ⚠️ HTTP ingest shipped; MQTT publish from web not yet |
 | P1 | Dependabot / secret scan in CI | [security-roadmap.md](../docs/engineering/security-roadmap.md) |
 | P1 | `shared/` schema validation in CI | [testing-strategy.md](../docs/engineering/testing-strategy.md) |
 | P2 | Edge agent (stub only) | `edge-agent/` |
@@ -51,11 +51,12 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 - Docs: quality bar, security roadmap, architecture overview sync.
 - AI folder: persistent context structure (`ai/`).
 - Event search in video workspace + Copilot (`q` param, server + VAPIX fallback).
+- Live VAPIX event ingest service (stream/poll → `/api/events/ingest`).
 
 ## Next steps (suggested order)
 
 1. Run **24h soak** on home cameras; log in `docs/validation/` (optional).
-2. **VAPIX live event ingest** or ADR deferring it.
+2. ~~**VAPIX live event ingest**~~ HTTP path shipped; optional MQTT bridge later.
 3. **Dependabot + gitleaks** in CI (security roadmap P1).
 4. ~~Wire **semantic search** to Copilot or Forensic UI.~~ Done — video workspace search bar + Copilot `q`.
 5. **Alarm persistence** (localStorage or server).

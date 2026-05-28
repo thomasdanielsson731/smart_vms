@@ -9,15 +9,17 @@ Design and implement **VAPIX → normalized event → bus → incident** paths w
 ## Scope
 
 - `web/server/recorded-events.ts` (historical/backtest today)
+- `web/server/vapix-event-ingest-service.ts` (live stream/poll → server HTTP ingest)
 - `server/src/event-bus/`, `shared/schemas/`
-- Future live subscription (WS/long-poll) — **not built**
+- Future: MQTT publish bridge from web ingest (optional)
 
 ## Checklist
 
-- [ ] `SmartVmsEvent` schema version field
-- [ ] `vapix_event_key` dedupe where applicable
-- [ ] Idempotent ingest handlers
-- [ ] Backpressure (bounded queue) — see `mqtt.ts`
+- [x] `SmartVmsEvent` schema version field
+- [x] `vapix_event_key` dedupe where applicable (5s window)
+- [x] Idempotent ingest handlers (`stableEventId` + server ON CONFLICT)
+- [x] Live VAPIX stream with poll fallback
+- [ ] Backpressure on web→server HTTP (retry queue — future)
 - [ ] Golden fixtures in `web/fixtures/vapix/` or `shared/`
 
 ## Must not
