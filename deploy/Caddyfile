@@ -1,0 +1,14 @@
+# HTTPS reverse proxy for Smart VMS operator UI
+# Bind to localhost by default — change for LAN/Tailscale access.
+
+{
+	admin off
+}
+
+localhost, smart-vms.local {
+	tls internal
+	reverse_proxy host.docker.internal:5173 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+}

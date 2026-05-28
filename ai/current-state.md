@@ -26,7 +26,7 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 | Phase 3 server | ⚠️ Optional | Needs `docker compose` + `SMARTVMS_SERVER_URL` |
 | Incidents in UI | ⚠️ | Empty without server; poll every 30s |
 | Tier-2 alarm narrative | ⚠️ Mock | Client-side rules only |
-| Alarm rule persistence | ⚠️ | Session memory only |
+| Alarm rule persistence | ✅ | localStorage via `alarm-storage.ts` |
 | Face workspace | ⚠️ Opt-in | Mock detections |
 | Semantic search UI | ✅ | Video workspace + Copilot `q` param; server + VAPIX fallback |
 
@@ -34,8 +34,8 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 
 | Priority | Item | Doc |
 |----------|------|-----|
-| P0 | 24h recording soak not signed off | [soak-test-24h.md](../docs/engineering/soak-test-24h.md) |
-| P0 | TLS for production UI | [security-roadmap.md](../docs/engineering/security-roadmap.md) |
+| P0 | 24h recording soak not signed off | **In progress** — `npm run soak:start` · [soak-test-24h.md](../docs/engineering/soak-test-24h.md) |
+| P0 | TLS for production UI | ✅ Caddy + [tls-production.md](../docs/engineering/tls-production.md) |
 | P1 | Live VAPIX event → MQTT/server | ⚠️ HTTP ingest shipped; MQTT publish from web not yet |
 | P1 | Dependabot / secret scan in CI | [security-roadmap.md](../docs/engineering/security-roadmap.md) |
 | P1 | `shared/` schema validation in CI | [testing-strategy.md](../docs/engineering/testing-strategy.md) |
@@ -52,14 +52,16 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 - AI folder: persistent context structure (`ai/`).
 - Event search in video workspace + Copilot (`q` param, server + VAPIX fallback).
 - Live VAPIX event ingest service (stream/poll → `/api/events/ingest`).
+- CI: Dependabot, gitleaks, shared schema validation.
+- Alarm definitions persist in localStorage across reloads.
 
 ## Next steps (suggested order)
 
-1. Run **24h soak** on home cameras; log in `docs/validation/` (optional).
+1. **24h soak in progress** — monitor with `npm run soak:monitor`; sign off at T+24h in `docs/validation/`.
 2. ~~**VAPIX live event ingest**~~ HTTP path shipped; optional MQTT bridge later.
-3. **Dependabot + gitleaks** in CI (security roadmap P1).
-4. ~~Wire **semantic search** to Copilot or Forensic UI.~~ Done — video workspace search bar + Copilot `q`.
-5. **Alarm persistence** (localStorage or server).
+3. ~~**Dependabot + gitleaks** in CI~~ Done.
+4. ~~**`shared/` schema validation** in CI~~ Done.
+5. ~~**Alarm persistence**~~ Done — localStorage.
 6. Phase 2: edge-agent ingest spike behind feature flag.
 
 ## Broken / do not assume

@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "event_id": "01JTEST0000000001",
+  "event_type": "vapix.received",
+  "occurred_at": "2026-05-28T12:00:00.000Z",
+  "ingested_at": "2026-05-28T12:00:00.050Z",
+  "source": {
+    "camera_id": "cam-driveway",
+    "software_version": "web-vapix-ingest/0.1.0"
+  },
+  "payload": {
+    "title": "VAPIX motion event",
+    "rule_name": "tns1:RuleEngine/Motion",
+    "vapix_event_key": "cam-driveway|motion|2026-05-28T12:00:00.000Z"
+  }
+}

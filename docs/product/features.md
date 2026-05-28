@@ -16,7 +16,7 @@ Legend: **Real** = production path exists · **Mock** = UI/types only · **Plann
 | Face recognition | `faces` | Enroll, manage, events, settings | **Mock** detect · opt-in |
 | Camera web | `camera-web` | Embedded Axis device UI | **Real** proxied |
 | Onboarding | `onboarding` | LAN discovery, bulk register | **Real** discovery + registry |
-| Create alarm | `alarms` | Monitoring rules, bulk per camera | **Mock** persistence |
+| Create alarm | `agents` | Monitoring rules, bulk per camera | **Shipped** — localStorage persistence |
 | Agents | `agents` | List/pause monitoring policies | **Mock** |
 | Tracking | `tracking` | Cross-camera re-id | **Planned** Phase 3 |
 | Settings | `settings` | Auth, cameras, storage | **Real** partial |

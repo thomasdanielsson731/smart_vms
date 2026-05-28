@@ -244,11 +244,17 @@ export function sendJson(res: ServerResponse, status: number, body: unknown): vo
   res.end(JSON.stringify(body))
 }
 
-export function applySecurityHeaders(res: ServerResponse): void {
+export function applySecurityHeaders(
+  res: ServerResponse,
+  options?: { strictTransport?: boolean },
+): void {
   res.setHeader('X-Content-Type-Options', 'nosniff')
   res.setHeader('X-Frame-Options', 'DENY')
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)')
+  if (options?.strictTransport) {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+  }
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; img-src 'self' data: blob:; connect-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'",

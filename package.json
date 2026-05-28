@@ -1,15 +1,11 @@
 {
   "name": "smart-vms",
   "private": true,
-  "description": "Smart VMS — run scripts from repo root; app lives in web/",
   "scripts": {
-    "dev": "npm run dev --prefix web",
-    "build": "npm run build --prefix web",
-    "test": "npm run test --prefix web",
-    "test:watch": "npm run test:watch --prefix web",
-    "test:e2e": "npm run test:e2e --prefix web",
-    "test:e2e:ui": "npm run test:e2e:ui --prefix web",
-    "lint": "npm run lint --prefix web",
-    "preview": "npm run preview --prefix web"
+    "soak:preflight": "node scripts/soak-24h.mjs preflight",
+    "soak:start": "node scripts/soak-24h.mjs start",
+    "soak:checkpoint": "node scripts/soak-24h.mjs checkpoint",
+    "soak:monitor": "node scripts/soak-24h.mjs monitor",
+    "schemas:validate": "npm test --prefix shared"
   }
 }

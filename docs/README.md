@@ -55,6 +55,7 @@ Start with [product/overview.md](product/overview.md) for a product summary, [ar
 - [api-conventions.md](engineering/api-conventions.md) — Phase 1 `/api/*` contracts
 - [security-and-privacy.md](engineering/security-and-privacy.md) — home threat model
 - [soak-test-24h.md](engineering/soak-test-24h.md) — Phase 1 exit soak checklist
+- [tls-production.md](engineering/tls-production.md) — HTTPS reverse proxy (Caddy)
 - [remote-access.md](engineering/remote-access.md) — Tailscale pattern (Phase 4)
 - [runbooks/camera-offline.md](engineering/runbooks/camera-offline.md)
 - [runbooks/disk-full.md](engineering/runbooks/disk-full.md)

@@ -75,7 +75,8 @@ Aligned with a senior EM background: **risk-based testing**, clear quality gates
 | E2E smoke (Playwright) | ✓ | ✓ |
 | Integration (compose + Postgres/MQTT) | optional (label) | ✓ |
 | Model benchmark | | ✓ (when models exist) |
-| Dependency + secret scan | **Backlog** | ✓ |
+| Dependency + secret scan | ✓ | ✓ |
+| `shared/` JSON Schema validation | ✓ | ✓ |
 
 **Decided:** Vitest in `web/` and `server/` — see `.github/workflows/ci.yml`. Golden VAPIX fixture: `web/fixtures/vapix/param-list.txt`.
 

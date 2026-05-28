@@ -53,6 +53,10 @@ import {
   saveFaceSettings,
 } from '@/lib/face-storage'
 import { buildFaceEventsFromMemory } from '@/lib/face-memory'
+import {
+  loadAlarmDefinitions,
+  saveAlarmDefinitions,
+} from '@/lib/alarm-storage'
 
 interface AppConfigContextValue {
   cameras: Camera[]
@@ -103,7 +107,7 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
     saveCameraRegistry(next)
     void syncCamerasToRecordingService(next)
   }, [])
-  const [alarms, setAlarms] = useState<AlarmDefinition[]>([])
+  const [alarms, setAlarms] = useState<AlarmDefinition[]>(() => loadAlarmDefinitions())
   const [discovered, setDiscovered] = useState<DiscoveredCamera[]>([])
   const [discoveryStatus, setDiscoveryStatus] = useState<DiscoveryStatus>('idle')
   const [discoveryError, setDiscoveryError] = useState<string | null>(null)
@@ -117,6 +121,10 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   const [storageUsage, setStorageUsage] = useState<StorageUsageSnapshot>(() =>
     storageUsageSnapshot(loadStorageSettings() ?? defaultRecordingStorageSettings()),
   )
+
+  useEffect(() => {
+    saveAlarmDefinitions(alarms)
+  }, [alarms])
 
   useEffect(() => {
     let cancelled = false

@@ -18,8 +18,8 @@ Legend: **P0** before home production · **P1** next quarter · **P2** planned �
 | SSRF allowlist on camera proxy | **Done** | [camera-proxy-shared.ts](../../web/server/camera-proxy-shared.ts) |
 | Audit log (auth + credential changes) | **Done** | [audit-log.ts](../../web/server/audit-log.ts) |
 | Recording quota enforced server-side | **Done** | `/api/recording/settings` |
-| **24h recording soak** on real cameras | **Open** | [soak-test-24h.md](soak-test-24h.md) |
-| TLS for operator UI (HTTPS) | **Open** | Reverse proxy or Tailscale; see ADR-0004 |
+| **24h recording soak** on real cameras | **In progress** | [soak-test-24h.md](soak-test-24h.md) · `node scripts/soak-24h.mjs` |
+| TLS for operator UI (HTTPS) | **Done** (proxy + docs) | [tls-production.md](tls-production.md) · set `SMARTVMS_COOKIE_SECURE=true` |
 
 ---
 
@@ -27,9 +27,9 @@ Legend: **P0** before home production · **P1** next quarter · **P2** planned �
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Dependency scan in CI (Dependabot or `npm audit` gate) | **Open** | CRA checklist item |
-| Secret scan in CI (`gitleaks` or equivalent) | **Open** | Block commits with `.env` patterns |
-| JSON Schema validation for `shared/` in CI | **Open** | Contract tests per [testing-strategy.md](testing-strategy.md) |
+| Dependency scan in CI (Dependabot or `npm audit` gate) | **Done** | `.github/dependabot.yml` |
+| Secret scan in CI (`gitleaks` or equivalent) | **Done** | `.github/workflows/ci.yml` · `.gitleaks.toml` |
+| JSON Schema validation for `shared/` in CI | **Done** | `shared/scripts/validate-schemas.mjs` |
 | Live VAPIX event ingest (signed/normalized) | **Open** | No ad-hoc MQTT topics; `vapix_event_key` dedupe |
 | `automation` API key role (scoped read/write) | **Open** | Documented in security doc, not implemented |
 | Per-camera indoor face bbox default off | **Open** | Policy in [security-and-privacy.md](security-and-privacy.md) |

@@ -24,7 +24,7 @@ SMARTVMS_ADMIN_PASSWORD=<starkt lösenord>
 SMARTVMS_VIEWER_USER=familj          # valfritt
 SMARTVMS_VIEWER_PASSWORD=<...>       # valfritt
 SMARTVMS_SESSION_TTL_HOURS=8
-SMARTVMS_COOKIE_SECURE=false         # true bakom HTTPS
+SMARTVMS_COOKIE_SECURE=false         # true bakom HTTPS — see tls-production.md
 ```
 
 Starta om **`npm run dev`** efter ändringar i `.env`.

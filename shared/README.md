@@ -5,6 +5,8 @@ Versioned event schemas and types used by **edge-agent**, **server**, and **web*
 | Path | Purpose |
 |------|---------|
 | `schemas/` | JSON Schema (source of truth) |
+| `fixtures/` | Golden JSON validated in CI |
+| `scripts/validate-schemas.mjs` | Contract validation (`npm test`) |
 | `typescript/` | Generated / hand-maintained TS types for Node services |
 
 Contract-first rule: change schema → bump `schema_version` → update consumers.

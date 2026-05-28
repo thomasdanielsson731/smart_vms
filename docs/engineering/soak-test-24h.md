@@ -28,3 +28,15 @@
 
 - Capture logs + manifest.json snapshot
 - File issue with camera model, firmware, and gap timestamps
+
+## Automation
+
+From repo root (UI must be running on port 5173):
+
+```bash
+node scripts/soak-24h.mjs preflight   # quick check
+node scripts/soak-24h.mjs start         # T+0 + state file
+node scripts/soak-24h.mjs monitor       # background until T+24h (15 min poll)
+```
+
+Logs: `docs/validation/YYYY-MM-DD-soak.md`

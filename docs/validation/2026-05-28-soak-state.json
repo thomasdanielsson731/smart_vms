@@ -1,0 +1,39 @@
+{
+  "startedAt": "2026-05-28T14:59:22.971Z",
+  "baseUrl": "http://127.0.0.1:5173",
+  "checkpoints": [
+    {
+      "checkpoint": "T+0",
+      "at": "2026-05-28T14:59:22.977Z",
+      "elapsedHours": 0,
+      "pass": true,
+      "metrics": {
+        "now": "2026-05-28T14:59:22.977Z",
+        "cameraCount": 1,
+        "cameraIds": [
+          "cam-192-168-68-200"
+        ],
+        "offlineCameras": [],
+        "frames1h": 2,
+        "expectedFrames1h": 120,
+        "frameRatio": 0.016666666666666666,
+        "segmentCount1h": 1,
+        "segmentCount24h": 1,
+        "usage": {
+          "recordingUsedGiB": 0.016003111377358437,
+          "clipsUsedGiB": 0,
+          "recordingPercent": 0.016003111377358437,
+          "clipsPercent": 0,
+          "isOverQuota": false,
+          "isWarning": false
+        },
+        "authConfigured": true,
+        "errors": []
+      },
+      "notes": [
+        "Started with 1 camera(s)."
+      ]
+    }
+  ],
+  "lastCheckpointAt": "2026-05-28T14:59:22.977Z"
+}

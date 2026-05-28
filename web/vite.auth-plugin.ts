@@ -23,6 +23,8 @@ type MiddlewareStack = {
 
 function attachAuthMiddleware(middlewares: MiddlewareStack, mode: string, cwd: string) {
   const env = loadAuthEnv(mode, cwd)
+  const secureHeaders = (res: ServerResponse) =>
+    applySecurityHeaders(res, { strictTransport: env.cookieSecure })
 
   middlewares.use(async (req, res, next) => {
     const url = req.url ?? ''
@@ -30,7 +32,7 @@ function attachAuthMiddleware(middlewares: MiddlewareStack, mode: string, cwd: s
 
     // --- Auth routes ---
     if (pathname === '/api/auth/login' && req.method === 'POST') {
-      applySecurityHeaders(res)
+      secureHeaders(res)
       if (!isAuthConfigured(env)) {
         sendJson(res, 503, {
           error: 'auth_not_configured',
@@ -69,7 +71,7 @@ function attachAuthMiddleware(middlewares: MiddlewareStack, mode: string, cwd: s
     }
 
     if (pathname === '/api/auth/logout' && req.method === 'POST') {
-      applySecurityHeaders(res)
+      secureHeaders(res)
       const session = sessionFromRequest(req, env)
       clearSessionCookie(res, env)
       if (session) appendAuditLog(cwd, 'auth.logout', session.username)
@@ -78,7 +80,7 @@ function attachAuthMiddleware(middlewares: MiddlewareStack, mode: string, cwd: s
     }
 
     if (pathname === '/api/auth/me' && req.method === 'GET') {
-      applySecurityHeaders(res)
+      secureHeaders(res)
       const user = sessionFromRequest(req, env)
       if (!user) {
         sendJson(res, 401, { error: 'unauthenticated' })
@@ -89,7 +91,7 @@ function attachAuthMiddleware(middlewares: MiddlewareStack, mode: string, cwd: s
     }
 
     if (pathname === '/api/auth/status' && req.method === 'GET') {
-      applySecurityHeaders(res)
+      secureHeaders(res)
       sendJson(res, 200, { configured: isAuthConfigured(env) })
       return
     }
@@ -98,7 +100,7 @@ function attachAuthMiddleware(middlewares: MiddlewareStack, mode: string, cwd: s
     if (requiresAuth(pathname)) {
       const user = sessionFromRequest(req, env)
       if (!user) {
-        applySecurityHeaders(res)
+        secureHeaders(res)
         sendJson(res, 401, {
           error: 'unauthenticated',
           message: 'Sign in to use Smart VMS.',

@@ -1,0 +1,15 @@
+{
+  "frame_ts": "2026-05-28T12:00:00.000Z",
+  "model": {
+    "name": "yolov8n",
+    "version": "0.1.0"
+  },
+  "objects": [
+    {
+      "class": "person",
+      "confidence": 0.92,
+      "bbox_norm": [0.1, 0.2, 0.3, 0.5]
+    }
+  ],
+  "zone_ids": ["zone-entry"]
+}

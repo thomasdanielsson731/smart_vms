@@ -1,0 +1,18 @@
+title = "Smart VMS gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlisted paths and patterns"
+paths = [
+  '''web/\.env\.example$''',
+  '''\.env\.example$''',
+  '''docs/''',
+  '''web/fixtures/''',
+  '''shared/fixtures/''',
+]
+
+[[allowlist.regexes]]
+description = "Example placeholders in docs and env samples"
+regex = '''(?i)(example|changeme|your-password|openssl rand|<[^>]+>)'''

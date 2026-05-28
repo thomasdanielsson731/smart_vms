@@ -37,6 +37,26 @@ cd web && npm run dev
 
 Recording, VAPIX proxy, and AOA configuration run in the Vite dev server. Optional: `SMARTVMS_RECORDING_DIR` for snapshot storage path.
 
+## TLS (production UI)
+
+HTTPS via Caddy reverse proxy — see [../docs/engineering/tls-production.md](../docs/engineering/tls-production.md).
+
+```bash
+cd deploy
+docker compose -f docker-compose.tls.yml up -d caddy
+```
+
+Set `SMARTVMS_COOKIE_SECURE=true` in `web/.env` when using HTTPS.
+
+## 24h soak (Phase 1 exit)
+
+```bash
+cd web && npm run dev
+# separate terminal:
+node scripts/soak-24h.mjs start
+node scripts/soak-24h.mjs monitor
+```
+
 ## Backup (Phase 4)
 
 - Postgres: `pg_dump` nightly to encrypted volume
