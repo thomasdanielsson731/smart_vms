@@ -6,6 +6,7 @@
     "soak:start": "node scripts/soak-24h.mjs start",
     "soak:checkpoint": "node scripts/soak-24h.mjs checkpoint",
     "soak:monitor": "node scripts/soak-24h.mjs monitor",
-    "schemas:validate": "npm test --prefix shared"
+    "schemas:validate": "npm test --prefix shared",
+    "pipeline:smoke": "node scripts/pipeline-smoke.mjs"
   }
 }

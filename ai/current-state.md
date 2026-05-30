@@ -23,7 +23,7 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 
 | Area | Status | Gap |
 |------|--------|-----|
-| Phase 3 server | ⚠️ Optional | Needs `docker compose` + `SMARTVMS_SERVER_URL` |
+| Phase 3 server | ⚠️ Optional | Needs `docker compose` + `SMARTVMS_SERVER_URL`; use pipeline smoke to verify |
 | Incidents in UI | ⚠️ | Empty without server; poll every 30s |
 | Tier-2 alarm narrative | ⚠️ Mock | Client-side rules only |
 | Alarm rule persistence | ✅ | localStorage via `alarm-storage.ts` |
@@ -36,10 +36,10 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 |----------|------|-----|
 | P0 | 24h recording soak not signed off | **In progress** — `npm run soak:start` · [soak-test-24h.md](../docs/engineering/soak-test-24h.md) |
 | P0 | TLS for production UI | ✅ Caddy + [tls-production.md](../docs/engineering/tls-production.md) |
-| P1 | Live VAPIX event → MQTT/server | ⚠️ HTTP ingest shipped; MQTT publish from web not yet |
+| P1 | Live VAPIX event → MQTT/server | ⚠️ Web HTTP ingest + edge MQTT spike; full edge RTSP TBD |
 | P1 | Dependabot / secret scan in CI | [security-roadmap.md](../docs/engineering/security-roadmap.md) |
 | P1 | `shared/` schema validation in CI | [testing-strategy.md](../docs/engineering/testing-strategy.md) |
-| P2 | Edge agent (stub only) | `edge-agent/` |
+| P2 | Edge agent (stub only) | ⚠️ VAPIX poll + MQTT spike in `edge-agent/` |
 | P2 | H.264 continuous recorder | Phase 1+ stretch |
 
 ## Recent major changes
@@ -54,6 +54,8 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 - Live VAPIX event ingest service (stream/poll → `/api/events/ingest`).
 - CI: Dependabot, gitleaks, shared schema validation.
 - Alarm definitions persist in localStorage across reloads.
+- Pipeline smoke test (CLI + Dashboard) for ingest → incidents → search.
+- Edge agent VAPIX poll + MQTT publish spike.
 
 ## Next steps (suggested order)
 
@@ -62,7 +64,7 @@ Living snapshot for AI sessions. **Do not treat chat history as source of truth*
 3. ~~**Dependabot + gitleaks** in CI~~ Done.
 4. ~~**`shared/` schema validation** in CI~~ Done.
 5. ~~**Alarm persistence**~~ Done — localStorage.
-6. Phase 2: edge-agent ingest spike behind feature flag.
+6. ~~Phase 2: edge-agent ingest spike~~ VAPIX poll + MQTT shipped; RTSP/detector next.
 
 ## Broken / do not assume
 

@@ -2,14 +2,25 @@
 
 edge_node_id: "edge-home-1"
 site_id: "home"
+poll_interval_sec: 15
+
+features:
+  vapix_events: true   # Phase 2 spike — poll Axis event.cgi
+  stub_ingest: false   # RTSP frame sampling (not wired yet)
 
 mqtt:
   host: 127.0.0.1
   port: 1883
   topic_prefix: smart-vms/events
 
+vapix:
+  user: root
+  # password: use AXIS_VAPIX_PASSWORD env (never commit)
+  lookback_sec: 120
+
 cameras:
   - camera_id: cam-example
+    name: Driveway
     host: 192.168.68.200
     rtsp_url: rtsp://192.168.68.200/axis-media/media.amp
 

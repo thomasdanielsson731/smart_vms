@@ -33,7 +33,39 @@
       "notes": [
         "Started with 1 camera(s)."
       ]
+    },
+    {
+      "checkpoint": "T+1h",
+      "at": "2026-05-28T15:59:59.624Z",
+      "elapsedHours": 1.01,
+      "pass": true,
+      "metrics": {
+        "now": "2026-05-28T15:59:59.624Z",
+        "cameraCount": 1,
+        "cameraIds": [
+          "cam-192-168-68-200"
+        ],
+        "offlineCameras": [],
+        "frames1h": 120,
+        "expectedFrames1h": 120,
+        "frameRatio": 1,
+        "segmentCount1h": 1,
+        "segmentCount24h": 1,
+        "usage": {
+          "recordingUsedGiB": 0.020326679572463036,
+          "clipsUsedGiB": 0,
+          "recordingPercent": 0.020326679572463036,
+          "clipsPercent": 0,
+          "isOverQuota": false,
+          "isWarning": false
+        },
+        "authConfigured": true,
+        "errors": []
+      },
+      "notes": [
+        "Frame ratio 100.0% OK."
+      ]
     }
   ],
-  "lastCheckpointAt": "2026-05-28T14:59:22.977Z"
+  "lastCheckpointAt": "2026-05-28T15:59:59.624Z"
 }

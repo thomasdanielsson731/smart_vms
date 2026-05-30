@@ -7,6 +7,7 @@ import { SeverityBadge } from '@/components/ui/StatusBadge'
 import { formatRelativeTime } from '@/lib/format'
 import { generateAlarmTier2Analysis } from '@/lib/alarm-tier2-analytics'
 import { SystemHealthPanel } from '@/components/dashboard/SystemHealthPanel'
+import { PipelineVerifyPanel } from '@/components/dashboard/PipelineVerifyPanel'
 import { useMemo } from 'react'
 
 export function DashboardWorkspace() {
@@ -40,6 +41,7 @@ export function DashboardWorkspace() {
       </div>
 
       <SystemHealthPanel />
+      <PipelineVerifyPanel />
 
       <section>
         <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">

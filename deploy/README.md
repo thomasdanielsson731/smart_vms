@@ -23,6 +23,23 @@ SMARTVMS_SERVER_URL=http://127.0.0.1:8787
 
 Restart `npm run dev` in `web/`. Dashboard **System health** and **Incidents** populate when the stack is up.
 
+### Verify pipeline (ingest → incidents → search)
+
+```bash
+npm run pipeline:smoke
+```
+
+Or Dashboard → **Event pipeline** → **Run smoke test** (admin). See [../docs/engineering/pipeline-verification.md](../docs/engineering/pipeline-verification.md).
+
+### Edge agent (MQTT publish)
+
+```bash
+cd edge-agent
+pip install -e .
+set AXIS_VAPIX_PASSWORD=...
+python -m edge_agent.cli --config config.example.yaml --smoke-publish
+```
+
 Publish test events:
 
 ```bash
